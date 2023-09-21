@@ -31,12 +31,16 @@ public class MyGdxGame extends ApplicationAdapter {
 	private float maxCameraX;
 	private float maxCameraY;
 
+	private float enemySpawnTimer = 0.0f;
+	private int enemiesToSpawn = 10; // Adjust this to control the number of enemies
+	Array<Enemy> enemies;
+
 	private float timeSinceLastShot = 0.0f;
 
 	@Override
 	public void create() {
 		batch = new SpriteBatch();
-
+		enemies = new Array<>();
 		// Load the TiledMap
 		tiledMap = new TmxMapLoader().load("map.tmx");
 
@@ -102,6 +106,29 @@ public class MyGdxGame extends ApplicationAdapter {
 			bullet.update(Gdx.graphics.getDeltaTime());
 			bullet.render(batch);
 		}
+		// Render Enemies
+		enemySpawnTimer += Gdx.graphics.getDeltaTime();
+		// Adjust this to control spawn rate
+		float enemySpawnInterval = 0.1f;
+		if (enemiesToSpawn > 0 && enemySpawnTimer >= enemySpawnInterval) {
+			spawnEnemy();
+			enemySpawnTimer = 0.0f;
+			enemiesToSpawn--;
+		}
+
+		// Render Enemies
+		enemySpawnTimer += Gdx.graphics.getDeltaTime();
+		if (enemiesToSpawn > 0 && enemySpawnTimer >= enemySpawnInterval) {
+			spawnEnemy();
+			enemySpawnTimer = 0.0f;
+			enemiesToSpawn--;
+		}
+
+		// Update and render enemies
+		for (Enemy enemy : enemies) {
+			enemy.update(Gdx.graphics.getDeltaTime());
+			enemy.render(batch);
+		}
 
 		// End the batch
 		batch.end();
@@ -151,4 +178,16 @@ public class MyGdxGame extends ApplicationAdapter {
 		// Return the direction vector from the starting point to the cursor position
         return cursorPositionWorld.cpy().sub(startingPoint);
 	}
+
+	private void spawnEnemy() {
+		// Generate a random position for the enemy
+		Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
+
+		// Create an enemy instance and pass the player's position
+		Enemy enemy = new Enemy(enemyPosition, character.getPosition());
+
+		// Add the enemy to a list or array to manage multiple enemies
+		enemies.add(enemy);
+	}
+
 }
