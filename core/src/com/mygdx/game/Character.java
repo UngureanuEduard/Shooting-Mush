@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
 
 public class Character {
     private static final float SPEED = 400;
@@ -16,6 +17,9 @@ public class Character {
     private final Animation<TextureRegion> idleAnimation;
     private boolean isWalking;
     private boolean isFlipped;
+    private int lives;
+
+    private float timeSinceLastLifeLost = 0.0f;
 
     public Character( Vector2 initialPosition) {
 
@@ -31,9 +35,10 @@ public class Character {
         idleAnimation = new Animation<>(0.1f, idleFrames);
         isWalking = false; // Initially, the character is not walking
         isFlipped = false; // Initially, the character is not flipped
+        lives = 3;
     }
 
-    public void update() {
+    public void update( Array<Enemy> enemies) {
         // Handle character movement based on keyboard input
         float deltaTime = Gdx.graphics.getDeltaTime();
         boolean moveLeft = Gdx.input.isKeyPressed(Input.Keys.A);
@@ -67,6 +72,18 @@ public class Character {
 
         // Update animation stateTime
         stateTime += deltaTime;
+
+        // Check for enemy collisions
+        for (Enemy enemy : enemies) {
+            if (isCollidingWithEnemy(enemy)) {
+                if (timeSinceLastLifeLost >= 4.0f) {
+                    loseLife(); // Character loses a life
+                    timeSinceLastLifeLost = 0.0f; // Reset the timer
+                }
+            }
+        }
+
+        timeSinceLastLifeLost += Gdx.graphics.getDeltaTime();
     }
 
     public void render(SpriteBatch batch) {
@@ -134,5 +151,33 @@ public class Character {
         idleAnimation.getKeyFrames()[7].flip(true, false);
         idleAnimation.getKeyFrames()[8].flip(true, false);
     }
+
+    public int getLives() {
+        return lives;
+    }
+
+    public void loseLife() {
+        lives--;
+    }
+
+    private boolean isCollidingWithEnemy(Enemy enemy) {
+        // Calculate the hitbox of the character and the enemy
+        float characterLeft = position.x;
+        float characterRight = position.x + getWidth();
+        float characterTop = position.y + getHeight();
+        float characterBottom = position.y;
+
+        float enemyLeft = enemy.getPosition().x;
+        float enemyRight = enemy.getPosition().x + enemy.getWidth();
+        float enemyTop = enemy.getPosition().y + enemy.getHeight();
+        float enemyBottom = enemy.getPosition().y;
+
+        // Check for collision by comparing the hitboxes
+        boolean horizontalCollision = characterRight > enemyLeft && characterLeft < enemyRight;
+        boolean verticalCollision = characterTop > enemyBottom && characterBottom < enemyTop;
+
+        return horizontalCollision && verticalCollision;
+    }
+
 
 }

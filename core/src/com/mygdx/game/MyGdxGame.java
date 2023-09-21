@@ -6,41 +6,39 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.ScreenUtils;
+
+import java.util.Iterator;
 
 public class MyGdxGame extends ApplicationAdapter {
 	SpriteBatch batch;
-
 	TiledMap tiledMap;
 	OrthogonalTiledMapRenderer tiledMapRenderer;
-
 	OrthographicCamera camera;
-
 	Character character;
 	Array<Bullet> bullets;
-
 	private float minCameraX;
 	private float minCameraY;
 	private float maxCameraX;
 	private float maxCameraY;
-
 	private float enemySpawnTimer = 0.0f;
-	private int enemiesToSpawn = 10; // Adjust this to control the number of enemies
+	private int enemiesToSpawn = 10; // Adjust to control the number of enemies
 	Array<Enemy> enemies;
-
 	private float timeSinceLastShot = 0.0f;
+	private Texture heartTexture;
+	private Texture emptyHeartTexture;
+	private int characterLives;
 
 	@Override
 	public void create() {
 		batch = new SpriteBatch();
-		enemies = new Array<>();
+
 		// Load the TiledMap
 		tiledMap = new TmxMapLoader().load("map.tmx");
 
@@ -60,14 +58,21 @@ public class MyGdxGame extends ApplicationAdapter {
 		// Initialize bullets array
 		bullets = new Array<>();
 
-		// Map size
-		int mapWidth = 3200;
-		int mapHeight = 3200;
+		// Initialize enemies array
+		enemies = new Array<>();
 
 		minCameraX = camera.viewportWidth / 2 - 320;
 		minCameraY = camera.viewportHeight / 2 - 320;
-		maxCameraX = mapWidth * tiledMapRenderer.getUnitScale() - camera.viewportWidth / 2 + 320;
-		maxCameraY = mapHeight * tiledMapRenderer.getUnitScale() - camera.viewportHeight / 2 + 320;
+
+		// 3200 = map size (w x h)
+		maxCameraX = 3200 * tiledMapRenderer.getUnitScale() - camera.viewportWidth / 2 + 320;
+		maxCameraY = 3200 * tiledMapRenderer.getUnitScale() - camera.viewportHeight / 2 + 320;
+
+		heartTexture = new Texture("heart.png");
+		emptyHeartTexture = new Texture("border.png");
+
+		characterLives = 3; // Start with 3 lives
+
 	}
 
 	@Override
@@ -76,7 +81,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		ScreenUtils.clear(1, 0, 0, 1);
 
 		// Update character and camera
-		character.update();
+		character.update(enemies);
 		updateCamera();
 
 		timeSinceLastShot += Gdx.graphics.getDeltaTime();
@@ -102,10 +107,16 @@ public class MyGdxGame extends ApplicationAdapter {
 		character.render(batch);
 
 		// Render the bullets
-		for (Bullet bullet : bullets) {
+		for (Iterator<Bullet> iter = bullets.iterator(); iter.hasNext(); ) {
+			Bullet bullet = iter.next();
 			bullet.update(Gdx.graphics.getDeltaTime());
-			bullet.render(batch);
+			if (!bullet.isActive()) {
+				iter.remove(); // Remove the inactive bullet
+			} else {
+				bullet.render(batch);
+			}
 		}
+
 		// Render Enemies
 		enemySpawnTimer += Gdx.graphics.getDeltaTime();
 		// Adjust this to control spawn rate
@@ -126,10 +137,24 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		// Update and render enemies
 		for (Enemy enemy : enemies) {
-			enemy.update(Gdx.graphics.getDeltaTime());
+			enemy.update(Gdx.graphics.getDeltaTime(),bullets,enemies);
 			enemy.render(batch);
 		}
 
+		float heartX = camera.position.x - (camera.viewportWidth * camera.zoom) / 2 + 10 * camera.zoom;
+		float heartY = camera.position.y + (camera.viewportHeight * camera.zoom) / 2 - 40 * camera.zoom;
+
+		for (int i = 0; i < characterLives; i++) {
+			// Calculate the position for each heart container
+			float heartContainerX = heartX + i * 40 * camera.zoom;
+
+			if (i >= characterLives - character.getLives()) {
+				batch.draw(heartTexture, heartContainerX, heartY);
+				batch.draw(emptyHeartTexture, heartContainerX, heartY);
+			} else {
+				batch.draw(emptyHeartTexture, heartContainerX, heartY);
+			}
+		}
 		// End the batch
 		batch.end();
 	}
@@ -161,9 +186,10 @@ public class MyGdxGame extends ApplicationAdapter {
 		// Normalize the direction vector and scale it to the bullet's speed
 		directionToCursor.nor().scl(800);
 
-		Texture bulletTexture = new Texture("apple_regular_30_30px.png");
-		TextureRegion bulletTextureRegion = new TextureRegion(bulletTexture);
-		Bullet bullet = new Bullet(bulletStartPosition, directionToCursor, bulletTextureRegion);
+		Bullet bullet = new Bullet(bulletStartPosition, directionToCursor);
+
+		// Set the bullet's damage
+		bullet.setDamage(50);
 		bullets.add(bullet);
 	}
 
@@ -185,6 +211,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		// Create an enemy instance and pass the player's position
 		Enemy enemy = new Enemy(enemyPosition, character.getPosition());
+		enemy.setHealth(100);
 
 		// Add the enemy to a list or array to manage multiple enemies
 		enemies.add(enemy);
