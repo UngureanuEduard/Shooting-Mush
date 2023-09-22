@@ -47,7 +47,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		// Create the camera
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 1280, 1280); // Can change
+		camera.setToOrtho(false, 1920, 1080); // Can change
 		float zoomLevel;
 		zoomLevel = 0.5f;
 		camera.zoom = zoomLevel;
@@ -61,12 +61,12 @@ public class MyGdxGame extends ApplicationAdapter {
 		// Initialize enemies array
 		enemies = new Array<>();
 
-		minCameraX = camera.viewportWidth / 2 - 320;
-		minCameraY = camera.viewportHeight / 2 - 320;
+		minCameraX = camera.viewportWidth / 2-480 ;
+		minCameraY = camera.viewportHeight / 2 - 268;
 
 		// 3200 = map size (w x h)
-		maxCameraX = 3200 * tiledMapRenderer.getUnitScale() - camera.viewportWidth / 2 + 320;
-		maxCameraY = 3200 * tiledMapRenderer.getUnitScale() - camera.viewportHeight / 2 + 320;
+		maxCameraX = 3200 * tiledMapRenderer.getUnitScale() - camera.viewportWidth / 2 +480 ;
+		maxCameraY = 3200 * tiledMapRenderer.getUnitScale() - camera.viewportHeight / 2 +268;
 
 		heartTexture = new Texture("heart.png");
 		emptyHeartTexture = new Texture("border.png");
@@ -81,7 +81,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		ScreenUtils.clear(1, 0, 0, 1);
 
 		// Update character and camera
-		character.update(enemies);
+		character.update(enemies,tiledMap);
 		updateCamera();
 
 		timeSinceLastShot += Gdx.graphics.getDeltaTime();
@@ -127,14 +127,6 @@ public class MyGdxGame extends ApplicationAdapter {
 			enemiesToSpawn--;
 		}
 
-		// Render Enemies
-		enemySpawnTimer += Gdx.graphics.getDeltaTime();
-		if (enemiesToSpawn > 0 && enemySpawnTimer >= enemySpawnInterval) {
-			spawnEnemy();
-			enemySpawnTimer = 0.0f;
-			enemiesToSpawn--;
-		}
-
 		// Update and render enemies
 		for (Enemy enemy : enemies) {
 			enemy.update(Gdx.graphics.getDeltaTime(),bullets,enemies);
@@ -145,9 +137,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		float heartY = camera.position.y + (camera.viewportHeight * camera.zoom) / 2 - 40 * camera.zoom;
 
 		for (int i = 0; i < characterLives; i++) {
-			// Calculate the position for each heart container
 			float heartContainerX = heartX + i * 40 * camera.zoom;
-
 			if (i >= characterLives - character.getLives()) {
 				batch.draw(heartTexture, heartContainerX, heartY);
 				batch.draw(emptyHeartTexture, heartContainerX, heartY);
@@ -198,8 +188,8 @@ public class MyGdxGame extends ApplicationAdapter {
 		Vector2 cursorPositionScreen = new Vector2(Gdx.input.getX(), Gdx.graphics.getHeight() - Gdx.input.getY());
 
 		// Convert the cursor position from screen coordinates to world coordinates
-		Vector2 cursorPositionWorld = new Vector2(cursorPositionScreen.x / camera.zoom + camera.position.x - camera.viewportWidth / 2,
-				cursorPositionScreen.y / camera.zoom + camera.position.y - camera.viewportHeight / 2);
+		Vector2 cursorPositionWorld = new Vector2(cursorPositionScreen.x / camera.zoom + camera.position.x - camera.viewportWidth ,
+				cursorPositionScreen.y / camera.zoom + camera.position.y - camera.viewportHeight );
 
 		// Return the direction vector from the starting point to the cursor position
         return cursorPositionWorld.cpy().sub(startingPoint);

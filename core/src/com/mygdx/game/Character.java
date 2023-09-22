@@ -6,6 +6,8 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
@@ -38,37 +40,54 @@ public class Character {
         lives = 3;
     }
 
-    public void update( Array<Enemy> enemies) {
-        // Handle character movement based on keyboard input
+    public void update( Array<Enemy> enemies,TiledMap tiledMap) {
+
         float deltaTime = Gdx.graphics.getDeltaTime();
+
         boolean moveLeft = Gdx.input.isKeyPressed(Input.Keys.A);
         boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
-        // Check if any movement keys are pressed
-        isWalking = Gdx.input.isKeyPressed(Input.Keys.W) || Gdx.input.isKeyPressed(Input.Keys.S)
-                || moveLeft || moveRight;
+        boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
+        boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
+        isWalking=moveDown||moveRight||moveLeft||moveUp;
+        //The potential new position based on input
+        float potentialX = position.x;
+        float potentialY = position.y;
+
+        //The potential new position based on a buff distance (avoid overlaps of the character with the tile)
+        float buffedpotentialX = position.x;
+        float buffedpotentialY = position.y;
 
 
-        // Update character's position based on user input
-        if (Gdx.input.isKeyPressed(Input.Keys.W)) {
-            position.y += SPEED * deltaTime;
+        if (moveUp) {
+            potentialY += SPEED * deltaTime;
+            buffedpotentialY=potentialY+10;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.S)) {
-            position.y -= SPEED * deltaTime;
+        if (moveDown) {
+            potentialY -= SPEED * deltaTime;
+            buffedpotentialY=potentialY-4;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.A)) {
-            position.x -= SPEED * deltaTime;
+        if (moveLeft) {
+            potentialX -= SPEED * deltaTime;
             if (!isFlipped) {
                 flipAnimations();
                 isFlipped = true;
             }
+            buffedpotentialX=potentialX-4;
         }
-        if (Gdx.input.isKeyPressed(Input.Keys.D)) {
-            position.x += SPEED * deltaTime;
+        if (moveRight) {
+            potentialX += SPEED * deltaTime;
             if (isFlipped) {
                 flipAnimations();
                 isFlipped = false;
             }
+            buffedpotentialX=potentialX+15;
         }
+
+        // Check if the potential new position collides with blocked tiles
+        if (isTileBlocked(buffedpotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedpotentialY, tiledMap)) {
+            position.set(potentialX, potentialY);
+        }
+
 
         // Update animation stateTime
         stateTime += deltaTime;
@@ -178,6 +197,22 @@ public class Character {
 
         return horizontalCollision && verticalCollision;
     }
+
+    private boolean isTileBlocked(float x, float y, TiledMap tiledMap) {
+        // Get the collision layer from the TiledMap
+        TiledMapTileLayer collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Tile Layer 3");
+
+        // Calculate the tile indices for the given position
+        int tileX = (int) (x / 15.9);
+        int tileY = (int) (y / 15.9);
+
+        // Get the cell at the calculated tile indices
+        TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
+
+        // Check if the cell exists and has the "blocked" property
+        return !(cell != null && cell.getTile().getProperties().containsKey("blocked"));
+    }
+
 
 
 }
