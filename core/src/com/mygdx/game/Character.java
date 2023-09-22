@@ -15,9 +15,11 @@ public class Character {
     private static final float SPEED = 400;
     private final Vector2 position;
     private float stateTime;
-    private final Animation<TextureRegion> walkAnimation;
-    private final Animation<TextureRegion> idleAnimation;
-    private boolean isWalking;
+    private final Animation<TextureRegion> walkAnimationLeftAndRight;
+    private final Animation<TextureRegion> idleAnimationLeftAndRight;
+    private final Animation<TextureRegion> walkAnimationFront;
+    private final Animation<TextureRegion> walkAnimationBack;
+    private String isWalking;
     private boolean isFlipped;
     private int lives;
 
@@ -29,13 +31,19 @@ public class Character {
         position = initialPosition;
 
         // Use the splitCharacterTexture method in this class for the walk animation
-        Texture walkTexture = new Texture("cute mushroom walk.png");
-        Texture idleTexture = new Texture("cute mushroom idle.png");
+        Texture walkTexture = new Texture("Character/Character Walking Side.png");
+        Texture idleTexture = new Texture("Character/Character Idle Side.png");
+        Texture walkFrontTexture = new Texture("Character/Character Walking Front.png");
+        Texture walkBackTexture = new Texture("Character/Character Walking Back.png");
+        TextureRegion[] walkFrontFrames = splitCharacterTexture(walkFrontTexture,4);
+        TextureRegion[] walkBackFrames = splitCharacterTexture(walkBackTexture,4);
         TextureRegion[] walkFrames = splitCharacterTexture(walkTexture,4);
         TextureRegion[] idleFrames = splitCharacterTexture(idleTexture,9);
-        walkAnimation = new Animation<>(0.1f, walkFrames);
-        idleAnimation = new Animation<>(0.1f, idleFrames);
-        isWalking = false; // Initially, the character is not walking
+        walkAnimationLeftAndRight = new Animation<>(0.1f, walkFrames);
+        walkAnimationFront = new Animation<>(0.1f, walkFrontFrames);
+        walkAnimationBack = new Animation<>(0.1f, walkBackFrames);
+        idleAnimationLeftAndRight = new Animation<>(0.1f, idleFrames);
+        isWalking = ""; // Initially, the character is not walking
         isFlipped = false; // Initially, the character is not flipped
         lives = 3;
     }
@@ -48,7 +56,6 @@ public class Character {
         boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
         boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
         boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
-        isWalking=moveDown||moveRight||moveLeft||moveUp;
         //The potential new position based on input
         float potentialX = position.x;
         float potentialY = position.y;
@@ -56,15 +63,17 @@ public class Character {
         //The potential new position based on a buff distance (avoid overlaps of the character with the tile)
         float buffedpotentialX = position.x;
         float buffedpotentialY = position.y;
-
+        isWalking="";
 
         if (moveUp) {
             potentialY += SPEED * deltaTime;
             buffedpotentialY=potentialY+10;
+            isWalking="up";
         }
         if (moveDown) {
             potentialY -= SPEED * deltaTime;
             buffedpotentialY=potentialY-4;
+            isWalking="down";
         }
         if (moveLeft) {
             potentialX -= SPEED * deltaTime;
@@ -73,6 +82,7 @@ public class Character {
                 isFlipped = true;
             }
             buffedpotentialX=potentialX-4;
+            isWalking="left";
         }
         if (moveRight) {
             potentialX += SPEED * deltaTime;
@@ -81,6 +91,7 @@ public class Character {
                 isFlipped = false;
             }
             buffedpotentialX=potentialX+15;
+            isWalking="right";
         }
 
         // Check if the potential new position collides with blocked tiles
@@ -108,10 +119,20 @@ public class Character {
     public void render(SpriteBatch batch) {
         // Get the current frame from the appropriate animation
         TextureRegion currentFrame;
-        if (isWalking) {
-            currentFrame = walkAnimation.getKeyFrame(stateTime, true);
-        } else {
-            currentFrame = idleAnimation.getKeyFrame(stateTime, true);
+        switch (isWalking) {
+            case "right":
+            case "left":
+                currentFrame = walkAnimationLeftAndRight.getKeyFrame(stateTime, true);
+                break;
+            case "up":
+                currentFrame = walkAnimationBack.getKeyFrame(stateTime, true);
+                break;
+            case "down":
+                currentFrame = walkAnimationFront.getKeyFrame(stateTime, true);
+                break;
+            default:
+                currentFrame = idleAnimationLeftAndRight.getKeyFrame(stateTime, true);
+                break;
         }
         // Draw the character at its current position
         batch.draw(currentFrame, position.x, position.y);
@@ -119,19 +140,19 @@ public class Character {
 
     public void dispose() {
         // Dispose of character textures here
-        walkAnimation.getKeyFrames()[0].getTexture().dispose();
-        walkAnimation.getKeyFrames()[1].getTexture().dispose();
-        walkAnimation.getKeyFrames()[2].getTexture().dispose();
-        walkAnimation.getKeyFrames()[3].getTexture().dispose();
-        idleAnimation.getKeyFrames()[0].getTexture().dispose();
-        idleAnimation.getKeyFrames()[1].getTexture().dispose();
-        idleAnimation.getKeyFrames()[2].getTexture().dispose();
-        idleAnimation.getKeyFrames()[3].getTexture().dispose();
-        idleAnimation.getKeyFrames()[4].getTexture().dispose();
-        idleAnimation.getKeyFrames()[5].getTexture().dispose();
-        idleAnimation.getKeyFrames()[6].getTexture().dispose();
-        idleAnimation.getKeyFrames()[7].getTexture().dispose();
-        idleAnimation.getKeyFrames()[8].getTexture().dispose();
+        walkAnimationLeftAndRight.getKeyFrames()[0].getTexture().dispose();
+        walkAnimationLeftAndRight.getKeyFrames()[1].getTexture().dispose();
+        walkAnimationLeftAndRight.getKeyFrames()[2].getTexture().dispose();
+        walkAnimationLeftAndRight.getKeyFrames()[3].getTexture().dispose();
+        idleAnimationLeftAndRight.getKeyFrames()[0].getTexture().dispose();
+        idleAnimationLeftAndRight.getKeyFrames()[1].getTexture().dispose();
+        idleAnimationLeftAndRight.getKeyFrames()[2].getTexture().dispose();
+        idleAnimationLeftAndRight.getKeyFrames()[3].getTexture().dispose();
+        idleAnimationLeftAndRight.getKeyFrames()[4].getTexture().dispose();
+        idleAnimationLeftAndRight.getKeyFrames()[5].getTexture().dispose();
+        idleAnimationLeftAndRight.getKeyFrames()[6].getTexture().dispose();
+        idleAnimationLeftAndRight.getKeyFrames()[7].getTexture().dispose();
+        idleAnimationLeftAndRight.getKeyFrames()[8].getTexture().dispose();
     }
 
 
@@ -156,19 +177,19 @@ public class Character {
 
     private void flipAnimations() {
 
-        walkAnimation.getKeyFrames()[0].flip(true, false);
-        walkAnimation.getKeyFrames()[1].flip(true, false);
-        walkAnimation.getKeyFrames()[2].flip(true, false);
-        walkAnimation.getKeyFrames()[3].flip(true, false);
-        idleAnimation.getKeyFrames()[0].flip(true, false);
-        idleAnimation.getKeyFrames()[1].flip(true, false);
-        idleAnimation.getKeyFrames()[2].flip(true, false);
-        idleAnimation.getKeyFrames()[3].flip(true, false);
-        idleAnimation.getKeyFrames()[4].flip(true, false);
-        idleAnimation.getKeyFrames()[5].flip(true, false);
-        idleAnimation.getKeyFrames()[6].flip(true, false);
-        idleAnimation.getKeyFrames()[7].flip(true, false);
-        idleAnimation.getKeyFrames()[8].flip(true, false);
+        walkAnimationLeftAndRight.getKeyFrames()[0].flip(true, false);
+        walkAnimationLeftAndRight.getKeyFrames()[1].flip(true, false);
+        walkAnimationLeftAndRight.getKeyFrames()[2].flip(true, false);
+        walkAnimationLeftAndRight.getKeyFrames()[3].flip(true, false);
+        idleAnimationLeftAndRight.getKeyFrames()[0].flip(true, false);
+        idleAnimationLeftAndRight.getKeyFrames()[1].flip(true, false);
+        idleAnimationLeftAndRight.getKeyFrames()[2].flip(true, false);
+        idleAnimationLeftAndRight.getKeyFrames()[3].flip(true, false);
+        idleAnimationLeftAndRight.getKeyFrames()[4].flip(true, false);
+        idleAnimationLeftAndRight.getKeyFrames()[5].flip(true, false);
+        idleAnimationLeftAndRight.getKeyFrames()[6].flip(true, false);
+        idleAnimationLeftAndRight.getKeyFrames()[7].flip(true, false);
+        idleAnimationLeftAndRight.getKeyFrames()[8].flip(true, false);
     }
 
     public int getLives() {
