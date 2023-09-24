@@ -12,11 +12,13 @@ public class Bullet {
     private final TextureRegion texture;
     private int damage;
     private boolean isActive = true;
+    private float damageScale;
+
 
     public Bullet(Vector2 position, Vector2 velocity) {
         this.position = position;
         this.velocity = velocity;
-        Texture bulletTexture = new Texture("apple_regular_30_30px.png");
+        Texture bulletTexture = new Texture("Environment/apple.png");
         texture = new TextureRegion(bulletTexture);
     }
 
@@ -25,8 +27,9 @@ public class Bullet {
     }
 
     public void render(SpriteBatch batch) {
-        batch.draw(texture, position.x, position.y);
+        batch.draw(texture, position.x, position.y, getWidth() / 2, getHeight() / 2, getWidth(), getHeight(), damageScale, damageScale, 0);
     }
+
 
     public void dispose() {
         texture.getTexture().dispose();
@@ -47,6 +50,7 @@ public class Bullet {
     public void setDamage(int damage)
     {
         this.damage=damage;
+        this.damageScale = 0.5f + (damage - 100) / 200.0f;
     }
 
     public Vector2 getPosition() {
@@ -54,10 +58,12 @@ public class Bullet {
     }
 
     public float getWidth() {
-        return 30;
+        return 35 *this.damageScale;
     }
 
     public float getHeight() {
-        return 30;
+        return 35 *this.damageScale;
     }
+
+
 }

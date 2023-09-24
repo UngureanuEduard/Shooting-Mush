@@ -3,9 +3,13 @@ package com.mygdx.game;
 import com.badlogic.gdx.ApplicationAdapter;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
+import com.badlogic.gdx.graphics.g2d.GlyphLayout;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TmxMapLoader;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -28,12 +32,16 @@ public class MyGdxGame extends ApplicationAdapter {
 	private float maxCameraX;
 	private float maxCameraY;
 	private float enemySpawnTimer = 0.0f;
-	private int enemiesToSpawn = 10; // Adjust to control the number of enemies
 	Array<Enemy> enemies;
 	private float timeSinceLastShot = 0.0f;
 	private Texture heartTexture;
 	private Texture emptyHeartTexture;
 	private int characterLives;
+	private int damage;
+	Array<Wave> waves;
+
+	private BitmapFont font;
+	private GlyphLayout glyphLayout;
 
 	@Override
 	public void create() {
@@ -47,7 +55,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		// Create the camera
 		camera = new OrthographicCamera();
-		camera.setToOrtho(false, 1920, 1080); // Can change
+		camera.setToOrtho(false, 1920, 1080);
 		float zoomLevel;
 		zoomLevel = 0.5f;
 		camera.zoom = zoomLevel;
@@ -61,6 +69,11 @@ public class MyGdxGame extends ApplicationAdapter {
 		// Initialize enemies array
 		enemies = new Array<>();
 
+		//Initialize waves add a few
+		waves = new Array<>();
+		waves.add(new Wave(1, 3, 0.5f, 200, 200));
+		waves.add(new Wave(2, 6, 0.4f, 400, 200));
+
 		minCameraX = camera.viewportWidth / 2-480 ;
 		minCameraY = camera.viewportHeight / 2 - 268;
 
@@ -68,10 +81,23 @@ public class MyGdxGame extends ApplicationAdapter {
 		maxCameraX = 3200 * tiledMapRenderer.getUnitScale() - camera.viewportWidth / 2 +480 ;
 		maxCameraY = 3200 * tiledMapRenderer.getUnitScale() - camera.viewportHeight / 2 +268;
 
-		heartTexture = new Texture("heart.png");
-		emptyHeartTexture = new Texture("border.png");
+		heartTexture = new Texture("Environment/heart.png");
+		emptyHeartTexture = new Texture("Environment/border.png");
 
 		characterLives = 3; // Start with 3 lives
+
+		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Kaph-Regular.ttf"));
+		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
+		parameter.size = 24; // Adjust as needed
+		parameter.borderColor = Color.BLACK;
+		parameter.borderWidth = 1;
+		parameter.minFilter = Texture.TextureFilter.Linear;
+		parameter.magFilter = Texture.TextureFilter.Linear;
+		font = generator.generateFont(parameter);
+		generator.dispose();
+		glyphLayout = new GlyphLayout();
+		// Without this the font will shake
+		font.setUseIntegerPositions(false);
 
 	}
 
@@ -86,7 +112,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		timeSinceLastShot += Gdx.graphics.getDeltaTime();
 
-		// Handle shooting bullets if the cooldown has expired
+		// Handle shooting bullets if the cooldown has expired , 0.2f = cooldown
 
 		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && timeSinceLastShot >= 0.2f) {
 			shootBullet();
@@ -117,14 +143,20 @@ public class MyGdxGame extends ApplicationAdapter {
 			}
 		}
 
-		// Render Enemies
-		enemySpawnTimer += Gdx.graphics.getDeltaTime();
-		// Adjust this to control spawn rate
-		float enemySpawnInterval = 0.1f;
-		if (enemiesToSpawn > 0 && enemySpawnTimer >= enemySpawnInterval) {
-			spawnEnemy();
-			enemySpawnTimer = 0.0f;
-			enemiesToSpawn--;
+		if (!waves.isEmpty()) {
+			Wave currentWave = waves.first();
+			enemySpawnTimer += Gdx.graphics.getDeltaTime();
+			damage=currentWave.getBulletDamage();
+			if (currentWave.getNumEnemies() > 0 && enemySpawnTimer >= currentWave.getEnemySpawnInterval()) {
+				spawnEnemy(currentWave.getEnemyHealth());
+				enemySpawnTimer = 0.0f;
+				currentWave.setNumEnemies(currentWave.getNumEnemies() - 1);
+			}
+
+			// Check if the current wave is completed
+			if (currentWave.getNumEnemies() == 0 && enemies.isEmpty()) {
+				waves.removeIndex(0);
+			}
 		}
 
 		// Update and render enemies
@@ -145,6 +177,10 @@ public class MyGdxGame extends ApplicationAdapter {
 				batch.draw(emptyHeartTexture, heartContainerX, heartY);
 			}
 		}
+
+		// Draw wave number
+		drawCurrentWaveNumber(heartX,heartY);
+
 		// End the batch
 		batch.end();
 	}
@@ -179,7 +215,7 @@ public class MyGdxGame extends ApplicationAdapter {
 		Bullet bullet = new Bullet(bulletStartPosition, directionToCursor);
 
 		// Set the bullet's damage
-		bullet.setDamage(50);
+		bullet.setDamage(damage);
 		bullets.add(bullet);
 	}
 
@@ -195,16 +231,29 @@ public class MyGdxGame extends ApplicationAdapter {
         return cursorPositionWorld.cpy().sub(startingPoint);
 	}
 
-	private void spawnEnemy() {
+	private void spawnEnemy(int health) {
 		// Generate a random position for the enemy
 		Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
 
 		// Create an enemy instance and pass the player's position
-		Enemy enemy = new Enemy(enemyPosition, character.getPosition());
-		enemy.setHealth(100);
+		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health);
 
 		// Add the enemy to a list or array to manage multiple enemies
 		enemies.add(enemy);
 	}
+
+	private void drawCurrentWaveNumber(float heartX, float heartY) {
+		String text = "Wave:" + waves.first().getWaveNumber();
+
+		glyphLayout.setText(font, text);
+
+		float textX = heartX + camera.viewportWidth / 4 - 90 * camera.zoom;
+		float textY = heartY + 15;
+
+		// Draw the text
+		font.setColor(Color.WHITE);
+		font.draw(batch, text, textX, textY);
+	}
+
 
 }

@@ -14,15 +14,18 @@ public class Enemy {
     private float stateTime;
     private boolean isFlipped = false;
     private int health;
+    private float healthScale=1f;
 
-
-    public Enemy(Vector2 position, Vector2 playerPosition) {
+    public Enemy(Vector2 position, Vector2 playerPosition,int health) {
+        this.health = health;
         this.position = position;
         this.playerPosition = playerPosition;
-        Texture duckTexture = new Texture("Duck.png");
+        Texture duckTexture = new Texture("Environment/Duck.png");
+        System.out.println(duckTexture.getHeight());
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture);
         walkAnimation = new Animation<>(0.1f, duckFrames);
         stateTime = 0.0f; // Initialize the animation time
+        this.healthScale = 0.5f + (health - 100) / 200.0f;
     }
 
     public void update(float deltaTime, Array<Bullet> bullets,Array<Enemy> enemies) {
@@ -68,8 +71,11 @@ public class Enemy {
         // Get the current frame from the walk animation
         TextureRegion currentFrame = walkAnimation.getKeyFrame(stateTime, true);
 
+        float scaledWidth = getWidth() * healthScale;
+        float scaledHeight = getHeight() * healthScale;
+
         // Draw the current frame at the enemy's position
-        batch.draw(currentFrame, position.x, position.y, isFlipped ? -currentFrame.getRegionWidth() : currentFrame.getRegionWidth(), currentFrame.getRegionHeight());
+        batch.draw(currentFrame, position.x, position.y, scaledWidth / 2, scaledHeight / 2, scaledWidth, scaledHeight, isFlipped ? -1 : 1, 1, 0);
     }
 
     private TextureRegion[] splitEnemyTexture(Texture characterTexture) {
@@ -79,18 +85,14 @@ public class Enemy {
         return characterFrames;
     }
 
-    public void setHealth(int health) {
-        this.health = health;
-    }
-
     public float getWidth()
     {
-        return 32;
+        return 32*healthScale;
     }
 
     public float getHeight()
     {
-        return 32;
+        return 35*healthScale;
     }
 
     public Vector2 getPosition() {
