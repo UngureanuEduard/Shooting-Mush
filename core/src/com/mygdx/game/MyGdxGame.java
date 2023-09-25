@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.GlyphLayout;
+import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.freetype.FreeTypeFontGenerator;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -42,6 +43,8 @@ public class MyGdxGame extends ApplicationAdapter {
 
 	private BitmapFont font;
 	private GlyphLayout glyphLayout;
+
+	Array<ParticleEffect> particleEffects;
 
 	@Override
 	public void create() {
@@ -88,7 +91,7 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		FreeTypeFontGenerator generator = new FreeTypeFontGenerator(Gdx.files.internal("Kaph-Regular.ttf"));
 		FreeTypeFontGenerator.FreeTypeFontParameter parameter = new FreeTypeFontGenerator.FreeTypeFontParameter();
-		parameter.size = 24; // Adjust as needed
+		parameter.size = 24;
 		parameter.borderColor = Color.BLACK;
 		parameter.borderWidth = 1;
 		parameter.minFilter = Texture.TextureFilter.Linear;
@@ -99,6 +102,8 @@ public class MyGdxGame extends ApplicationAdapter {
 		// Without this the font will shake
 		font.setUseIntegerPositions(false);
 
+		// Initialize particles array
+		particleEffects=new Array<>();
 	}
 
 	@Override
@@ -121,6 +126,10 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		// Set the camera's projection matrix
 		batch.setProjectionMatrix(camera.combined);
+
+		for (ParticleEffect particle:particleEffects) {
+			particle.update(Gdx.graphics.getDeltaTime());
+		}
 
 		// Begin the batch
 		batch.begin();
@@ -161,7 +170,10 @@ public class MyGdxGame extends ApplicationAdapter {
 
 		// Update and render enemies
 		for (Enemy enemy : enemies) {
-			enemy.update(Gdx.graphics.getDeltaTime(),bullets,enemies);
+			 Vector2 poz=enemy.update(Gdx.graphics.getDeltaTime(),bullets,enemies);
+			// Check if the enemy died
+			 if(!poz.epsilonEquals(-1,-1))
+				 DeathParticles(poz,enemy.getHealthScale());
 			enemy.render(batch);
 		}
 
@@ -179,8 +191,14 @@ public class MyGdxGame extends ApplicationAdapter {
 		}
 
 		// Draw wave number
-		drawCurrentWaveNumber(heartX,heartY);
-
+		if(!waves.isEmpty())
+		{
+			drawCurrentWaveNumber(heartX,heartY);
+		}
+		// Draw the particle effects
+		for (ParticleEffect particle:particleEffects) {
+			particle.draw(batch);
+		}
 		// End the batch
 		batch.end();
 	}
@@ -253,6 +271,15 @@ public class MyGdxGame extends ApplicationAdapter {
 		// Draw the text
 		font.setColor(Color.WHITE);
 		font.draw(batch, text, textX, textY);
+	}
+
+	private void DeathParticles(Vector2 position,float scale)
+	{
+		particleEffects.add(new ParticleEffect());
+		particleEffects.get(particleEffects.size-1).load(Gdx.files.internal("Environment/explosion/explosion.party"),Gdx.files.internal("Environment/explosion"));
+		particleEffects.get(particleEffects.size-1).getEmitters().first().setPosition(position.x, position.y);
+		particleEffects.get(particleEffects.size-1).getEmitters().first().scaleSize(scale);
+		particleEffects.get(particleEffects.size-1).start();
 	}
 
 

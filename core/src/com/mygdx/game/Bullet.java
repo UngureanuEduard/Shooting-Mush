@@ -1,6 +1,8 @@
 package com.mygdx.game;
 
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -14,12 +16,16 @@ public class Bullet {
     private boolean isActive = true;
     private float damageScale;
 
+    Sound sound = Gdx.audio.newSound(Gdx.files.internal("mp3/throw.mp3"));
+
+
 
     public Bullet(Vector2 position, Vector2 velocity) {
         this.position = position;
         this.velocity = velocity;
         Texture bulletTexture = new Texture("Environment/apple.png");
         texture = new TextureRegion(bulletTexture);
+        sound.play(1.0f);
     }
 
     public void update(float deltaTime) {

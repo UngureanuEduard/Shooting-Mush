@@ -1,5 +1,7 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -15,20 +17,20 @@ public class Enemy {
     private boolean isFlipped = false;
     private int health;
     private float healthScale=1f;
+    Sound sound = Gdx.audio.newSound(Gdx.files.internal("mp3/duck.mp3"));
 
     public Enemy(Vector2 position, Vector2 playerPosition,int health) {
         this.health = health;
         this.position = position;
         this.playerPosition = playerPosition;
         Texture duckTexture = new Texture("Environment/Duck.png");
-        System.out.println(duckTexture.getHeight());
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture);
         walkAnimation = new Animation<>(0.1f, duckFrames);
         stateTime = 0.0f; // Initialize the animation time
         this.healthScale = 0.5f + (health - 100) / 200.0f;
     }
 
-    public void update(float deltaTime, Array<Bullet> bullets,Array<Enemy> enemies) {
+    public Vector2 update(float deltaTime, Array<Bullet> bullets,Array<Enemy> enemies) {
         // Calculate the direction from the enemy to the player
         Vector2 direction = playerPosition.cpy().sub(position).nor();
 
@@ -45,10 +47,12 @@ public class Enemy {
         // Check for bullet collisions
         for (Bullet bullet : bullets) {
             if (isCollidingWithBullet(bullet)) {
-                takeDamage(bullet.getDamage(),enemies); // Reduce enemy's health
+                if(takeDamage(bullet.getDamage(),enemies))
+                    return new Vector2(this.position.x+this.getWidth()/2,this.position.y+this.getHeight()/2);
                 bullet.setActive(false); // Deactivate the bullet
             }
         }
+        return new Vector2(-1,-1);
     }
 
     private boolean isCollidingWithBullet(Bullet bullet) {
@@ -59,12 +63,14 @@ public class Enemy {
                 position.y + getHeight() > bullet.getPosition().y;
     }
 
-    private void takeDamage(int damage,Array<Enemy> enemies) {
+    private Boolean takeDamage(int damage,Array<Enemy> enemies) {
         health -= damage;
         if (health <= 0) {
             enemies.removeValue(this, true);
+            return true;
         }
-
+        sound.play(1.0f);
+        return false;
     }
 
     public void render(SpriteBatch batch) {
@@ -98,5 +104,7 @@ public class Enemy {
     public Vector2 getPosition() {
         return position;
     }
+
+    public float getHealthScale(){return healthScale;}
 }
 
