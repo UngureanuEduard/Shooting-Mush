@@ -1,7 +1,6 @@
 package com.mygdx.game;
 
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -12,20 +11,26 @@ public class Bullet {
     private final Vector2 position;
     private final Vector2 velocity;
     private final TextureRegion texture;
-    private int damage;
+    private final int damage;
     private boolean isActive = true;
-    private float damageScale;
+    private final float damageScale;
 
-    Sound sound = Gdx.audio.newSound(Gdx.files.internal("mp3/throw.mp3"));
+    Assets assets;
+
+    Sound sound;
 
 
 
-    public Bullet(Vector2 position, Vector2 velocity) {
+    public Bullet(Vector2 position, Vector2 velocity, int damage, Assets assets) {
+        this.assets=assets;
+        this.damage=damage;
+        this.damageScale = 0.5f + (damage - 100) / 200.0f;
         this.position = position;
         this.velocity = velocity;
-        Texture bulletTexture = new Texture("Environment/apple.png");
+        Texture bulletTexture = this.assets.getAssetManager().get(Assets.bulletTexture);
+        sound = assets.getAssetManager().get(Assets.throwSound);
         texture = new TextureRegion(bulletTexture);
-        sound.play(1.0f);
+        sound.play(0.5f);
     }
 
     public void update(float deltaTime) {
@@ -51,12 +56,6 @@ public class Bullet {
 
     public void setActive(boolean active) {
         isActive = active;
-    }
-
-    public void setDamage(int damage)
-    {
-        this.damage=damage;
-        this.damageScale = 0.5f + (damage - 100) / 200.0f;
     }
 
     public Vector2 getPosition() {

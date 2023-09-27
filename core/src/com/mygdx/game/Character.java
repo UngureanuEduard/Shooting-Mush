@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -23,18 +24,26 @@ public class Character {
     private boolean isFlipped;
     private int lives;
 
-    private float timeSinceLastLifeLost = 0.0f;
+    private final Texture heartTexture;
+    private final Texture emptyHeartTexture;
 
-    public Character( Vector2 initialPosition) {
+    private float timeSinceLastLifeLost = 4.0f;
+
+    Assets assets;
+
+    public Character( Vector2 initialPosition,Assets assets) {
+        this.assets=assets;
 
         // Set the initial position of the character
         position = initialPosition;
 
         // Use the splitCharacterTexture method in this class for the walk animation
-        Texture walkTexture = new Texture("Character/Character Walking Side.png");
-        Texture idleTexture = new Texture("Character/Character Idle Side.png");
-        Texture walkFrontTexture = new Texture("Character/Character Walking Front.png");
-        Texture walkBackTexture = new Texture("Character/Character Walking Back.png");
+        Texture walkTexture = assets.getAssetManager().get(Assets.walkTexture);
+        Texture idleTexture = assets.getAssetManager().get(Assets.idleTexture);
+        Texture walkFrontTexture = assets.getAssetManager().get(Assets.walkFrontTexture);
+        Texture walkBackTexture = assets.getAssetManager().get(Assets.walkBackTexture);
+        heartTexture = assets.getAssetManager().get(Assets.heartTexture);
+        emptyHeartTexture = assets.getAssetManager().get(Assets.emptyHeartTexture);
         TextureRegion[] walkFrontFrames = splitCharacterTexture(walkFrontTexture,4);
         TextureRegion[] walkBackFrames = splitCharacterTexture(walkBackTexture,4);
         TextureRegion[] walkFrames = splitCharacterTexture(walkTexture,4);
@@ -107,13 +116,14 @@ public class Character {
         for (Enemy enemy : enemies) {
             if (isCollidingWithEnemy(enemy)) {
                 if (timeSinceLastLifeLost >= 4.0f) {
+                    System.out.println(timeSinceLastLifeLost);
                     loseLife(); // Character loses a life
                     timeSinceLastLifeLost = 0.0f; // Reset the timer
                 }
             }
         }
 
-        timeSinceLastLifeLost += Gdx.graphics.getDeltaTime();
+        timeSinceLastLifeLost += deltaTime;
     }
 
     public void render(SpriteBatch batch) {
@@ -192,10 +202,6 @@ public class Character {
         idleAnimationLeftAndRight.getKeyFrames()[8].flip(true, false);
     }
 
-    public int getLives() {
-        return lives;
-    }
-
     public void loseLife() {
         lives--;
     }
@@ -219,6 +225,21 @@ public class Character {
         return horizontalCollision && verticalCollision;
     }
 
+    public void drawHearts(SpriteBatch batch, int characterLives, OrthographicCamera camera)
+    {
+        float heartX = camera.position.x - (camera.viewportWidth * camera.zoom) / 2 + 10 * camera.zoom;
+        float heartY = camera.position.y + (camera.viewportHeight * camera.zoom) / 2 - 40 * camera.zoom;
+
+        for (int i = 0; i < characterLives; i++) {
+            float heartContainerX = heartX + i * 40 *camera.zoom;
+            if (i <lives) {
+                batch.draw(heartTexture, heartContainerX, heartY);
+                batch.draw(emptyHeartTexture, heartContainerX, heartY);
+            } else {
+                batch.draw(emptyHeartTexture, heartContainerX, heartY);
+            }
+        }
+    }
     private boolean isTileBlocked(float x, float y, TiledMap tiledMap) {
         // Get the collision layer from the TiledMap
         TiledMapTileLayer collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Tile Layer 3");
@@ -233,7 +254,4 @@ public class Character {
         // Check if the cell exists and has the "blocked" property
         return !(cell != null && cell.getTile().getProperties().containsKey("blocked"));
     }
-
-
-
 }

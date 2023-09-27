@@ -16,7 +16,7 @@ public class Enemy {
     private float stateTime;
     private boolean isFlipped = false;
     private int health;
-    private float healthScale=1f;
+    private final float healthScale;
     Sound sound = Gdx.audio.newSound(Gdx.files.internal("mp3/duck.mp3"));
 
     public Enemy(Vector2 position, Vector2 playerPosition,int health) {
@@ -106,5 +106,6 @@ public class Enemy {
     }
 
     public float getHealthScale(){return healthScale;}
-}
 
+    public Integer getHealth(){return health;}
+}
