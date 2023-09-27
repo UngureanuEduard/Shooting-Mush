@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;
 import com.badlogic.gdx.assets.loaders.resolvers.InternalFileHandleResolver;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
@@ -30,8 +31,16 @@ public class Assets {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
     }
     public static final AssetDescriptor<Texture> skullTexture = new AssetDescriptor<>("Environment/skull.png", Texture.class);
+    public static final AssetDescriptor<Texture> menuBackgroundTexture = new AssetDescriptor<>("Font/Background.jpg", Texture.class);
+    public static final AssetDescriptor<Texture> duckTexture = new AssetDescriptor<>("Environment/Duck.png", Texture.class);
+    public static final AssetDescriptor<Sound> duckSound = new AssetDescriptor<>("mp3/duck.mp3",Sound.class);
+    public static final AssetDescriptor<Music> menuMusic = new AssetDescriptor<>("mp3/menuMusic.ogg", Music.class);
+    public static final AssetDescriptor<Music> gameMusic = new AssetDescriptor<>("mp3/gameMusic.mp3", Music.class);
     public void loadMenuAssets() {
         assetManager.load(skin);
+        assetManager.load(menuBackgroundTexture);
+        assetManager.load(duckTexture);
+        assetManager.load(menuMusic);
     }
 
     public void loadGameAssets() {
@@ -47,6 +56,9 @@ public class Assets {
         assetManager.load(throwSound);
         assetManager.load(explosionParticleEffect);
         assetManager.load(skullTexture);
+        assetManager.load(duckTexture);
+        assetManager.load(duckSound);
+        assetManager.load(gameMusic);
     }
 
     public AssetManager getAssetManager() {

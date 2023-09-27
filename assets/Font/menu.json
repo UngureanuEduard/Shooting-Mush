@@ -5,25 +5,37 @@
 		"scaledSize": -1,
 		"markupEnabled": false,
 		"flip": false
-	},
-	"Kaph-Regular": {
-		"file": "Kaph-Regular.fnt",
-		"scaledSize": -1,
-		"markupEnabled": false,
-		"flip": false
 	}
 },
 "com.badlogic.gdx.graphics.Color": {
-	"black": {
-		"r": 0,
-		"g": 0,
-		"b": 0,
+	"Flamingo": {
+		"r": 1,
+		"g": 0.2,
+		"b": 1,
 		"a": 1
 	},
 	"green": {
-		"r": 0,
+		"r": 1,
 		"g": 1,
-		"b": 0,
+		"b": 1,
+		"a": 1
+	},
+	"Green": {
+		"r": 0.1764706,
+		"g": 0.654902,
+		"b": 0.1764706,
+		"a": 1
+	},
+	"grey": {
+		"r": 0.7,
+		"g": 0.7,
+		"b": 0.7,
+		"a": 1
+	},
+	"light_grey": {
+		"r": 0.8,
+		"g": 0.8,
+		"b": 0.8,
 		"a": 1
 	},
 	"Orange": {
@@ -34,8 +46,32 @@
 	},
 	"red": {
 		"r": 1,
+		"g": 1,
+		"b": 1,
+		"a": 1
+	},
+	"RGBA_156_237_138_255": {
+		"r": 0.6117647,
+		"g": 0.92941177,
+		"b": 0.5411765,
+		"a": 1
+	},
+	"black": {
+		"r": 0,
 		"g": 0,
 		"b": 0,
+		"a": 1
+	},
+	"cyan": {
+		"r": 0,
+		"g": 1,
+		"b": 0.99166656,
+		"a": 1
+	},
+	"dark-cyan": {
+		"r": 0,
+		"g": 0.39373153,
+		"b": 0.4333333,
 		"a": 1
 	},
 	"white": {
@@ -49,147 +85,189 @@
 	"dialogDim": {
 		"name": "white",
 		"color": {
+			"r": 0.2,
+			"g": 0.2,
+			"b": 0.2,
+			"a": 1
+		}
+	},
+	"pale-blue": {
+		"name": "white",
+		"color": {
+			"r": 0.48342222,
+			"g": 0.76367503,
+			"b": 0.99333334,
+			"a": 1
+		}
+	},
+	"black": {
+		"name": "white",
+		"color": {
 			"r": 0,
 			"g": 0,
 			"b": 0,
-			"a": 0.45
+			"a": 1
+		}
+	},
+	"Green-button": {
+		"name": "button",
+		"color": "Green"
+	},
+	"button-down-Green": {
+		"name": "button-down",
+		"color": {
+			"r": 0.15686275,
+			"g": 0.627451,
+			"b": 0.05490196,
+			"a": 1
 		}
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.Button$ButtonStyle": {
 	"default": {
-		"up": "default-round",
-		"down": "default-round-down"
+		"up": "button",
+		"down": "button-down"
 	},
 	"toggle": {
-		"up": "default-round",
-		"down": "default-round-down",
-		"checked": "default-round-down"
+		"up": "toggle-button-off",
+		"down": "toggle-button-down",
+		"checked": "toggle-button"
+	},
+	"music": {
+		"up": "music-off",
+		"down": "music-down",
+		"checked": "music"
+	},
+	"left": {
+		"up": "left-button",
+		"down": "left-button-down"
+	},
+	"sound": {
+		"up": "sound-off",
+		"down": "sound-down",
+		"checked": "sound"
+	},
+	"right": {
+		"up": "right-button",
+		"down": "right-button-down"
+	},
+	"small": {
+		"up": "button-small",
+		"down": "button-small-down"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.CheckBox$CheckBoxStyle": {
 	"default": {
-		"checkboxOn": "check-on",
-		"checkboxOff": "check-off",
-		"font": "Kaph-Regular",
-		"fontColor": "white"
-	}
-},
-"com.badlogic.gdx.scenes.scene2d.ui.ImageTextButton$ImageTextButtonStyle": {
-	"default": {
-		"font": "Kaph-Regular"
-	}
-},
-"com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
-	"default": {
+		"checkboxOn": "checkbox",
+		"checkboxOff": "checkbox-off",
 		"font": "Kaph-Big",
 		"fontColor": "white"
 	}
 },
+"com.badlogic.gdx.scenes.scene2d.ui.ImageButton$ImageButtonStyle": {
+	"default": {
+		"up": "button",
+		"down": "button-down"
+	}
+},
+"com.badlogic.gdx.scenes.scene2d.ui.Label$LabelStyle": {
+	"default": {
+		"font": "Kaph-Big"
+	}
+},
 "com.badlogic.gdx.scenes.scene2d.ui.List$ListStyle": {
 	"default": {
-		"font": "Kaph-Regular",
+		"font": "Kaph-Big",
 		"fontColorSelected": "white",
-		"fontColorUnselected": "white",
-		"selection": "selection"
+		"fontColorUnselected": "dark-cyan",
+		"selection": "pale-blue",
+		"background": "list"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.ProgressBar$ProgressBarStyle": {
 	"default-horizontal": {
-		"background": "default-slider",
-		"knob": "default-slider-knob"
+		"background": "progress-bar",
+		"knobBefore": "progress-bar-knob"
 	},
 	"default-vertical": {
-		"background": "default-slider",
-		"knob": "default-round-large"
+		"background": "progress-bar-vertical",
+		"knobBefore": "progress-bar-knob-vertical"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.ScrollPane$ScrollPaneStyle": {
 	"default": {
-		"background": "default-rect",
-		"hScroll": "default-scroll",
-		"hScrollKnob": "default-round-large",
-		"vScroll": "default-scroll",
-		"vScrollKnob": "default-round-large"
-	}
-},
-"com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle": {
-	"default": {
-		"font": "Kaph-Regular",
-		"fontColor": "white",
-		"background": "default-select",
-		"scrollStyle": "default",
-		"listStyle": "default"
+		"hScroll": "horizontal-scroll-bar",
+		"hScrollKnob": "horizontal-scroll-knob",
+		"vScroll": "vertical-scroll-bar",
+		"vScrollKnob": "vertical-scroll-knob"
+	},
+	"android": {
+		"background": "panel1",
+		"hScroll": "android-horizontal-scrollbar",
+		"hScrollKnob": "android-horizontal-scrollbar-knob",
+		"vScroll": "android-vertical-scrollbar",
+		"vScrollKnob": "android-vertical-scrollbar-knob"
+	},
+	"scroll": {
+		"background": "list",
+		"hScroll": "horizontal-scroll-bar",
+		"hScrollKnob": "horizontal-scroll-knob",
+		"vScroll": "vertical-scroll-bar",
+		"vScrollKnob": "vertical-scroll-knob"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle": {
 	"default-horizontal": {
-		"background": "default-slider",
-		"knob": "default-slider-knob"
+		"background": "slider",
+		"knob": "slider-knob"
 	},
 	"default-vertical": {
-		"background": "default-slider",
-		"knob": "default-round-large"
+		"background": "slider-vertical",
+		"knob": "slider-knob"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.SplitPane$SplitPaneStyle": {
 	"default-horizontal": {
-		"handle": "default-splitpane"
+		"handle": "horizontal-split-pane"
 	},
 	"default-vertical": {
-		"handle": "default-splitpane-vertical"
+		"handle": "vertical-split-pane"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.TextButton$TextButtonStyle": {
 	"default": {
-		"font": "Kaph-Regular",
-		"fontColor": "Orange",
-		"up": "default-round",
-		"down": "default-round-down"
-	},
-	"toggle": {
-		"font": "Kaph-Regular",
-		"fontColor": "white",
-		"downFontColor": "red",
-		"up": "default-round",
-		"down": "default-round-down",
-		"checked": "default-round-down"
+		"font": "Kaph-Big",
+		"up": "Green-button",
+		"down": "button-down-Green"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.TextField$TextFieldStyle": {
 	"default": {
-		"font": "Kaph-Regular",
-		"fontColor": "white",
+		"font": "Kaph-Big",
+		"fontColor": "black",
 		"background": "textfield",
-		"cursor": "cursor",
-		"selection": "selection"
-	}
-},
-"com.badlogic.gdx.scenes.scene2d.ui.TextTooltip$TextTooltipStyle": {
-	"default": {
-		"label": "default",
-		"background": "default-pane",
-		"wrapWidth": 150
+		"cursor": "black",
+		"selection": "pale-blue"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.Touchpad$TouchpadStyle": {
 	"default": {
-		"background": "default-pane",
-		"knob": "default-round-large"
+		"background": "touchpad",
+		"knob": "touchpad-knob"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.Tree$TreeStyle": {
 	"default": {
-		"plus": "tree-plus",
-		"minus": "tree-minus",
-		"selection": "default-select-selection"
+		"plus": "plus",
+		"minus": "minus",
+		"selection": "pale-blue"
 	}
 },
 "com.badlogic.gdx.scenes.scene2d.ui.Window$WindowStyle": {
 	"default": {
-		"background": "default-window",
-		"titleFont": "Kaph-Regular",
-		"titleFontColor": "white"
+		"background": "window",
+		"titleFont": "Kaph-Big",
+		"titleFontColor": "black"
 	}
 }
 }

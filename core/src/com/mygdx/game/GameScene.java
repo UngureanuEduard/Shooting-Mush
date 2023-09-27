@@ -3,6 +3,7 @@ package com.mygdx.game;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
+import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
@@ -55,6 +56,8 @@ public class GameScene extends ScreenAdapter {
 	private int enemiesLeftToKill;
 	Texture imageTexture;
 	Image imageActor;
+
+	Music gameMusic;
 
     @Override
     public void show()
@@ -112,6 +115,11 @@ public class GameScene extends ScreenAdapter {
 		imageActor.setPosition((float)Gdx.graphics.getWidth()/2-imageActor.getWidth(),(float)(Gdx.graphics.getHeight()-Gdx.graphics.getHeight()/10)+imageActor.getHeight()/3);
 		imageActor.setSize(imageActor.getWidth()/1.5f,imageActor.getHeight()/1.5f);
 		enemiesLeftToKill=waves.first().getNumEnemies();
+
+		gameMusic = assets.getAssetManager().get(Assets.gameMusic);
+		gameMusic.setLooping(true);
+		gameMusic.setVolume(0.5f);
+		gameMusic.play();
 
 
 	}
@@ -236,6 +244,7 @@ public class GameScene extends ScreenAdapter {
 		}
 		stage.dispose();
 		assets.dispose();
+		gameMusic.dispose();
 	}
 
 	private void shootBullet() {
@@ -269,7 +278,7 @@ public class GameScene extends ScreenAdapter {
 		Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
 
 		// Create an enemy instance and pass the player's position
-		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health);
+		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health,assets);
 
 		// Add the enemy to a list or array to manage multiple enemies
 		enemies.add(enemy);

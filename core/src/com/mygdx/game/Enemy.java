@@ -1,6 +1,5 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -17,13 +16,14 @@ public class Enemy {
     private boolean isFlipped = false;
     private int health;
     private final float healthScale;
-    Sound sound = Gdx.audio.newSound(Gdx.files.internal("mp3/duck.mp3"));
+    Sound sound;
 
-    public Enemy(Vector2 position, Vector2 playerPosition,int health) {
+    public Enemy(Vector2 position, Vector2 playerPosition,int health,Assets assets) {
         this.health = health;
         this.position = position;
         this.playerPosition = playerPosition;
-        Texture duckTexture = new Texture("Environment/Duck.png");
+        Texture duckTexture = assets.getAssetManager().get(Assets.duckTexture);
+        this.sound=assets.getAssetManager().get(Assets.duckSound);
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture);
         walkAnimation = new Animation<>(0.1f, duckFrames);
         stateTime = 0.0f; // Initialize the animation time
@@ -69,7 +69,7 @@ public class Enemy {
             enemies.removeValue(this, true);
             return true;
         }
-        sound.play(1.0f);
+        sound.play(0.1f);
         return false;
     }
 
@@ -106,6 +106,4 @@ public class Enemy {
     }
 
     public float getHealthScale(){return healthScale;}
-
-    public Integer getHealth(){return health;}
 }
