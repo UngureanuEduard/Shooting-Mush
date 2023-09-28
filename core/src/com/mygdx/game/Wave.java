@@ -5,7 +5,7 @@ public class Wave {
     private  int numEnemies;
     private final float enemySpawnInterval;
     private final int enemyHealth;
-    private final int bulletDamage;
+    private int bulletDamage;
 
     public Wave(int waveNumber, int numEnemies, float enemySpawnInterval, int enemyHealth, int bulletDamage) {
         this.waveNumber = waveNumber;
@@ -39,4 +39,6 @@ public class Wave {
     public void setNumEnemies(int numEnemies){
         this.numEnemies = numEnemies;
     }
+
+    public void setBulletDamage(int damage){this.bulletDamage=damage;}
 }

@@ -13,7 +13,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class Character {
-    private static final float SPEED = 400;
+    public float SPEED = 200;
     private final Vector2 position;
     private float stateTime;
     private final Animation<TextureRegion> walkAnimationLeftAndRight;
@@ -23,6 +23,8 @@ public class Character {
     private String isWalking;
     private boolean isFlipped;
     private int lives;
+
+    private int lostLives=0;
 
     private final Texture heartTexture;
     private final Texture emptyHeartTexture;
@@ -57,73 +59,74 @@ public class Character {
         lives = 3;
     }
 
-    public void update( Array<Enemy> enemies,TiledMap tiledMap) {
+    public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused) {
+        if(!isPaused) {
+            float deltaTime = Gdx.graphics.getDeltaTime();
 
-        float deltaTime = Gdx.graphics.getDeltaTime();
+            boolean moveLeft = Gdx.input.isKeyPressed(Input.Keys.A);
+            boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
+            boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
+            boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
+            //The potential new position based on input
+            float potentialX = position.x;
+            float potentialY = position.y;
 
-        boolean moveLeft = Gdx.input.isKeyPressed(Input.Keys.A);
-        boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
-        boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
-        boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
-        //The potential new position based on input
-        float potentialX = position.x;
-        float potentialY = position.y;
+            //The potential new position based on a buff distance (avoid overlaps of the character with the tile)
+            float buffedpotentialX = position.x;
+            float buffedpotentialY = position.y;
+            isWalking = "";
 
-        //The potential new position based on a buff distance (avoid overlaps of the character with the tile)
-        float buffedpotentialX = position.x;
-        float buffedpotentialY = position.y;
-        isWalking="";
-
-        if (moveUp) {
-            potentialY += SPEED * deltaTime;
-            buffedpotentialY=potentialY+10;
-            isWalking="up";
-        }
-        if (moveDown) {
-            potentialY -= SPEED * deltaTime;
-            buffedpotentialY=potentialY-4;
-            isWalking="down";
-        }
-        if (moveLeft) {
-            potentialX -= SPEED * deltaTime;
-            if (!isFlipped) {
-                flipAnimations();
-                isFlipped = true;
+            if (moveUp) {
+                potentialY += SPEED * deltaTime;
+                buffedpotentialY = potentialY + 10;
+                isWalking = "up";
             }
-            buffedpotentialX=potentialX-4;
-            isWalking="left";
-        }
-        if (moveRight) {
-            potentialX += SPEED * deltaTime;
-            if (isFlipped) {
-                flipAnimations();
-                isFlipped = false;
+            if (moveDown) {
+                potentialY -= SPEED * deltaTime;
+                buffedpotentialY = potentialY - 4;
+                isWalking = "down";
             }
-            buffedpotentialX=potentialX+15;
-            isWalking="right";
-        }
+            if (moveLeft) {
+                potentialX -= SPEED * deltaTime;
+                if (!isFlipped) {
+                    flipAnimations();
+                    isFlipped = true;
+                }
+                buffedpotentialX = potentialX - 4;
+                isWalking = "left";
+            }
+            if (moveRight) {
+                potentialX += SPEED * deltaTime;
+                if (isFlipped) {
+                    flipAnimations();
+                    isFlipped = false;
+                }
+                buffedpotentialX = potentialX + 15;
+                isWalking = "right";
+            }
 
-        // Check if the potential new position collides with blocked tiles
-        if (isTileBlocked(buffedpotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedpotentialY, tiledMap)) {
-            position.set(potentialX, potentialY);
-        }
+            // Check if the potential new position collides with blocked tiles
+            if (isTileBlocked(buffedpotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedpotentialY, tiledMap)) {
+                position.set(potentialX, potentialY);
+            }
 
 
-        // Update animation stateTime
-        stateTime += deltaTime;
+            // Update animation stateTime
+            stateTime += deltaTime;
 
-        // Check for enemy collisions
-        for (Enemy enemy : enemies) {
-            if (isCollidingWithEnemy(enemy)) {
-                if (timeSinceLastLifeLost >= 4.0f) {
-                    System.out.println(timeSinceLastLifeLost);
-                    loseLife(); // Character loses a life
-                    timeSinceLastLifeLost = 0.0f; // Reset the timer
+            // Check for enemy collisions
+            for (Enemy enemy : enemies) {
+                if (isCollidingWithEnemy(enemy)) {
+                    if (timeSinceLastLifeLost >= 4.0f) {
+                        System.out.println(timeSinceLastLifeLost);
+                        loseLife(); // Character loses a life
+                        timeSinceLastLifeLost = 0.0f; // Reset the timer
+                    }
                 }
             }
-        }
 
-        timeSinceLastLifeLost += deltaTime;
+            timeSinceLastLifeLost += deltaTime;
+        }
     }
 
     public void render(SpriteBatch batch) {
@@ -204,6 +207,7 @@ public class Character {
 
     public void loseLife() {
         lives--;
+        lostLives++;
     }
 
     private boolean isCollidingWithEnemy(Enemy enemy) {
@@ -225,12 +229,12 @@ public class Character {
         return horizontalCollision && verticalCollision;
     }
 
-    public void drawHearts(SpriteBatch batch, int characterLives, OrthographicCamera camera)
+    public void drawHearts(SpriteBatch batch, OrthographicCamera camera)
     {
         float heartX = camera.position.x - (camera.viewportWidth * camera.zoom) / 2 + 10 * camera.zoom;
         float heartY = camera.position.y + (camera.viewportHeight * camera.zoom) / 2 - 40 * camera.zoom;
 
-        for (int i = 0; i < characterLives; i++) {
+        for (int i = 0; i < lives+lostLives; i++) {
             float heartContainerX = heartX + i * 40 *camera.zoom;
             if (i <lives) {
                 batch.draw(heartTexture, heartContainerX, heartY);
@@ -253,5 +257,13 @@ public class Character {
 
         // Check if the cell exists and has the "blocked" property
         return !(cell != null && cell.getTile().getProperties().containsKey("blocked"));
+    }
+
+    public void GainLife(){
+        lives++;
+    }
+
+    public void GainSpeed(){
+        SPEED+=25;
     }
 }

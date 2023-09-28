@@ -29,7 +29,7 @@ public class MainMenuScreen extends ScreenAdapter {
 
     private final SpriteBatch batch;
     private float screenWidth;
-    boolean isFlipped = false; // Initialize as not flipped
+    boolean isFlipped = false;
 
     private boolean moveRight = true;
     private Music backgroundMusic;

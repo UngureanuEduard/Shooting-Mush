@@ -27,32 +27,34 @@ public class Enemy {
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture);
         walkAnimation = new Animation<>(0.1f, duckFrames);
         stateTime = 0.0f; // Initialize the animation time
-        this.healthScale = 0.5f + (health - 100) / 200.0f;
+        this.healthScale = 0.7f + health/ 300.0f;
     }
 
-    public Vector2 update(float deltaTime, Array<Bullet> bullets,Array<Enemy> enemies) {
-        // Calculate the direction from the enemy to the player
-        Vector2 direction = playerPosition.cpy().sub(position).nor();
+    public Vector2 update(float deltaTime, Array<Bullet> bullets,Array<Enemy> enemies,Boolean isPaused) {
+        if(!isPaused) {
+            // Calculate the direction from the enemy to the player
+            Vector2 direction = playerPosition.cpy().sub(position).nor();
 
-        float movementSpeed = 100.0f; // Adjust the speed
+            float movementSpeed = 100.0f; // Adjust the speed
 
-        position.add(direction.x * movementSpeed * deltaTime, direction.y * movementSpeed * deltaTime);
+            position.add(direction.x * movementSpeed * deltaTime, direction.y * movementSpeed * deltaTime);
 
-        // Update animation stateTime
-        stateTime += deltaTime;
+            // Update animation stateTime
+            stateTime += deltaTime;
 
-        // Determine if the enemy should be flipped
-        isFlipped = direction.x < 0;
+            // Determine if the enemy should be flipped
+            isFlipped = direction.x < 0;
 
-        // Check for bullet collisions
-        for (Bullet bullet : bullets) {
-            if (isCollidingWithBullet(bullet)) {
-                if(takeDamage(bullet.getDamage(),enemies))
-                    return new Vector2(this.position.x+this.getWidth()/2,this.position.y+this.getHeight()/2);
-                bullet.setActive(false); // Deactivate the bullet
+            // Check for bullet collisions
+            for (Bullet bullet : bullets) {
+                if (isCollidingWithBullet(bullet)) {
+                    if (takeDamage(bullet.getDamage(), enemies))
+                        return new Vector2(this.position.x + this.getWidth() / 2, this.position.y + this.getHeight() / 2);
+                    bullet.setActive(false); // Deactivate the bullet
+                }
             }
         }
-        return new Vector2(-1,-1);
+        return new Vector2(-1, -1);
     }
 
     private boolean isCollidingWithBullet(Bullet bullet) {
@@ -79,6 +81,7 @@ public class Enemy {
 
         float scaledWidth = getWidth() * healthScale;
         float scaledHeight = getHeight() * healthScale;
+
 
         // Draw the current frame at the enemy's position
         batch.draw(currentFrame, position.x, position.y, scaledWidth / 2, scaledHeight / 2, scaledWidth, scaledHeight, isFlipped ? -1 : 1, 1, 0);

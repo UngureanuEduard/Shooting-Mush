@@ -42,8 +42,7 @@ public class GameScene extends ScreenAdapter {
 	private float enemySpawnTimer = 0.0f;
 	Array<Enemy> enemies;
 	private float timeSinceLastShot = 0.0f;
-	private int characterLives;
-	private int damage;
+	private int damage=5;
 	Array<Wave> waves;
 	Assets assets;
 
@@ -59,6 +58,11 @@ public class GameScene extends ScreenAdapter {
 
 	Music gameMusic;
 
+	boolean isPaused=false;
+
+	private WaveCompleteTable waveCompleteTable;
+
+	Integer choice=-1;
     @Override
     public void show()
     {
@@ -95,8 +99,9 @@ public class GameScene extends ScreenAdapter {
 
 		//Initialize waves add a few
 		waves = new Array<>();
-		waves.add(new Wave(1, 3, 0.5f, 200, 200));
-		waves.add(new Wave(2, 6, 0.4f, 300, 200));
+		waves.add(new Wave(1, 1, 0.5f, 70, damage));
+		waves.add(new Wave(2, 1, 0.4f, 90, damage));
+		waves.add(new Wave(3, 1, 0.4f, 110, damage));
 
 		minCameraX = camera.viewportWidth / 2-480 ;
 		minCameraY = camera.viewportHeight / 2 - 268;
@@ -104,8 +109,6 @@ public class GameScene extends ScreenAdapter {
 		// 3200 = map size (w x h)
 		maxCameraX = 1920 * tiledMapRenderer.getUnitScale() - camera.viewportWidth / 2 +480 ;
 		maxCameraY = 1920 * tiledMapRenderer.getUnitScale() - camera.viewportHeight / 2 +268;
-
-		characterLives = 3; // Start with 3 lives
 
 		// Initialize particles array
 		particleEffects=new Array<>();
@@ -121,24 +124,51 @@ public class GameScene extends ScreenAdapter {
 		gameMusic.setVolume(0.5f);
 		gameMusic.play();
 
+		waveCompleteTable= new WaveCompleteTable(skin,assets,this);
 
+		waveCompleteTable.center();
+
+		// Calculate the position to center the table on the screen
+		float centerX = Gdx.graphics.getWidth() / 2f;
+		float centerY = Gdx.graphics.getHeight() / 2f;
+
+		// Set the table's position
+		waveCompleteTable.setPosition(centerX - waveCompleteTable.getWidth() / 2f, centerY - waveCompleteTable.getHeight() / 2f);
 	}
 
     @Override
 	public void render(float delta) {
 
+		switch (choice) {
+			case 1:
+				damage = damage + 5;
+				for (Wave wave:waves) {
+					wave.setBulletDamage(damage);
+				}
+				choice = -1;
+				break;
+			case 2:
+				character.GainLife();
+				choice = -1;
+				break;
+			case 3:
+				character.GainSpeed();
+				choice = -1;
+				break;
+		}
+
 		// Clear the screen
 		ScreenUtils.clear(1, 0, 0, 1);
 
 		// Update character and camera
-		character.update(enemies,tiledMap);
+		character.update(enemies,tiledMap,isPaused);
 		updateCamera();
 
 		timeSinceLastShot += Gdx.graphics.getDeltaTime();
 
 		// Handle shooting bullets if the cooldown has expired , 0.2f = cooldown
 
-		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && timeSinceLastShot >= 0.2f) {
+		if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && timeSinceLastShot >= 0.2f && !isPaused) {
 			shootBullet();
 			timeSinceLastShot = 0.0f;
 		}
@@ -176,7 +206,7 @@ public class GameScene extends ScreenAdapter {
 			Wave currentWave = waves.first();
 			enemySpawnTimer += Gdx.graphics.getDeltaTime();
 			damage=currentWave.getBulletDamage();
-			if (currentWave.getNumEnemies() > 0 && enemySpawnTimer >= currentWave.getEnemySpawnInterval()) {
+			if (currentWave.getNumEnemies() > 0 && enemySpawnTimer >= currentWave.getEnemySpawnInterval() && !isPaused) {
 				spawnEnemy(currentWave.getEnemyHealth());
 				enemySpawnTimer = 0.0f;
 				currentWave.setNumEnemies(currentWave.getNumEnemies() - 1);
@@ -190,12 +220,13 @@ public class GameScene extends ScreenAdapter {
 				{
 					enemiesLeftToKill=waves.first().getNumEnemies();
 				}
+				isPaused=true;
 			}
 		}
 
 		// Update and render enemies
 		for (Enemy enemy : enemies) {
-			Vector2 poz=enemy.update(Gdx.graphics.getDeltaTime(),bullets,enemies);
+			Vector2 poz=enemy.update(Gdx.graphics.getDeltaTime(),bullets,enemies,isPaused);
 			// Check if the enemy died
 			if(!poz.epsilonEquals(-1,-1))
 			{
@@ -211,7 +242,7 @@ public class GameScene extends ScreenAdapter {
 			drawWaveNumberAndScore();
 		}
 		//draw Hearts
-		character.drawHearts(batch,characterLives,camera);
+		character.drawHearts(batch,camera);
 
 		// Draw the particle effects
 		for (ParticleEffect particle:particleEffects) {
@@ -222,6 +253,7 @@ public class GameScene extends ScreenAdapter {
 
 		stage.act(Gdx.graphics.getDeltaTime());
 		stage.draw();
+
 	}
 
 	private void updateCamera() {
@@ -285,29 +317,36 @@ public class GameScene extends ScreenAdapter {
 	}
 
 	private void drawWaveNumberAndScore() {
-		stage.clear();
-		// Wave
-		String Text = "Wave: " + waves.first().getWaveNumber();
-		Label Label = new Label(Text, skin);
-		float TextX = (float) Gdx.graphics.getWidth() / 2 - Label.getWidth() / 2;
-		float TextY = Gdx.graphics.getHeight() - Label.getHeight() / 2;
-		Label.setPosition(TextX, TextY);
-		stage.addActor(Label);
-		// Score
-		Text = "Score: " + score;
-		Label = new Label(Text, skin);
-		TextX = Gdx.graphics.getWidth() - (float)Gdx.graphics.getWidth() / 6;
-		TextY = Gdx.graphics.getHeight() - Label.getHeight() / 2;
-		Label.setPosition(TextX, TextY);
-		stage.addActor(Label);
 
-		Text=": "+enemiesLeftToKill;
-		Label = new Label(Text, skin);
-		TextX = imageActor.getX()+Label.getWidth();
-		TextY = imageActor.getY();
-		Label.setPosition(TextX, TextY);
-		stage.addActor(Label);
-		stage.addActor(imageActor);
+		if(!isPaused) {
+			stage.clear();
+			// Wave
+			String Text = "Wave: " + waves.first().getWaveNumber();
+			Label Label = new Label(Text, skin);
+			float TextX = (float) Gdx.graphics.getWidth() / 2 - Label.getWidth() / 2;
+			float TextY = Gdx.graphics.getHeight() - Label.getHeight() / 2;
+			Label.setPosition(TextX, TextY);
+			stage.addActor(Label);
+			// Score
+			Text = "Score: " + score;
+			Label = new Label(Text, skin);
+			TextX = Gdx.graphics.getWidth() - (float) Gdx.graphics.getWidth() / 6;
+			TextY = Gdx.graphics.getHeight() - Label.getHeight() / 2;
+			Label.setPosition(TextX, TextY);
+			stage.addActor(Label);
+
+			Text = ": " + enemiesLeftToKill;
+			Label = new Label(Text, skin);
+			TextX = imageActor.getX() + Label.getWidth();
+			TextY = imageActor.getY();
+			Label.setPosition(TextX, TextY);
+			stage.addActor(Label);
+			stage.addActor(imageActor);
+		}
+		else stage.addActor(waveCompleteTable);
+		Gdx.input.setInputProcessor(stage);
+
+
 	}
 
 	private void DeathParticles(Vector2 position, float scale) {

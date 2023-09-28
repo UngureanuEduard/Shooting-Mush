@@ -24,7 +24,7 @@ public class Bullet {
     public Bullet(Vector2 position, Vector2 velocity, int damage, Assets assets) {
         this.assets=assets;
         this.damage=damage;
-        this.damageScale = 0.5f + (damage - 100) / 200.0f;
+        this.damageScale = 0.8f + damage / 200.0f;
         this.position = position;
         this.velocity = velocity;
         Texture bulletTexture = this.assets.getAssetManager().get(Assets.bulletTexture);
