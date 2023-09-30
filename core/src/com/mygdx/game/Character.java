@@ -53,7 +53,7 @@ public class Character {
         lives = 3; // Start with 3 lives
     }
 
-    public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused) {
+    public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused, Array<Bullet> bullets) {
         if(!isPaused) {
             float deltaTime = Gdx.graphics.getDeltaTime();
 
@@ -113,13 +113,18 @@ public class Character {
             for (Enemy enemy : enemies) {
                 if (isCollidingWithEnemy(enemy)) {
                     if (timeSinceLastLifeLost >= 4.0f) {
-                        System.out.println(timeSinceLastLifeLost);
-                        loseLife(); // Character loses a life
-                        timeSinceLastLifeLost = 0.0f; // Reset the timer
+                        loseLife();
                     }
                 }
             }
 
+            // Check for bullet collisions
+            for (Bullet bullet : bullets) {
+                if (isCollidingWithBullet(bullet)&& !bullet.getType().equals("Character")&&timeSinceLastLifeLost>=4.0f) {
+                    loseLife();
+                    bullet.setActive(false); // Deactivate the bullet
+                }
+            }
             timeSinceLastLifeLost += deltaTime;
         }
     }
@@ -203,6 +208,7 @@ public class Character {
     public void loseLife() {
         lives--;
         lostLives++;
+        timeSinceLastLifeLost=0;
     }
 
     private boolean isCollidingWithEnemy(Enemy enemy) {
@@ -261,4 +267,14 @@ public class Character {
     public void GainSpeed(){
         SPEED+=25;
     }
+
+    private boolean isCollidingWithBullet(Bullet bullet) {
+        // Check if the enemy's bounding box intersects with the bullet's position
+        return position.x < bullet.getPosition().x + bullet.getWidth() &&
+                position.x + getWidth() > bullet.getPosition().x &&
+                position.y < bullet.getPosition().y + bullet.getHeight() &&
+                position.y + getHeight() > bullet.getPosition().y;
+    }
+
+    public Integer getLives(){return lives;}
 }

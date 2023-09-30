@@ -15,20 +15,31 @@ public class Bullet {
     private boolean isActive = true;
     private final float damageScale;
 
+    private final String type;
+
     Assets assets;
 
-    Sound sound;
 
-    public Bullet(Vector2 position, Vector2 velocity, int damage, Assets assets) {
+
+    public Bullet(Vector2 position, Vector2 velocity, int damage, Assets assets,String type) {
+        this.type=type;
         this.assets=assets;
         this.damage=damage;
         this.damageScale = 0.8f + damage / 200.0f;
         this.position = position;
         this.velocity = velocity;
-        Texture bulletTexture = this.assets.getAssetManager().get(Assets.bulletTexture);
-        sound = assets.getAssetManager().get(Assets.throwSound);
-        texture = new TextureRegion(bulletTexture);
-        sound.play(0.5f);
+        Texture bulletAppleTexture = this.assets.getAssetManager().get(Assets.bulletTexture);
+        Texture bulletCornTexture = this.assets.getAssetManager().get(Assets.candyCornTexture);
+        Sound soundCharacter = assets.getAssetManager().get(Assets.throwSound);
+        Sound soundEnemy = assets.getAssetManager().get(Assets.duckShootSound);
+        if (type.equals("Enemy")) {
+            texture = new TextureRegion(bulletCornTexture);
+            soundEnemy.play(0.5f);
+
+        } else {
+            texture = new TextureRegion(bulletAppleTexture);
+            soundCharacter.play(0.5f);
+        }
     }
 
     public void update(float deltaTime) {
@@ -36,7 +47,15 @@ public class Bullet {
     }
 
     public void render(SpriteBatch batch) {
-        batch.draw(texture, position.x, position.y, getWidth() / 2, getHeight() / 2, getWidth(), getHeight(), damageScale, damageScale, 0);
+
+        float angle = (float) Math.atan2(velocity.y, velocity.x);
+        angle = (float) Math.toDegrees(angle) - 90;
+
+        if (angle < 0) {
+            angle += 360;
+        }
+
+        batch.draw(texture, position.x, position.y, getWidth() / 2, getHeight() / 2, getWidth(), getHeight(), damageScale, damageScale, angle);
     }
 
 
@@ -67,4 +86,6 @@ public class Bullet {
     public float getHeight() {
         return 35 *this.damageScale;
     }
+
+    public String getType(){return type;}
 }

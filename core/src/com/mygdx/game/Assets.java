@@ -37,6 +37,10 @@ public class Assets {
     public static final AssetDescriptor<Music> menuMusic = new AssetDescriptor<>("mp3/menuMusic.ogg", Music.class);
     public static final AssetDescriptor<Music> gameMusic = new AssetDescriptor<>("mp3/gameMusic.mp3", Music.class);
     public static final AssetDescriptor<Texture> lightningBoltTexture = new AssetDescriptor<>("Environment/lightningBolt.png", Texture.class);
+    public static final AssetDescriptor<Texture> candyCornTexture = new AssetDescriptor<>("Environment/candyCorn.png", Texture.class);
+    public static final AssetDescriptor<Sound> duckShootSound = new AssetDescriptor<>("mp3/duckShoot.mp3",Sound.class);
+    public static final AssetDescriptor<Texture> bossTexture = new AssetDescriptor<>("Environment/boss.png", Texture.class);
+    public static final AssetDescriptor<Texture> idleBossTexture = new AssetDescriptor<>("Environment/IdleDuckBoss.png", Texture.class);
     public void loadMenuAssets() {
         assetManager.load(skin);
         assetManager.load(menuBackgroundTexture);
@@ -59,8 +63,12 @@ public class Assets {
         assetManager.load(skullTexture);
         assetManager.load(duckTexture);
         assetManager.load(lightningBoltTexture);
+        assetManager.load(candyCornTexture);
         assetManager.load(duckSound);
         assetManager.load(gameMusic);
+        assetManager.load(bossTexture);
+        assetManager.load(duckShootSound);
+        assetManager.load(idleBossTexture);
     }
 
     public AssetManager getAssetManager() {

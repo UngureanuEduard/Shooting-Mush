@@ -53,7 +53,13 @@ public class GameScene extends ScreenAdapter {
 	boolean isPaused=false;
 	private WaveCompleteTable waveCompleteTable;
 
-    @Override
+	MyGdxGame game;
+
+	public GameScene(MyGdxGame game) {
+		this.game=game;
+	}
+
+	@Override
     public void show()
     {
 
@@ -89,7 +95,7 @@ public class GameScene extends ScreenAdapter {
 
 		//Initialize waves add a few
 		waves = new Array<>();
-		waves.add(new Wave(1, 1, 0.5f, 70, damage));
+		waves.add(new Wave(1, 1, 0.5f, 500, damage));
 		waves.add(new Wave(2, 1, 0.4f, 90, damage));
 		waves.add(new Wave(3, 1, 0.4f, 110, damage));
 
@@ -132,7 +138,7 @@ public class GameScene extends ScreenAdapter {
 		ScreenUtils.clear(1, 0, 0, 1);
 
 		// Update character and camera
-		character.update(enemies,tiledMap,isPaused);
+		character.update(enemies,tiledMap,isPaused,bullets);
 		updateCamera();
 
 		timeSinceLastShot += Gdx.graphics.getDeltaTime();
@@ -224,6 +230,12 @@ public class GameScene extends ScreenAdapter {
 
 		stage.act(Gdx.graphics.getDeltaTime());
 		stage.draw();
+
+		if(character.getLives()<=0||Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+			gameMusic.dispose();
+			game.setScreen(new MainMenuScreen(game));
+		}
+
 	}
 
 	private void updateCamera() {
@@ -257,7 +269,7 @@ public class GameScene extends ScreenAdapter {
 		directionToCursor.nor().scl(800);
 
 		// Create a new Bullet and set the damage
-		Bullet bullet = new Bullet(bulletStartPosition, directionToCursor,damage,assets);
+		Bullet bullet = new Bullet(bulletStartPosition, directionToCursor,damage,assets,"Character");
 
 		// Add bullet to array
 		bullets.add(bullet);
@@ -280,7 +292,7 @@ public class GameScene extends ScreenAdapter {
 		Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
 
 		// Create an enemy instance and pass the player's position
-		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health,assets);
+		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health,assets,500==health);
 
 		// Add the enemy to a list or array to manage multiple enemies
 		enemies.add(enemy);
