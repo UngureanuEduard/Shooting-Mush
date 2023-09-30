@@ -16,7 +16,7 @@ public class Enemy {
     private boolean isFlipped = false;
     private int health;
     private final float healthScale;
-    Sound sound;
+    private final Sound sound;
 
     public Enemy(Vector2 position, Vector2 playerPosition,int health,Assets assets) {
         this.health = health;

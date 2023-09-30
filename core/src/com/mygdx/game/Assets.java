@@ -36,6 +36,7 @@ public class Assets {
     public static final AssetDescriptor<Sound> duckSound = new AssetDescriptor<>("mp3/duck.mp3",Sound.class);
     public static final AssetDescriptor<Music> menuMusic = new AssetDescriptor<>("mp3/menuMusic.ogg", Music.class);
     public static final AssetDescriptor<Music> gameMusic = new AssetDescriptor<>("mp3/gameMusic.mp3", Music.class);
+    public static final AssetDescriptor<Texture> lightningBoltTexture = new AssetDescriptor<>("Environment/lightningBolt.png", Texture.class);
     public void loadMenuAssets() {
         assetManager.load(skin);
         assetManager.load(menuBackgroundTexture);
@@ -57,6 +58,7 @@ public class Assets {
         assetManager.load(explosionParticleEffect);
         assetManager.load(skullTexture);
         assetManager.load(duckTexture);
+        assetManager.load(lightningBoltTexture);
         assetManager.load(duckSound);
         assetManager.load(gameMusic);
     }

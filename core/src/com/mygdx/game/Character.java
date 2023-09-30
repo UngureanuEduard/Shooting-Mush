@@ -23,23 +23,17 @@ public class Character {
     private String isWalking;
     private boolean isFlipped;
     private int lives;
-
     private int lostLives=0;
-
     private final Texture heartTexture;
     private final Texture emptyHeartTexture;
-
     private float timeSinceLastLifeLost = 4.0f;
 
-    Assets assets;
 
     public Character( Vector2 initialPosition,Assets assets) {
-        this.assets=assets;
 
         // Set the initial position of the character
         position = initialPosition;
 
-        // Use the splitCharacterTexture method in this class for the walk animation
         Texture walkTexture = assets.getAssetManager().get(Assets.walkTexture);
         Texture idleTexture = assets.getAssetManager().get(Assets.idleTexture);
         Texture walkFrontTexture = assets.getAssetManager().get(Assets.walkFrontTexture);
@@ -56,7 +50,7 @@ public class Character {
         idleAnimationLeftAndRight = new Animation<>(0.1f, idleFrames);
         isWalking = ""; // Initially, the character is not walking
         isFlipped = false; // Initially, the character is not flipped
-        lives = 3;
+        lives = 3; // Start with 3 lives
     }
 
     public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused) {
@@ -67,6 +61,7 @@ public class Character {
             boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
             boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
             boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
+
             //The potential new position based on input
             float potentialX = position.x;
             float potentialY = position.y;

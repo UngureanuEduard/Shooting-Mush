@@ -19,8 +19,6 @@ public class Bullet {
 
     Sound sound;
 
-
-
     public Bullet(Vector2 position, Vector2 velocity, int damage, Assets assets) {
         this.assets=assets;
         this.damage=damage;
@@ -69,6 +67,4 @@ public class Bullet {
     public float getHeight() {
         return 35 *this.damageScale;
     }
-
-
 }

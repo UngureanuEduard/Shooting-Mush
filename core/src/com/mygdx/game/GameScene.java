@@ -5,7 +5,6 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -42,27 +41,18 @@ public class GameScene extends ScreenAdapter {
 	private float enemySpawnTimer = 0.0f;
 	Array<Enemy> enemies;
 	private float timeSinceLastShot = 0.0f;
-	private int damage=5;
+	public int damage=5;
 	Array<Wave> waves;
 	Assets assets;
-
 	Array<ParticleEffect> particleEffects;
-
 	Boolean scaled=false;
-
 	private int score=0;
-
 	private int enemiesLeftToKill;
-	Texture imageTexture;
 	Image imageActor;
-
 	Music gameMusic;
-
 	boolean isPaused=false;
-
 	private WaveCompleteTable waveCompleteTable;
 
-	Integer choice=-1;
     @Override
     public void show()
     {
@@ -113,8 +103,7 @@ public class GameScene extends ScreenAdapter {
 		// Initialize particles array
 		particleEffects=new Array<>();
 
-		imageTexture=assets.getAssetManager().get(Assets.skullTexture);
-		imageActor= new Image(imageTexture);
+		imageActor= new Image(assets.getAssetManager().get(Assets.skullTexture));
 		imageActor.setPosition((float)Gdx.graphics.getWidth()/2-imageActor.getWidth(),(float)(Gdx.graphics.getHeight()-Gdx.graphics.getHeight()/10)+imageActor.getHeight()/3);
 		imageActor.setSize(imageActor.getWidth()/1.5f,imageActor.getHeight()/1.5f);
 		enemiesLeftToKill=waves.first().getNumEnemies();
@@ -138,24 +127,6 @@ public class GameScene extends ScreenAdapter {
 
     @Override
 	public void render(float delta) {
-
-		switch (choice) {
-			case 1:
-				damage = damage + 5;
-				for (Wave wave:waves) {
-					wave.setBulletDamage(damage);
-				}
-				choice = -1;
-				break;
-			case 2:
-				character.GainLife();
-				choice = -1;
-				break;
-			case 3:
-				character.GainSpeed();
-				choice = -1;
-				break;
-		}
 
 		// Clear the screen
 		ScreenUtils.clear(1, 0, 0, 1);
@@ -253,7 +224,6 @@ public class GameScene extends ScreenAdapter {
 
 		stage.act(Gdx.graphics.getDeltaTime());
 		stage.draw();
-
 	}
 
 	private void updateCamera() {
@@ -345,8 +315,6 @@ public class GameScene extends ScreenAdapter {
 		}
 		else stage.addActor(waveCompleteTable);
 		Gdx.input.setInputProcessor(stage);
-
-
 	}
 
 	private void DeathParticles(Vector2 position, float scale) {

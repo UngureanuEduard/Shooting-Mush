@@ -25,14 +25,14 @@ public class MainMenuScreen extends ScreenAdapter {
 
     private Image movingImage;
     private Animation<TextureRegion> movingAnimation;
-    private float stateTime = 0; // Used to track the animation time
+    private float stateTime = 0;
 
     private final SpriteBatch batch;
     private float screenWidth;
     boolean isFlipped = false;
-
     private boolean moveRight = true;
     private Music backgroundMusic;
+    float moveSpeed = 50;
     public MainMenuScreen(MyGdxGame game) {
         this.game = game;
         batch = new SpriteBatch();
@@ -59,6 +59,7 @@ public class MainMenuScreen extends ScreenAdapter {
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new GameScene());
             }
+
         });
         addButton("Options").addListener(new ClickListener() {
             @Override
@@ -106,7 +107,6 @@ public class MainMenuScreen extends ScreenAdapter {
 
         stateTime += delta;
         TextureRegion currentFrame = movingAnimation.getKeyFrame(stateTime);
-        float moveSpeed = 50;
 
         if (moveRight) {
             movingImage.setX(movingImage.getX() + moveSpeed * delta);
@@ -121,7 +121,6 @@ public class MainMenuScreen extends ScreenAdapter {
                 isFlipped = false;
             }
         }
-
         stage.act(delta);
         stage.draw();
         batch.begin();
