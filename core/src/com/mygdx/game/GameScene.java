@@ -5,6 +5,7 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
+import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
 import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -50,13 +51,26 @@ public class GameScene extends ScreenAdapter {
 	private int enemiesLeftToKill;
 	Image imageActor;
 	Music gameMusic;
+
+	Music bossMusic;
 	boolean isPaused=false;
 	private WaveCompleteTable waveCompleteTable;
 
+	private Texture healthBarTexture;
+	private Texture healthFillTexture;
+	private float healthBarWidth;
+	private float healthBarHeight;
+	private float maxBossHealth;
+
+	private final Integer musicVolume;
+	private final Integer soundVolume;
+
 	MyGdxGame game;
 
-	public GameScene(MyGdxGame game) {
+	public GameScene(MyGdxGame game,Integer musicVolume,Integer soundVolume) {
 		this.game=game;
+		this.soundVolume=soundVolume;
+		this.musicVolume=musicVolume;
 	}
 
 	@Override
@@ -95,9 +109,8 @@ public class GameScene extends ScreenAdapter {
 
 		//Initialize waves add a few
 		waves = new Array<>();
-		waves.add(new Wave(1, 1, 0.5f, 500, damage));
-		waves.add(new Wave(2, 1, 0.4f, 90, damage));
-		waves.add(new Wave(3, 1, 0.4f, 110, damage));
+		waves.add(new Wave(1, 1, 0.5f, 90, damage));
+		waves.add(new Wave(2, 1, 0.4f, 500, damage));
 
 		minCameraX = camera.viewportWidth / 2-480 ;
 		minCameraY = camera.viewportHeight / 2 - 268;
@@ -116,8 +129,11 @@ public class GameScene extends ScreenAdapter {
 
 		gameMusic = assets.getAssetManager().get(Assets.gameMusic);
 		gameMusic.setLooping(true);
-		gameMusic.setVolume(0.5f);
+		gameMusic.setVolume(musicVolume/100f);
 		gameMusic.play();
+
+		bossMusic=assets.getAssetManager().get(Assets.bossMusic);
+		bossMusic.setLooping(true);
 
 		waveCompleteTable= new WaveCompleteTable(skin,assets,this);
 
@@ -129,6 +145,13 @@ public class GameScene extends ScreenAdapter {
 
 		// Set the table's position
 		waveCompleteTable.setPosition(centerX - waveCompleteTable.getWidth() / 2f, centerY - waveCompleteTable.getHeight() / 2f);
+
+		healthBarTexture = assets.getAssetManager().get(Assets.BorderHealthTexture);
+		healthFillTexture = assets.getAssetManager().get(Assets.HealthTexture);
+
+		healthBarWidth = (float) Gdx.graphics.getWidth() /5;
+		healthBarHeight = (float) Gdx.graphics.getHeight() /36;
+		maxBossHealth=500;
 	}
 
     @Override
@@ -198,7 +221,15 @@ public class GameScene extends ScreenAdapter {
 					enemiesLeftToKill=waves.first().getNumEnemies();
 				}
 				isPaused=true;
+				if(waves.size==1)
+				{
+					gameMusic.stop();
+					bossMusic.play();
+				}
 			}
+		}
+		else {
+			game.setScreen(new MainMenuScreen(game));
 		}
 
 		// Update and render enemies
@@ -225,14 +256,22 @@ public class GameScene extends ScreenAdapter {
 		for (ParticleEffect particle:particleEffects) {
 			particle.draw(batch);
 		}
+
+		if (!enemies.isEmpty() && enemies.first().isBoss) {
+			Vector2 healthBarPosition = new Vector2(camera.position.x- (float) healthBarTexture.getWidth() /2, camera.position.y+ (float) healthBarTexture.getWidth() /3+healthBarTexture.getHeight());
+			float bossHealthPercentage = (float) enemies.first().getHealth() / maxBossHealth;
+			float healthBarFillWidth = healthBarWidth * bossHealthPercentage;
+			batch.draw(healthBarTexture, healthBarPosition.x, healthBarPosition.y, healthBarWidth, healthBarHeight);
+			batch.draw(healthFillTexture, healthBarPosition.x, healthBarPosition.y, healthBarFillWidth, healthBarHeight);
+		}
 		// End the batch
 		batch.end();
-
 		stage.act(Gdx.graphics.getDeltaTime());
 		stage.draw();
 
 		if(character.getLives()<=0||Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
 			gameMusic.dispose();
+			bossMusic.dispose();
 			game.setScreen(new MainMenuScreen(game));
 		}
 
@@ -259,6 +298,7 @@ public class GameScene extends ScreenAdapter {
 		stage.dispose();
 		assets.dispose();
 		gameMusic.dispose();
+		bossMusic.dispose();
 	}
 
 	private void shootBullet() {
@@ -269,7 +309,7 @@ public class GameScene extends ScreenAdapter {
 		directionToCursor.nor().scl(800);
 
 		// Create a new Bullet and set the damage
-		Bullet bullet = new Bullet(bulletStartPosition, directionToCursor,damage,assets,"Character");
+		Bullet bullet = new Bullet(bulletStartPosition, directionToCursor,damage,assets,"Character",soundVolume);
 
 		// Add bullet to array
 		bullets.add(bullet);
@@ -292,7 +332,7 @@ public class GameScene extends ScreenAdapter {
 		Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
 
 		// Create an enemy instance and pass the player's position
-		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health,assets,500==health);
+		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health,assets,500==health,soundVolume);
 
 		// Add the enemy to a list or array to manage multiple enemies
 		enemies.add(enemy);

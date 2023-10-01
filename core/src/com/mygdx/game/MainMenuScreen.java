@@ -33,6 +33,10 @@ public class MainMenuScreen extends ScreenAdapter {
     private boolean moveRight = true;
     private Music backgroundMusic;
     float moveSpeed = 50;
+    private OptionsTable optionsTable;
+    private Image backgroundImage;
+    int musicVolume=100;
+    int soundVolume=100;
     public MainMenuScreen(MyGdxGame game) {
         this.game = game;
         batch = new SpriteBatch();
@@ -50,21 +54,37 @@ public class MainMenuScreen extends ScreenAdapter {
         mainTable = new Table();
         mainTable.setFillParent(true);
         Texture backgroundTexture = assets.getAssetManager().get(Assets.menuBackgroundTexture);
-        Image backgroundImage = new Image(backgroundTexture);
+        backgroundImage = new Image(backgroundTexture);
         backgroundImage.setSize(Gdx.graphics.getWidth() + 200, Gdx.graphics.getHeight() + 200);
         stage.addActor(backgroundImage);
         stage.addActor(mainTable);
+        optionsTable = new OptionsTable(assets, new MainMenuScreen.MainMenuCallback() {
+            @Override
+            public void backToMainMenu() {
+                stage.clear();
+                stage.addActor(backgroundImage);
+                stage.addActor(mainTable);
+                backgroundMusic.setVolume(optionsTable.getMusicVolume()/100f);
+                updateVloumes();
+
+            }
+        },musicVolume,soundVolume);
+
+        optionsTable.setFillParent(true);
+        optionsTable.center();
         addButton("Play").addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScene(game));
+                game.setScreen(new GameScene(game,musicVolume,soundVolume));
             }
 
         });
         addButton("Options").addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                super.clicked(event, x, y);
+                stage.clear();
+                stage.addActor(backgroundImage);
+                stage.addActor(optionsTable);
             }
         });
         addButton("Quit").addListener(new ClickListener() {
@@ -74,7 +94,6 @@ public class MainMenuScreen extends ScreenAdapter {
             }
         });
 
-        // Get the screen width
         screenWidth = Gdx.graphics.getWidth();
         Texture movingImageTexture = assets.getAssetManager().get(Assets.duckTexture);
         Array<TextureRegion> frames = new Array<>();
@@ -139,4 +158,14 @@ public class MainMenuScreen extends ScreenAdapter {
         backgroundMusic.dispose();
         stage.dispose();
     }
+
+    public interface MainMenuCallback {
+        void backToMainMenu();
+    }
+
+    private void updateVloumes(){
+        musicVolume=optionsTable.getMusicVolume();
+        soundVolume=optionsTable.getSoundVolume();
+    }
+
 }

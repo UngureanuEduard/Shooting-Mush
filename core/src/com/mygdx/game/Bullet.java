@@ -21,7 +21,7 @@ public class Bullet {
 
 
 
-    public Bullet(Vector2 position, Vector2 velocity, int damage, Assets assets,String type) {
+    public Bullet(Vector2 position, Vector2 velocity, int damage, Assets assets,String type,Integer soundVolume) {
         this.type=type;
         this.assets=assets;
         this.damage=damage;
@@ -34,11 +34,11 @@ public class Bullet {
         Sound soundEnemy = assets.getAssetManager().get(Assets.duckShootSound);
         if (type.equals("Enemy")) {
             texture = new TextureRegion(bulletCornTexture);
-            soundEnemy.play(0.5f);
+            soundEnemy.play(soundVolume/100f);
 
         } else {
             texture = new TextureRegion(bulletAppleTexture);
-            soundCharacter.play(0.5f);
+            soundCharacter.play(soundVolume/100f);
         }
     }
 

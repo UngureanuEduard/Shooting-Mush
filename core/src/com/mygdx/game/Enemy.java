@@ -24,16 +24,18 @@ public class Enemy {
 
     private float bossMovementTimer = 0.0f;
     private boolean isBossMoving = true;
+    private final Integer soundVolume;
     Assets assets;
 
     Boolean isBoss;
 
-    public Enemy(Vector2 position, Vector2 playerPosition,int health,Assets assets,Boolean isBoss) {
+    public Enemy(Vector2 position, Vector2 playerPosition,int health,Assets assets,Boolean isBoss,Integer soundVolume) {
         this.assets=assets;
         this.health = health;
         this.position = position;
         this.playerPosition = playerPosition;
         this.isBoss=isBoss;
+        this.soundVolume=soundVolume;
         Texture duckTexture;
         Texture duckIdleTexture;
         if(!isBoss){
@@ -61,13 +63,13 @@ public class Enemy {
 
             if (isBoss && isBossMoving) {
                 bossMovementTimer += deltaTime;
-                if (bossMovementTimer >= 6.0f) {
+                if (bossMovementTimer >= 3.0f) {
                     isBossMoving = false;
                     bossMovementTimer = 0.0f;
                 }
             } else{
                 bossMovementTimer += deltaTime;
-                if (bossMovementTimer >= 8.0f) {
+                if (bossMovementTimer >= 11.0f) {
                     isBossMoving = true;
                     bossMovementTimer = 0.0f;
                 }
@@ -96,7 +98,7 @@ public class Enemy {
 
             shootTimer += deltaTime;
 
-            float shootInterval = 4.0f;
+            float shootInterval = 1.0f;
 
             if (shootTimer >= shootInterval)
             { if(!isBoss){
@@ -126,7 +128,7 @@ public class Enemy {
             enemies.removeValue(this, true);
             return true;
         }
-        sound.play(0.1f);
+        sound.play(soundVolume/100f);
         return false;
     }
 
@@ -158,17 +160,19 @@ public class Enemy {
         Vector2 direction = playerPosition.cpy().sub(position).nor();
 
         // Create a new Bullet and set the damage
-        Bullet bullet = new Bullet(position.cpy(), direction.cpy().scl(400), 1, assets,"Enemy");
+        Bullet bullet = new Bullet(position.cpy(), direction.cpy().scl(400), 1, assets,"Enemy",soundVolume);
 
         // Add bullet to array
         bullets.add(bullet);
     }
 
     private void shootBulletsInAllDirections(Array<Bullet> bullets) {
-        float bulletSpeed = 300.0f;
-        for (float angle = 0; angle < 360; angle += 45) {
+        float bulletSpeed = 450.0f;
+        float angle=MathUtils.random(0,3);
+
+        for (; angle < 360; angle += 15) {
             Vector2 direction = new Vector2(MathUtils.cosDeg(angle), MathUtils.sinDeg(angle));
-            Bullet bullet = new Bullet(new Vector2(position.x+getWidth(),position.y), direction.cpy().scl(bulletSpeed), 1, assets, "Enemy");
+            Bullet bullet = new Bullet(new Vector2(position.x+getWidth(),position.y), direction.cpy().scl(bulletSpeed), 1, assets, "Enemy",soundVolume);
             bullets.add(bullet);
         }
     }
@@ -188,4 +192,6 @@ public class Enemy {
     }
 
     public float getHealthScale(){return healthScale;}
+
+    public Integer getHealth(){return health;}
 }
