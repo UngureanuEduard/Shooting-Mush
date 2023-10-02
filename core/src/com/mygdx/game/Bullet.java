@@ -11,7 +11,7 @@ public class Bullet {
     private final Vector2 position;
     private final Vector2 velocity;
     private final TextureRegion texture;
-    private final float damage;
+    private float damage;
     private boolean isActive = true;
     private final float damageScale;
 
@@ -88,4 +88,6 @@ public class Bullet {
     }
 
     public String getType(){return type;}
+
+    public void setDamage(float damage){this.damage=damage;}
 }

@@ -7,6 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
+import static com.badlogic.gdx.math.MathUtils.random;
+
 public class WaveCompleteTable extends Table {
 
     GameScene gameScene;
@@ -14,7 +16,7 @@ public class WaveCompleteTable extends Table {
     public WaveCompleteTable(Skin skin, Assets assets, final GameScene gameScene) {
         this.gameScene = gameScene;
 
-        Label label1 = new Label("Damage", skin);
+        Label label1 = new Label("Damage(+5%)", skin);
         TextureRegion myTextureRegion = new TextureRegion(assets.getAssetManager().get(Assets.bulletTexture));
         TextureRegionDrawable myTexRegionDrawable = new TextureRegionDrawable(myTextureRegion);
         myTexRegionDrawable.setMinSize((float) Gdx.graphics.getWidth() /10, (float) Gdx.graphics.getWidth() /10);
@@ -30,7 +32,7 @@ public class WaveCompleteTable extends Table {
             }
         });
 
-        Label label2 = new Label("Health", skin);
+        Label label2 = new Label("Health(+1)", skin);
         myTextureRegion = new TextureRegion(assets.getAssetManager().get(Assets.heartTexture));
         myTexRegionDrawable = new TextureRegionDrawable(myTextureRegion);
         myTexRegionDrawable.setMinSize((float) Gdx.graphics.getWidth() /10, (float) Gdx.graphics.getWidth() /10);
@@ -44,11 +46,12 @@ public class WaveCompleteTable extends Table {
             public void clicked(InputEvent event, float x, float y) {
                 gameScene.isPaused = false;
                 gameScene.character.GainLife();
+
             }
         });
 
         // Create the third row
-        Label label3 = new Label("Speed", skin);
+        Label label3 = new Label("Speed(+10%)", skin);
         myTextureRegion = new TextureRegion(assets.getAssetManager().get(Assets.lightningBoltTexture));
         myTexRegionDrawable = new TextureRegionDrawable(myTextureRegion);
         myTexRegionDrawable.setMinSize((float) Gdx.graphics.getWidth() /10, (float) Gdx.graphics.getWidth() /10);
@@ -65,13 +68,46 @@ public class WaveCompleteTable extends Table {
         stack.add(behindImage);
         stack.add(button2);
 
+        Label label4 = new Label("Crit-Rate(+5%)", skin);
+        myTextureRegion = new TextureRegion(assets.getAssetManager().get(Assets.bulletTexture));
+        myTexRegionDrawable = new TextureRegionDrawable(myTextureRegion);
+        myTexRegionDrawable.setMinSize((float) Gdx.graphics.getWidth() /10, (float) Gdx.graphics.getWidth() /10);
+        ImageButton button4 = new ImageButton(myTexRegionDrawable);
+        button4.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                gameScene.isPaused = false;
+                gameScene.critRate+=5;
+            }
+        });
+
+        int randomNumber = random.nextInt(4) + 1;
+
         // Add the elements to the table
-        add(label1).pad(10,0,0,50);
-        add(label2).pad(10,0,0,50);
-        add(label3).pad(10,0,0,50);
+        if (randomNumber != 1) {
+            add(label1).pad(10, 0, 0, 50);
+        }
+        if (randomNumber != 2) {
+            add(label2).pad(10, 0, 0, 50);
+        }
+        if (randomNumber != 3) {
+            add(label3).pad(10, 0, 0, 50);
+        }
+        if (randomNumber != 4) {
+            add(label4).pad(10, 0, 0, 50);
+        }
         row();
-        add(button1).pad(10,0,0,50);
-        add(stack).pad(10,0,0,50);
-        add(button3).pad(10,0,0,50);
+        if (randomNumber != 1) {
+            add(button1).pad(10, 0, 0, 50);
+        }
+        if (randomNumber != 2) {
+            add(stack).pad(10, 0, 0, 50);
+        }
+        if (randomNumber != 3) {
+            add(button3).pad(10, 0, 0, 50);
+        }
+        if (randomNumber != 4) {
+            add(button4).pad(10, 0, 0, 50);
+        }
     }
 }

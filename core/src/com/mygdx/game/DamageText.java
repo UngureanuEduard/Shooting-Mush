@@ -8,11 +8,14 @@ public class DamageText {
     private final float duration;
     private float elapsedTime;
 
-    public DamageText(float text, Vector2 position, float duration) {
+    private final Boolean isCrit;
+
+    public DamageText(float text, Vector2 position, float duration,Boolean isCrit) {
         this.text = text;
         this.position = position;
         this.duration = duration;
         this.elapsedTime = 0;
+        this.isCrit=isCrit;
     }
 
     public void update(float deltaTime) {
@@ -30,4 +33,6 @@ public class DamageText {
     public Vector2 getPosition() {
         return position;
     }
+
+    public Boolean getIsCrit(){return isCrit; }
 }

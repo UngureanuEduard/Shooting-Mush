@@ -11,6 +11,8 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
+import java.util.Random;
+
 public class Enemy {
     private final Vector2 position;
     private final Vector2 playerPosition;
@@ -31,15 +33,18 @@ public class Enemy {
     Assets assets;
     private final BitmapFont defaultFont;
 
+    private final Integer critRate;
+
     Boolean isBoss;
 
-    public Enemy(Vector2 position, Vector2 playerPosition,float health,Assets assets,Boolean isBoss,Integer soundVolume) {
+    public Enemy(Vector2 position, Vector2 playerPosition,float health,Assets assets,Boolean isBoss,Integer soundVolume,Integer critRate) {
         this.assets=assets;
         this.health = health;
         this.position = position;
         this.playerPosition = playerPosition;
         this.isBoss=isBoss;
         this.soundVolume=soundVolume;
+        this.critRate=critRate;
         defaultFont = new BitmapFont();
         Texture duckTexture;
         Texture duckIdleTexture;
@@ -126,7 +131,12 @@ public class Enemy {
                 position.y < bullet.getPosition().y + bullet.getHeight() &&
                 position.y + getHeight() > bullet.getPosition().y)
         {
-            damageTexts.add(new DamageText(bullet.getDamage(),bullet.getPosition(),1f));
+            Boolean isCrit=isCrit();
+            if(isCrit)
+            {
+                bullet.setDamage(bullet.getDamage()*4);
+            }
+            damageTexts.add(new DamageText(bullet.getDamage(),bullet.getPosition(),1f,isCrit));
             return true;
         }
         else return false;
@@ -214,7 +224,14 @@ public class Enemy {
             float newY = damageText.getPosition().y + 20 * deltaTime;
             damageText.getPosition().set(damageText.getPosition().x, newY);
 
-            defaultFont.draw(batch, damageText.getText(), damageText.getPosition().x, damageText.getPosition().y);
+            if(!damageText.getIsCrit()){
+                defaultFont.draw(batch, damageText.getText(), damageText.getPosition().x, damageText.getPosition().y);
+            }
+            else {
+                defaultFont.setColor(1, 0, 0, 1);
+                defaultFont.draw(batch, damageText.getText(), damageText.getPosition().x, damageText.getPosition().y);
+                defaultFont.setColor(1, 1, 1, 1);
+            }
 
             if (damageText.isFinished()) {
                 textsToRemove.add(damageText);
@@ -222,5 +239,11 @@ public class Enemy {
         }
 
         damageTexts.removeAll(textsToRemove, true);
+    }
+
+    Boolean isCrit (){
+        Random random = new Random();
+        int randomNumber = random.nextInt(100) + 1;
+        return randomNumber <= critRate;
     }
 }

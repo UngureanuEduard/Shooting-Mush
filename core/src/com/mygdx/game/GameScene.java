@@ -65,6 +65,8 @@ public class GameScene extends ScreenAdapter {
 	private final Integer musicVolume;
 	private final Integer soundVolume;
 
+	public Integer critRate=15;
+
 	MyGdxGame game;
 
 	public GameScene(MyGdxGame game,Integer musicVolume,Integer soundVolume) {
@@ -332,7 +334,7 @@ public class GameScene extends ScreenAdapter {
 		Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
 
 		// Create an enemy instance and pass the player's position
-		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health,assets,500==health,soundVolume);
+		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health,assets,500==health,soundVolume,critRate);
 
 		// Add the enemy to a list or array to manage multiple enemies
 		enemies.add(enemy);

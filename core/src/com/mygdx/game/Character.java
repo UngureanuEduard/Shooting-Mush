@@ -265,7 +265,7 @@ public class Character {
     }
 
     public void GainSpeed(){
-        SPEED+=25;
+        SPEED+=SPEED*10/100;
     }
 
     private boolean isCollidingWithBullet(Bullet bullet) {
