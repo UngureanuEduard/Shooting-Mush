@@ -11,7 +11,7 @@ public class Bullet {
     private final Vector2 position;
     private final Vector2 velocity;
     private final TextureRegion texture;
-    private final int damage;
+    private final float damage;
     private boolean isActive = true;
     private final float damageScale;
 
@@ -21,7 +21,7 @@ public class Bullet {
 
 
 
-    public Bullet(Vector2 position, Vector2 velocity, int damage, Assets assets,String type,Integer soundVolume) {
+    public Bullet(Vector2 position, Vector2 velocity, float damage, Assets assets,String type,Integer soundVolume) {
         this.type=type;
         this.assets=assets;
         this.damage=damage;
@@ -63,7 +63,7 @@ public class Bullet {
         texture.getTexture().dispose();
     }
 
-    public int getDamage() {
+    public float getDamage() {
         return damage;
     }
 

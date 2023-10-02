@@ -42,7 +42,7 @@ public class GameScene extends ScreenAdapter {
 	private float enemySpawnTimer = 0.0f;
 	Array<Enemy> enemies;
 	private float timeSinceLastShot = 0.0f;
-	public int damage=5;
+	public float damage=5;
 	Array<Wave> waves;
 	Assets assets;
 	Array<ParticleEffect> particleEffects;
@@ -240,7 +240,7 @@ public class GameScene extends ScreenAdapter {
 			{
 				DeathParticles(poz,enemy.getHealthScale());
 				scaled=true;
-				score+=waves.first().getEnemyHealth();
+				score+= (int) waves.first().getEnemyHealth();
 				enemiesLeftToKill-=1;
 			}
 
@@ -259,7 +259,7 @@ public class GameScene extends ScreenAdapter {
 
 		if (!enemies.isEmpty() && enemies.first().isBoss) {
 			Vector2 healthBarPosition = new Vector2(camera.position.x- (float) healthBarTexture.getWidth() /2, camera.position.y+ (float) healthBarTexture.getWidth() /3+healthBarTexture.getHeight());
-			float bossHealthPercentage = (float) enemies.first().getHealth() / maxBossHealth;
+			float bossHealthPercentage =enemies.first().getHealth() / maxBossHealth;
 			float healthBarFillWidth = healthBarWidth * bossHealthPercentage;
 			batch.draw(healthBarTexture, healthBarPosition.x, healthBarPosition.y, healthBarWidth, healthBarHeight);
 			batch.draw(healthFillTexture, healthBarPosition.x, healthBarPosition.y, healthBarFillWidth, healthBarHeight);
@@ -327,7 +327,7 @@ public class GameScene extends ScreenAdapter {
 		return cursorPositionWorld.cpy().sub(startingPoint);
 	}
 
-	private void spawnEnemy(int health) {
+	private void spawnEnemy(float health) {
 		// Generate a random position for the enemy
 		Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
 

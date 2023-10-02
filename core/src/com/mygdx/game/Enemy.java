@@ -1,8 +1,10 @@
 package com.mygdx.game;
 
+import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -17,7 +19,7 @@ public class Enemy {
     private Animation<TextureRegion> idleAnimation;
     private float stateTime;
     private boolean isFlipped = false;
-    private int health;
+    private float health;
     private final float healthScale;
     private final Sound sound;
     private float shootTimer = 0.0f;
@@ -25,17 +27,20 @@ public class Enemy {
     private float bossMovementTimer = 0.0f;
     private boolean isBossMoving = true;
     private final Integer soundVolume;
+    Array<DamageText> damageTexts = new Array<>();
     Assets assets;
+    private final BitmapFont defaultFont;
 
     Boolean isBoss;
 
-    public Enemy(Vector2 position, Vector2 playerPosition,int health,Assets assets,Boolean isBoss,Integer soundVolume) {
+    public Enemy(Vector2 position, Vector2 playerPosition,float health,Assets assets,Boolean isBoss,Integer soundVolume) {
         this.assets=assets;
         this.health = health;
         this.position = position;
         this.playerPosition = playerPosition;
         this.isBoss=isBoss;
         this.soundVolume=soundVolume;
+        defaultFont = new BitmapFont();
         Texture duckTexture;
         Texture duckIdleTexture;
         if(!isBoss){
@@ -116,13 +121,18 @@ public class Enemy {
 
     private boolean isCollidingWithBullet(Bullet bullet) {
         // Check if the enemy's bounding box intersects with the bullet's position
-        return position.x < bullet.getPosition().x + bullet.getWidth() &&
+        if(position.x < bullet.getPosition().x + bullet.getWidth() &&
                 position.x + getWidth() > bullet.getPosition().x &&
                 position.y < bullet.getPosition().y + bullet.getHeight() &&
-                position.y + getHeight() > bullet.getPosition().y;
+                position.y + getHeight() > bullet.getPosition().y)
+        {
+            damageTexts.add(new DamageText(bullet.getDamage(),bullet.getPosition(),1f));
+            return true;
+        }
+        else return false;
     }
 
-    private Boolean takeDamage(int damage,Array<Enemy> enemies) {
+    private Boolean takeDamage(float damage,Array<Enemy> enemies) {
         health -= damage;
         if (health <= 0) {
             enemies.removeValue(this, true);
@@ -143,9 +153,10 @@ public class Enemy {
         float scaledWidth = getWidth() * healthScale;
         float scaledHeight = getHeight() * healthScale;
 
-
         // Draw the current frame at the enemy's position
         batch.draw(currentFrame, position.x, position.y, scaledWidth / 2, scaledHeight / 2, scaledWidth, scaledHeight, isFlipped ? -1 : 1, 1, 0);
+        // Render damage texts
+        renderDamageTexts(batch, Gdx.graphics.getDeltaTime());
     }
 
     public TextureRegion[] splitEnemyTexture(Texture characterTexture,int n) {
@@ -193,5 +204,23 @@ public class Enemy {
 
     public float getHealthScale(){return healthScale;}
 
-    public Integer getHealth(){return health;}
+    public float getHealth(){return health;}
+
+    public void renderDamageTexts(SpriteBatch batch, float deltaTime) {
+        Array<DamageText> textsToRemove = new Array<>();
+
+        for (DamageText damageText : damageTexts) {
+            damageText.update(deltaTime);
+            float newY = damageText.getPosition().y + 20 * deltaTime;
+            damageText.getPosition().set(damageText.getPosition().x, newY);
+
+            defaultFont.draw(batch, damageText.getText(), damageText.getPosition().x, damageText.getPosition().y);
+
+            if (damageText.isFinished()) {
+                textsToRemove.add(damageText);
+            }
+        }
+
+        damageTexts.removeAll(textsToRemove, true);
+    }
 }
