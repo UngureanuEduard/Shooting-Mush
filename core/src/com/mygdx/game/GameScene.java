@@ -111,8 +111,13 @@ public class GameScene extends ScreenAdapter {
 
 		//Initialize waves add a few
 		waves = new Array<>();
-		waves.add(new Wave(1, 1, 0.5f, 90, damage));
-		waves.add(new Wave(2, 1, 0.4f, 500, damage));
+		waves.add(new Wave(1, 3, 0.5f, 90, damage));
+		waves.add(new Wave(2, 4, 0.4f, 95, damage));
+		waves.add(new Wave(3, 5, 0.3f, 100, damage));
+		waves.add(new Wave(4, 6, 0.3f, 110, damage));
+		waves.add(new Wave(6, 6, 0.3f, 115, damage));
+		waves.add(new Wave(7, 7, 0.3f, 120, damage));
+		waves.add(new Wave(8, 1, 0.4f, 500, damage));
 
 		minCameraX = camera.viewportWidth / 2-480 ;
 		minCameraY = camera.viewportHeight / 2 - 268;
