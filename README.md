@@ -2,6 +2,9 @@
 
 ## Description
 A 2D top-down shooter game where you take on the role of a skilled hunter who must fend off waves of aggressive ducks and a powerful boss. You'll navigate a dynamic, tiled map filled with obstacles. As you progress, you'll face increasingly challenging waves.
+## Gameplay photos
+![1](https://github.com/UngureanuEduard/Shooting-Mush/assets/130817880/92362496-dcdf-46e9-a510-9c764d5b8c37)
+![2](https://github.com/UngureanuEduard/Shooting-Mush/assets/130817880/a53a3174-0ff7-475f-aa77-e06cf36cd4ff)
 
 ## Gameplay video
 https://www.youtube.com/watch?v=6Rx-HdjzlnM
