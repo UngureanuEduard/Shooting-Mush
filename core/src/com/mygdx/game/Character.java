@@ -27,6 +27,7 @@ public class Character {
     private final Texture heartTexture;
     private final Texture emptyHeartTexture;
     private float timeSinceLastLifeLost = 4.0f;
+    private float timeDashCooldown = 5.0f;
 
 
     public Character( Vector2 initialPosition,Assets assets) {
@@ -61,6 +62,7 @@ public class Character {
             boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
             boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
             boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
+            boolean dash = Gdx.input.isKeyPressed(Input.Keys.SPACE);
 
             //The potential new position based on input
             float potentialX = position.x;
@@ -74,10 +76,14 @@ public class Character {
             if (moveUp) {
                 potentialY += SPEED * deltaTime;
                 buffedpotentialY = potentialY + 10;
+                if(dash && timeDashCooldown >= 3.0f)
+                    potentialY= Dash(potentialY,true);
                 isWalking = "up";
             }
             if (moveDown) {
                 potentialY -= SPEED * deltaTime;
+                if(dash && timeDashCooldown >= 3.0f)
+                    potentialY= Dash(potentialY,false);
                 buffedpotentialY = potentialY - 4;
                 isWalking = "down";
             }
@@ -87,6 +93,8 @@ public class Character {
                     flipAnimations();
                     isFlipped = true;
                 }
+                if(dash && timeDashCooldown >= 3.0f)
+                    potentialX= Dash(potentialX,false);
                 buffedpotentialX = potentialX - 4;
                 isWalking = "left";
             }
@@ -96,6 +104,8 @@ public class Character {
                     flipAnimations();
                     isFlipped = false;
                 }
+                if(dash && timeDashCooldown >= 3.0f)
+                    potentialX= Dash(potentialX,true);
                 buffedpotentialX = potentialX + 15;
                 isWalking = "right";
             }
@@ -125,7 +135,9 @@ public class Character {
                     bullet.setActive(false); // Deactivate the bullet
                 }
             }
+
             timeSinceLastLifeLost += deltaTime;
+            timeDashCooldown += deltaTime;
         }
     }
 
@@ -258,6 +270,20 @@ public class Character {
 
         // Check if the cell exists and has the "blocked" property
         return !(cell != null && cell.getTile().getProperties().containsKey("blocked"));
+    }
+
+    // Increment direction for Dash action
+    private float Dash(float cardinalPoint , Boolean positive){
+
+        if(positive)
+            {
+                timeDashCooldown = 0;
+                return cardinalPoint+80;
+            }
+            else {
+                    timeDashCooldown = 0;
+                    return cardinalPoint-80;
+                 }
     }
 
     public void GainLife(){

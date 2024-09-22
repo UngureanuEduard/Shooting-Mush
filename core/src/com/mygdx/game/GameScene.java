@@ -29,7 +29,7 @@ public class GameScene extends ScreenAdapter {
 	Viewport viewport = new ExtendViewport(1920, 1080);
 	Skin skin;
 	private final Stage stage = new Stage(viewport);
-    SpriteBatch batch;
+	SpriteBatch batch;
 	TiledMap tiledMap;
 	OrthogonalTiledMapRenderer tiledMapRenderer;
 	OrthographicCamera camera;
@@ -65,6 +65,8 @@ public class GameScene extends ScreenAdapter {
 	private final Integer musicVolume;
 	private final Integer soundVolume;
 
+	Wave currentWave;
+
 	public Integer critRate=15;
 
 	MyGdxGame game;
@@ -76,8 +78,8 @@ public class GameScene extends ScreenAdapter {
 	}
 
 	@Override
-    public void show()
-    {
+	public void show()
+	{
 
 		assets = new Assets();
 		assets.loadGameAssets();
@@ -85,7 +87,7 @@ public class GameScene extends ScreenAdapter {
 
 		skin = assets.getAssetManager().get(Assets.skin);
 
-        batch = new SpriteBatch();
+		batch = new SpriteBatch();
 
 		// Load the TiledMap
 		tiledMap = assets.getAssetManager().get(Assets.tiledMap);
@@ -111,13 +113,8 @@ public class GameScene extends ScreenAdapter {
 
 		//Initialize waves add a few
 		waves = new Array<>();
-		waves.add(new Wave(1, 3, 0.5f, 90, damage));
-		waves.add(new Wave(2, 4, 0.4f, 95, damage));
-		waves.add(new Wave(3, 5, 0.3f, 100, damage));
-		waves.add(new Wave(4, 6, 0.3f, 110, damage));
-		waves.add(new Wave(6, 6, 0.3f, 115, damage));
-		waves.add(new Wave(7, 7, 0.3f, 120, damage));
-		waves.add(new Wave(8, 1, 0.4f, 500, damage));
+		waves.add(new Wave(1,0, 1, 0.5f, 90, damage));
+		waves.add(new Wave(2, 1,0, 0.4f, 500, damage));
 
 		minCameraX = camera.viewportWidth / 2-480 ;
 		minCameraY = camera.viewportHeight / 2 - 268;
@@ -161,7 +158,7 @@ public class GameScene extends ScreenAdapter {
 		maxBossHealth=500;
 	}
 
-    @Override
+	@Override
 	public void render(float delta) {
 
 		// Clear the screen
@@ -210,17 +207,25 @@ public class GameScene extends ScreenAdapter {
 
 		if (!waves.isEmpty()) {
 
-			Wave currentWave = waves.first();
+			currentWave = waves.first();
 			enemySpawnTimer += Gdx.graphics.getDeltaTime();
 			damage=currentWave.getBulletDamage();
+
 			if (currentWave.getNumEnemies() > 0 && enemySpawnTimer >= currentWave.getEnemySpawnInterval() && !isPaused) {
 				spawnEnemy(currentWave.getEnemyHealth());
 				enemySpawnTimer = 0.0f;
 				currentWave.setNumEnemies(currentWave.getNumEnemies() - 1);
 			}
 
+			if(currentWave.getNumBossEnemies() > 0 && !isPaused){
+				int health=500;
+				spawnBoss(health);
+				enemySpawnTimer = 0.0f;
+				currentWave.setNumBossEnemies(currentWave.getNumBossEnemies() - 1);
+			}
+
 			// Check if the current wave is completed
-			if (currentWave.getNumEnemies() == 0 && enemies.isEmpty()) {
+			if (currentWave.getNumEnemies() == 0 && enemies.isEmpty() && currentWave.getNumBossEnemies() == 0) {
 				waves.removeIndex(0);
 				scaled=false;
 				if(!waves.isEmpty())
@@ -264,7 +269,7 @@ public class GameScene extends ScreenAdapter {
 			particle.draw(batch);
 		}
 
-		if (!enemies.isEmpty() && enemies.first().isBoss) {
+		if (!enemies.isEmpty() && !isPaused && enemies.first() instanceof EnemyBoss ) {
 			Vector2 healthBarPosition = new Vector2(camera.position.x- (float) healthBarTexture.getWidth() /2, camera.position.y+ (float) healthBarTexture.getWidth() /3+healthBarTexture.getHeight());
 			float bossHealthPercentage =enemies.first().getHealth() / maxBossHealth;
 			float healthBarFillWidth = healthBarWidth * bossHealthPercentage;
@@ -339,7 +344,17 @@ public class GameScene extends ScreenAdapter {
 		Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
 
 		// Create an enemy instance and pass the player's position
-		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health,assets,500==health,soundVolume,critRate);
+		Enemy enemy = new Enemy(enemyPosition, character.getPosition(),health,assets,soundVolume,critRate);
+
+		// Add the enemy to a list or array to manage multiple enemies
+		enemies.add(enemy);
+	}
+
+	private void spawnBoss(float health) {
+		Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
+
+		// Create an enemy instance and pass the player's position
+		EnemyBoss enemy = new EnemyBoss(enemyPosition, character.getPosition(),health,assets,soundVolume,critRate);
 
 		// Add the enemy to a list or array to manage multiple enemies
 		enemies.add(enemy);
