@@ -14,13 +14,12 @@ public class Bullet {
     private float damage;
     private boolean isActive = true;
     private final float damageScale;
+    private float lifeTimer = 0.0f; // Tracks the life time of a bullet
 
     private final String type;
 
     Assets assets;
-
-
-
+    
     public Bullet(Vector2 position, Vector2 velocity, float damage, Assets assets,String type,Integer soundVolume) {
         this.type=type;
         this.assets=assets;
@@ -43,7 +42,17 @@ public class Bullet {
     }
 
     public void update(float deltaTime) {
+
+        // Update position
         position.add(velocity.x * deltaTime, velocity.y * deltaTime);
+
+        //Update LifeTimer
+        lifeTimer += deltaTime;
+
+        // Check if lifeTimer exceeds 2.5 second
+        if (lifeTimer >= 2.5f) {
+            isActive = false;
+        }
     }
 
     public void render(SpriteBatch batch) {
