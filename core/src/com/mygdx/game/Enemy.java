@@ -65,21 +65,28 @@ public  class Enemy {
             isFlipped = direction.x < 0;
 
             // Check for bullet collisions
-            for (Bullet bullet : bullets) {
-                if(!bullet.getType().equals("Enemy")){
-                    if (isCollidingWithBullet(bullet)) {
-                        if (takeDamage(bullet.getDamage(), enemies))
-                            return new Vector2(this.position.x + this.getWidth() / 2, this.position.y + this.getHeight() / 2);
-                        bullet.setActive(false); // Deactivate the bullet
-                    }
-                }
-            }
+            Vector2 CollisionPosition = CheckBulletCollisions(bullets, enemies);
+            if(CollisionPosition.x!=-1&&CollisionPosition.y!=-1)
+                return CollisionPosition;
 
             shootTimer += deltaTime;
             final float SHOOT_INTERVAL = 1.0f;
             if (shootTimer >= SHOOT_INTERVAL) {
                 shootBullet(bullets);
                 shootTimer = 0f;
+            }
+        }
+        return new Vector2(-1, -1);
+    }
+
+    public Vector2 CheckBulletCollisions(Array<Bullet> bullets ,Array<Enemy> enemies ){
+        for (Bullet bullet : bullets) {
+            if(!bullet.getType().equals("Enemy")){
+                if (isCollidingWithBullet(bullet)) {
+                    if (takeDamage(bullet.getDamage(), enemies))
+                        return new Vector2(this.position.x + this.getWidth() / 2, this.position.y + this.getHeight() / 2);
+                    bullet.setActive(false); // Deactivate the bullet
+                }
             }
         }
         return new Vector2(-1, -1);

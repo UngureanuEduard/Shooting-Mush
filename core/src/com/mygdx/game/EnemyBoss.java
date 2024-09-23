@@ -1,10 +1,8 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
@@ -19,22 +17,12 @@ public class EnemyBoss extends Enemy{
 
     private final Animation<TextureRegion> idleAnimation;
     private float stateTime;
-    private boolean isFlipped = false;
-    private float health;
-    private final float healthScale;
-    private final Sound sound;
     private float shootTimer = 0.0f;
 
     private float bossMovementTimer = 0.0f;
     private boolean isBossMoving = true;
     private final Integer soundVolume;
-    Array<DamageText> damageTexts = new Array<>();
     Assets assets;
-    private final BitmapFont defaultFont;
-
-    private final Integer critRate;
-
-    private final float shootInterval = 1.0f;
 
 
     public EnemyBoss(Vector2 position, Vector2 playerPosition,float health,Assets assets,Integer soundVolume,Integer critRate) {
@@ -42,11 +30,7 @@ public class EnemyBoss extends Enemy{
         this.position=position;
         this.playerPosition=playerPosition;
         this.soundVolume=soundVolume;
-        this.health=health;
         this.assets=assets;
-        this.critRate=critRate;
-
-        defaultFont = new BitmapFont();
 
         Texture duckTexture;
         Texture duckIdleTexture;
@@ -57,11 +41,7 @@ public class EnemyBoss extends Enemy{
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture,6);
         walkAnimation = new Animation<>(0.1f, duckFrames);
 
-        this.sound=assets.getAssetManager().get(Assets.duckSound);
-
         stateTime = 0.0f; // Initialize the animation time
-
-        this.healthScale = 0.7f + health/ 300.0f;
 
     }
 
@@ -92,20 +72,13 @@ public class EnemyBoss extends Enemy{
             stateTime += deltaTime;
 
             // Determine if the enemy should be flipped
-            isFlipped = direction.x < 0;
 
-            // Check for bullet collisions
-            for (Bullet bullet : bullets) {
-                if(!bullet.getType().equals("Enemy")){
-                    if (isCollidingWithBullet(bullet)) {
-                        if (takeDamage(bullet.getDamage(), enemies))
-                            return new Vector2(this.position.x + this.getWidth() / 2, this.position.y + this.getHeight() / 2);
-                        bullet.setActive(false); // Deactivate the bullet
-                    }
-                }
-            }
+            Vector2 CollisionPosition = CheckBulletCollisions(bullets, enemies);
+            if(CollisionPosition.x!=-1&&CollisionPosition.y!=-1)
+                return CollisionPosition;
 
             shootTimer += deltaTime;
+            float shootInterval = 1.0f;
             if(!isBossMoving&&shootTimer >= shootInterval){
 
                 shootBulletsInAllDirections(bullets);
