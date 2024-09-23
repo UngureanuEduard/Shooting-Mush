@@ -1,44 +1,30 @@
 package com.mygdx.game;
 
 
-import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 public class Bullet {
-    private final Vector2 position;
-    private final Vector2 velocity;
-    private final TextureRegion texture;
-    private float damage;
-    private boolean isActive = true;
-    private final float damageScale;
-    private float lifeTimer = 0.0f; // Tracks the life time of a bullet
+    protected final Vector2 position;
+    protected final Vector2 velocity;
+    protected TextureRegion texture;
+    protected float damage;
+    protected boolean isActive = true;
+    protected final float damageScale;
+    protected float lifeTimer = 0.0f; // Tracks the lifetime of a bullet
 
-    private final String type;
+
 
     Assets assets;
 
-    public Bullet(Vector2 position, Vector2 velocity, float damage, Assets assets,String type,Integer soundVolume) {
-        this.type=type;
+    public Bullet(Vector2 position, Vector2 velocity, float damage, Assets assets ) {
+
         this.assets=assets;
         this.damage=damage;
         this.damageScale = 0.8f + damage / 200.0f;
         this.position = position;
         this.velocity = velocity;
-        Texture bulletAppleTexture = this.assets.getAssetManager().get(Assets.bulletTexture);
-        Texture bulletCornTexture = this.assets.getAssetManager().get(Assets.candyCornTexture);
-        Sound soundCharacter = assets.getAssetManager().get(Assets.throwSound);
-        Sound soundEnemy = assets.getAssetManager().get(Assets.duckShootSound);
-        if (type.equals("Enemy")) {
-            texture = new TextureRegion(bulletCornTexture);
-            soundEnemy.play(soundVolume/100f);
-
-        } else {
-            texture = new TextureRegion(bulletAppleTexture);
-            soundCharacter.play(soundVolume/100f);
-        }
     }
 
     public void update(float deltaTime) {
@@ -77,7 +63,7 @@ public class Bullet {
     }
 
     public boolean isActive() {
-        return isActive;
+        return !isActive;
     }
 
     public void setActive(boolean active) {
@@ -96,7 +82,6 @@ public class Bullet {
         return 35 *this.damageScale;
     }
 
-    public String getType(){return type;}
 
     public void setDamage(float damage){this.damage=damage;}
 }

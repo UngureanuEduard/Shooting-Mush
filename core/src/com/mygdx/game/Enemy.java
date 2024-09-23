@@ -2,11 +2,15 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
+import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
@@ -20,7 +24,7 @@ public  class Enemy {
     private float stateTime;
     private boolean isFlipped = false;
     private float health;
-    private final float healthScale;
+    protected final float healthScale;
     private final Sound sound;
     private float shootTimer = 0.0f;
 
@@ -31,6 +35,10 @@ public  class Enemy {
 
     private final Integer critRate;
 
+    private final Rectangle bodyHitbox;
+    private final Circle headHitbox;
+    private final ShapeRenderer shapeRenderer;
+
 
     public Enemy(Vector2 position, Vector2 playerPosition,float health,Assets assets ,Integer soundVolume,Integer critRate) {
         this.assets=assets;
@@ -40,6 +48,9 @@ public  class Enemy {
         this.soundVolume=soundVolume;
         this.critRate=critRate;
 
+        bodyHitbox = new Rectangle();
+        headHitbox = new Circle();
+        shapeRenderer = new ShapeRenderer();
         defaultFont = new BitmapFont();
 
         Texture duckTexture;
@@ -50,37 +61,47 @@ public  class Enemy {
         this.sound=assets.getAssetManager().get(Assets.duckSound);
         stateTime = 0.0f; // Initialize the animation time
         this.healthScale = 0.7f + health/ 300.0f;
+        System.out.println(healthScale);
     }
 
-    public Vector2 update(float deltaTime, Array<Bullet> bullets, Array<Enemy> enemies, boolean isPaused) {
+    public Vector2 update(float deltaTime,Array<EnemyBullet> enemyBullets, Array<CharacterBullet> Characterbullets, Array<Enemy> enemies, boolean isPaused) {
         if (!isPaused) {
             // Calculate the direction from the enemy to the player
             Vector2 direction = playerPosition.cpy().sub(position).nor();
             final float MOVEMENT_SPEED = 60.0f; // Adjust the speed
             position.add(direction.x * MOVEMENT_SPEED * deltaTime, direction.y * MOVEMENT_SPEED * deltaTime);
 
+            bodyHitbox.set((float) (position.x+getWidth()/3.8*healthScale), position.y+getHeight()/10*healthScale, (float) (getWidth()/2.3)*healthScale, (float) (getHeight()/2.7*healthScale)); // Body hitbox (rectangle)
+            headHitbox.set(position.x+getWidth()/2*healthScale, (float) (position.y+getHeight()/1.5*healthScale), getHeight()/5*healthScale); // Head hitbox (circle)
             // Update animation stateTime
             stateTime += deltaTime;
             // Determine if the enemy should be flipped
             isFlipped = direction.x < 0;
 
             // Check for bullet collisions
-            for (Bullet bullet : bullets) {
-                if(!bullet.getType().equals("Enemy")){
-                    if (isCollidingWithBullet(bullet)) {
-                        if (takeDamage(bullet.getDamage(), enemies))
-                            return new Vector2(this.position.x + this.getWidth() / 2, this.position.y + this.getHeight() / 2);
-                        bullet.setActive(false); // Deactivate the bullet
-                    }
-                }
-            }
+            Vector2 CollisionPosition = CheckBulletCollisions(Characterbullets, enemies);
+            if(CollisionPosition.x!=-1&&CollisionPosition.y!=-1)
+                return CollisionPosition;
 
             shootTimer += deltaTime;
+
             final float SHOOT_INTERVAL = 1.0f;
             if (shootTimer >= SHOOT_INTERVAL) {
-                shootBullet(bullets);
+                shootBullet(enemyBullets);
                 shootTimer = 0f;
             }
+        }
+        return new Vector2(-1, -1);
+    }
+
+    public Vector2 CheckBulletCollisions(Array<CharacterBullet> bullets ,Array<Enemy> enemies ){
+        for (CharacterBullet bullet : bullets) {
+                if (isCollidingWithBullet(bullet)) {
+                    if (takeDamage(bullet.getDamage(), enemies))
+                        return new Vector2(this.position.x + this.getWidth() / 2, this.position.y + this.getHeight() / 2);
+                    bullet.setActive(false); // Deactivate the bullet
+                }
+
         }
         return new Vector2(-1, -1);
     }
@@ -114,43 +135,64 @@ public  class Enemy {
         return false;
     }
 
-    public void render(SpriteBatch batch) {
+    public void render(SpriteBatch batch, OrthographicCamera camera) {
         TextureRegion currentFrame = getCurrentFrame();
         float scaledWidth = calculateScaledDimension(getWidth());
         float scaledHeight = calculateScaledDimension(getHeight());
 
-        drawCurrentFrame(batch, currentFrame, scaledWidth, scaledHeight);
+        drawCurrentFrame(batch, currentFrame, scaledWidth, scaledHeight, isFlipped);
         renderDamageTexts(batch, Gdx.graphics.getDeltaTime());
+
+        batch.end();
+
+        //Debugging
+        drawHitboxes(camera);
+    }
+
+    private void drawHitboxes(OrthographicCamera camera) {
+        shapeRenderer.setProjectionMatrix(camera.combined);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+
+        // Draw the rectangle hitbox (body)
+        shapeRenderer.setColor(1, 0, 0, 1); // Red color for the rectangle
+        shapeRenderer.rect(bodyHitbox.x, bodyHitbox.y, bodyHitbox.width, bodyHitbox.height);
+
+        // Draw the circle hitbox (head)
+        shapeRenderer.setColor(0, 1, 0, 1); // Green color for the circle
+        shapeRenderer.circle(headHitbox.x, headHitbox.y, headHitbox.radius);
+
+        shapeRenderer.end();
     }
 
     private TextureRegion getCurrentFrame() {
         return walkAnimation.getKeyFrame(stateTime, true);
     }
 
-    public float calculateScaledDimension(float dimension) {
+    protected float calculateScaledDimension(float dimension) {
         return dimension * healthScale;
     }
 
-    public void drawCurrentFrame(SpriteBatch batch, TextureRegion currentFrame, float scaledWidth, float scaledHeight) {
+    protected void drawCurrentFrame(SpriteBatch batch, TextureRegion currentFrame, float scaledWidth, float scaledHeight , boolean isFlipped) {
         batch.draw(currentFrame, position.x, position.y, scaledWidth / 2, scaledHeight / 2, scaledWidth, scaledHeight, isFlipped ? -1 : 1, 1, 0);
     }
 
-    public TextureRegion[] splitEnemyTexture(Texture characterTexture,int n) {
+    protected TextureRegion[] splitEnemyTexture(Texture characterTexture,int n) {
         TextureRegion[][] tmp = TextureRegion.split(characterTexture, 32, 32);
         TextureRegion[] characterFrames = new TextureRegion[n];
         System.arraycopy(tmp[0], 0, characterFrames, 0, n);
         return characterFrames;
     }
 
-    private void shootBullet(Array<Bullet> bullets) {
+    private void shootBullet(Array<EnemyBullet> enemyBullets) {
         // Calculate the direction from the enemy to the player
         Vector2 direction = playerPosition.cpy().sub(position).nor();
 
         // Create a new Bullet and set the damage
-        Bullet bullet = new Bullet(position.cpy(), direction.cpy().scl(400), 1, assets,"Enemy",soundVolume);
+        EnemyBullet bullet = new EnemyBullet(position.cpy(), direction.cpy().scl(400), 1, assets,soundVolume);
 
         // Add bullet to array
-        bullets.add(bullet);
+        enemyBullets.add(bullet);
     }
 
     public float getWidth()

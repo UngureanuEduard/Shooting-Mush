@@ -7,8 +7,11 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
+import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
@@ -28,6 +31,10 @@ public class Character {
     private final Texture emptyHeartTexture;
     private float timeSinceLastLifeLost = 4.0f;
     private float timeDashCooldown = 5.0f;
+    private final Rectangle bodyHitbox;
+    private final Circle headHitbox;
+    private final ShapeRenderer shapeRenderer;
+
 
 
     public Character( Vector2 initialPosition,Assets assets) {
@@ -52,9 +59,12 @@ public class Character {
         isWalking = ""; // Initially, the character is not walking
         isFlipped = false; // Initially, the character is not flipped
         lives = 3; // Start with 3 lives
+        bodyHitbox = new Rectangle();
+        headHitbox = new Circle();
+        shapeRenderer = new ShapeRenderer();
     }
 
-    public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused, Array<Bullet> bullets) {
+    public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused, Array<EnemyBullet> enemyBullets) {
         if(!isPaused) {
             float deltaTime = Gdx.graphics.getDeltaTime();
 
@@ -113,6 +123,8 @@ public class Character {
             // Check if the potential new position collides with blocked tiles
             if (isTileBlocked(buffedpotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedpotentialY, tiledMap)) {
                 position.set(potentialX, potentialY);
+                bodyHitbox.set(potentialX+getWidth()*29/100, potentialY+getHeight()*10/100, (float) (getWidth()*41.66/100), (float) (getHeight()*31.25/100)); // Body hitbox (rectangle)
+                headHitbox.set(potentialX+getWidth()/2, (float) (potentialY+getHeight()/1.7), (float) (getWidth() / 3.1)); // Head hitbox (circle)
             }
 
 
@@ -129,19 +141,22 @@ public class Character {
             }
 
             // Check for bullet collisions
-            for (Bullet bullet : bullets) {
-                if (isCollidingWithBullet(bullet)&& !bullet.getType().equals("Character")&&timeSinceLastLifeLost>=4.0f) {
+            for (EnemyBullet enemyBullet : enemyBullets) {
+                if (isCollidingWithBullet(enemyBullet)&&timeSinceLastLifeLost>=4.0f) {
                     loseLife();
-                    bullet.setActive(false); // Deactivate the bullet
+                    enemyBullet.setActive(false); // Deactivate the bullet
                 }
             }
 
             timeSinceLastLifeLost += deltaTime;
             timeDashCooldown += deltaTime;
+
+
         }
+
     }
 
-    public void render(SpriteBatch batch) {
+    public void render(SpriteBatch batch , OrthographicCamera camera) {
         // Get the current frame from the appropriate animation
         TextureRegion currentFrame;
         switch (isWalking) {
@@ -159,8 +174,30 @@ public class Character {
                 currentFrame = idleAnimationLeftAndRight.getKeyFrame(stateTime, true);
                 break;
         }
+
         // Draw the character at its current position
         batch.draw(currentFrame, position.x, position.y);
+
+        batch.end();
+
+        //Debugging
+        drawHitboxes(camera);
+    }
+
+    private void drawHitboxes(OrthographicCamera camera) {
+        shapeRenderer.setProjectionMatrix(camera.combined);
+
+        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
+
+        // Draw the rectangle hitbox (body)
+        shapeRenderer.setColor(1, 0, 0, 1); // Red color for the rectangle
+        shapeRenderer.rect(bodyHitbox.x, bodyHitbox.y, bodyHitbox.width, bodyHitbox.height);
+
+        // Draw the circle hitbox (head)
+        shapeRenderer.setColor(0, 1, 0, 1); // Green color for the circle
+        shapeRenderer.circle(headHitbox.x, headHitbox.y, headHitbox.radius);
+
+        shapeRenderer.end();
     }
 
     public void dispose() {
@@ -217,14 +254,15 @@ public class Character {
         idleAnimationLeftAndRight.getKeyFrames()[8].flip(true, false);
     }
 
+    //change it -- to work
     public void loseLife() {
-        lives--;
+        lives++;
         lostLives++;
         timeSinceLastLifeLost=0;
     }
 
     private boolean isCollidingWithEnemy(Enemy enemy) {
-        // Calculate the hitbox of the character and the enemy
+        // Calculate the hit-box of the character and the enemy
         float characterLeft = position.x;
         float characterRight = position.x + getWidth();
         float characterTop = position.y + getHeight();
@@ -235,7 +273,7 @@ public class Character {
         float enemyTop = enemy.getPosition().y + enemy.getHeight();
         float enemyBottom = enemy.getPosition().y;
 
-        // Check for collision by comparing the hitboxes
+        // Check for collision by comparing the hit-boxes
         boolean horizontalCollision = characterRight > enemyLeft && characterLeft < enemyRight;
         boolean verticalCollision = characterTop > enemyBottom && characterBottom < enemyTop;
 

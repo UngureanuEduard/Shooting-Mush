@@ -34,7 +34,8 @@ public class GameScene extends ScreenAdapter {
 	OrthogonalTiledMapRenderer tiledMapRenderer;
 	OrthographicCamera camera;
 	Character character;
-	Array<Bullet> bullets;
+	Array<EnemyBullet> enemyBullets;
+	Array<CharacterBullet> characterBullets;
 	private float minCameraX;
 	private float minCameraY;
 	private float maxCameraX;
@@ -105,15 +106,16 @@ public class GameScene extends ScreenAdapter {
 		// Create character
 		character = new Character(new Vector2(800, 800),assets);
 
-		// Initialize bullets array
-		bullets = new Array<>();
+		// Initialize bullets arrays
+		enemyBullets=new Array<>();
+		characterBullets=new Array<>();
 
 		// Initialize enemies array
 		enemies = new Array<>();
 
 		//Initialize waves add a few
 		waves = new Array<>();
-		waves.add(new Wave(1,0, 1, 0.5f, 90, damage));
+		waves.add(new Wave(1,0, 2, 0.5f, 90, damage));
 		waves.add(new Wave(2, 1,0, 0.4f, 500, damage));
 
 		minCameraX = camera.viewportWidth / 2-480 ;
@@ -165,7 +167,7 @@ public class GameScene extends ScreenAdapter {
 		ScreenUtils.clear(1, 0, 0, 1);
 
 		// Update character and camera
-		character.update(enemies,tiledMap,isPaused,bullets);
+		character.update(enemies,tiledMap,isPaused,enemyBullets);
 		updateCamera();
 
 		timeSinceLastShot += Gdx.graphics.getDeltaTime();
@@ -192,18 +194,33 @@ public class GameScene extends ScreenAdapter {
 		tiledMapRenderer.render();
 
 		// Render the character
-		character.render(batch);
+		character.render(batch,camera);
+
+		batch.begin();
+
 
 		// Render the bullets
-		for (Iterator<Bullet> iter = bullets.iterator(); iter.hasNext(); ) {
-			Bullet bullet = iter.next();
-			bullet.update(Gdx.graphics.getDeltaTime());
-			if (!bullet.isActive()) {
+		for (Iterator<EnemyBullet> iter = enemyBullets.iterator(); iter.hasNext(); ) {
+			EnemyBullet enemyBullet = iter.next();
+			enemyBullet.update(Gdx.graphics.getDeltaTime());
+			if (enemyBullet.isActive()) {
 				iter.remove(); // Remove the inactive bullet
 			} else {
-				bullet.render(batch);
+				enemyBullet.render(batch);
 			}
 		}
+
+		// Render the bullets
+		for (Iterator<CharacterBullet> iter = characterBullets.iterator(); iter.hasNext(); ) {
+			CharacterBullet characterBullet = iter.next();
+			characterBullet.update(Gdx.graphics.getDeltaTime());
+			if (characterBullet.isActive()) {
+				iter.remove(); // Remove the inactive bullet
+			} else {
+				characterBullet.render(batch);
+			}
+		}
+
 
 		if (!waves.isEmpty()) {
 
@@ -246,7 +263,7 @@ public class GameScene extends ScreenAdapter {
 
 		// Update and render enemies
 		for (Enemy enemy : enemies) {
-			Vector2 poz=enemy.update(Gdx.graphics.getDeltaTime(),bullets,enemies,isPaused);
+			Vector2 poz=enemy.update(Gdx.graphics.getDeltaTime(),enemyBullets,characterBullets,enemies,isPaused);
 			// Check if the enemy died
 			if(!poz.epsilonEquals(-1,-1))
 			{
@@ -256,7 +273,8 @@ public class GameScene extends ScreenAdapter {
 				enemiesLeftToKill-=1;
 			}
 
-			enemy.render(batch);
+			enemy.render(batch,camera);
+			batch.begin();
 		}
 		if (!waves.isEmpty()) {
 			drawWaveNumberAndScore();
@@ -304,9 +322,13 @@ public class GameScene extends ScreenAdapter {
 		tiledMap.dispose();
 		tiledMapRenderer.dispose();
 		character.dispose();
-		for (Bullet bullet : bullets) {
+		for (CharacterBullet bullet : characterBullets) {
 			bullet.dispose();
 		}
+		for (EnemyBullet bullet : enemyBullets) {
+			bullet.dispose();
+		}
+
 		stage.dispose();
 		assets.dispose();
 		gameMusic.dispose();
@@ -321,10 +343,10 @@ public class GameScene extends ScreenAdapter {
 		directionToCursor.nor().scl(800);
 
 		// Create a new Bullet and set the damage
-		Bullet bullet = new Bullet(bulletStartPosition, directionToCursor,damage,assets,"Character",soundVolume);
+		CharacterBullet bullet = new CharacterBullet(bulletStartPosition, directionToCursor,damage,assets,soundVolume);
 
 		// Add bullet to array
-		bullets.add(bullet);
+		characterBullets.add(bullet);
 	}
 
 	private Vector2 calculateDirectionToCursor(Vector2 startingPoint) {
