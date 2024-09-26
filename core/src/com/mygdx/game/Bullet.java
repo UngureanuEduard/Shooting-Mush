@@ -13,9 +13,7 @@ public class Bullet {
     protected boolean isActive = true;
     protected final float damageScale;
     protected float lifeTimer = 0.0f; // Tracks the lifetime of a bullet
-
-
-
+    protected float angle;
     Assets assets;
 
     public Bullet(Vector2 position, Vector2 velocity, float damage, Assets assets ) {
@@ -27,7 +25,7 @@ public class Bullet {
         this.velocity = velocity;
     }
 
-    public void update(float deltaTime) {
+    protected void updatePosition(float deltaTime) {
 
         // Update position
         position.add(velocity.x * deltaTime, velocity.y * deltaTime);
@@ -41,9 +39,9 @@ public class Bullet {
         }
     }
 
-    public void render(SpriteBatch batch) {
+    protected void renderTexture(SpriteBatch batch) {
 
-        float angle = (float) Math.atan2(velocity.y, velocity.x);
+        angle = (float) Math.atan2(velocity.y, velocity.x);
         angle = (float) Math.toDegrees(angle) - 90;
 
         if (angle < 0) {
@@ -84,4 +82,6 @@ public class Bullet {
 
 
     public void setDamage(float damage){this.damage=damage;}
+
+
 }

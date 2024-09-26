@@ -206,7 +206,7 @@ public class GameScene extends ScreenAdapter {
 			if (enemyBullet.isActive()) {
 				iter.remove(); // Remove the inactive bullet
 			} else {
-				enemyBullet.render(batch);
+				enemyBullet.render(batch,camera);
 			}
 		}
 
@@ -217,7 +217,7 @@ public class GameScene extends ScreenAdapter {
 			if (characterBullet.isActive()) {
 				iter.remove(); // Remove the inactive bullet
 			} else {
-				characterBullet.render(batch);
+				characterBullet.render(batch,camera);
 			}
 		}
 
@@ -263,22 +263,27 @@ public class GameScene extends ScreenAdapter {
 
 		// Update and render enemies
 		for (Enemy enemy : enemies) {
-			Vector2 poz=enemy.update(Gdx.graphics.getDeltaTime(),enemyBullets,characterBullets,enemies,isPaused);
+			enemy.update(Gdx.graphics.getDeltaTime(),enemyBullets,characterBullets,isPaused);
+
 			// Check if the enemy died
-			if(!poz.epsilonEquals(-1,-1))
+			if(enemy.getHealth()<=0)
 			{
+				Vector2 poz = new Vector2(enemy.getPosition());
 				DeathParticles(poz,enemy.getHealthScale());
 				scaled=true;
 				score+= (int) waves.first().getEnemyHealth();
+				enemies.removeValue(enemy,true);
 				enemiesLeftToKill-=1;
 			}
 
 			enemy.render(batch,camera);
 			batch.begin();
 		}
+
 		if (!waves.isEmpty()) {
 			drawWaveNumberAndScore();
 		}
+
 		//draw Hearts
 		character.drawHearts(batch,camera);
 
@@ -287,6 +292,7 @@ public class GameScene extends ScreenAdapter {
 			particle.draw(batch);
 		}
 
+		//Draw health bar for boss enemies
 		if (!enemies.isEmpty() && !isPaused && enemies.first() instanceof EnemyBoss ) {
 			Vector2 healthBarPosition = new Vector2(camera.position.x- (float) healthBarTexture.getWidth() /2, camera.position.y+ (float) healthBarTexture.getWidth() /3+healthBarTexture.getHeight());
 			float bossHealthPercentage =enemies.first().getHealth() / maxBossHealth;

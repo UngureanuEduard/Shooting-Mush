@@ -10,6 +10,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
+import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
@@ -17,26 +18,26 @@ import com.badlogic.gdx.utils.Array;
 import java.util.Random;
 
 public  class Enemy {
-    private final Vector2 position;
-    private final Vector2 playerPosition;
-    private final Animation<TextureRegion> walkAnimation;
+    protected final Vector2 position;
+    protected final Vector2 playerPosition;
+    protected Animation<TextureRegion> walkAnimation;
 
-    private float stateTime;
-    private boolean isFlipped = false;
-    private float health;
-    protected final float healthScale;
-    private final Sound sound;
-    private float shootTimer = 0.0f;
+    protected float stateTime;
+    protected boolean isFlipped = false;
+    protected float health;
+    protected float healthScale;
+    protected final Sound sound;
+    protected float shootTimer = 0.0f;
 
-    private final Integer soundVolume;
+    protected final Integer soundVolume;
     Array<DamageText> damageTexts = new Array<>();
-    Assets assets;
-    private final BitmapFont defaultFont;
+    protected Assets assets;
+    protected final BitmapFont defaultFont;
 
-    private final Integer critRate;
+    protected final Integer critRate;
 
-    private final Rectangle bodyHitbox;
-    private final Circle headHitbox;
+    protected Rectangle bodyHitbox;
+    protected Circle headHitbox;
     private final ShapeRenderer shapeRenderer;
 
 
@@ -64,12 +65,13 @@ public  class Enemy {
         System.out.println(healthScale);
     }
 
-    public Vector2 update(float deltaTime,Array<EnemyBullet> enemyBullets, Array<CharacterBullet> Characterbullets, Array<Enemy> enemies, boolean isPaused) {
+    public void update(float deltaTime,Array<EnemyBullet> enemyBullets, Array<CharacterBullet> Characterbullets, boolean isPaused) {
         if (!isPaused) {
             // Calculate the direction from the enemy to the player
             Vector2 direction = playerPosition.cpy().sub(position).nor();
-            final float MOVEMENT_SPEED = 60.0f; // Adjust the speed
-            position.add(direction.x * MOVEMENT_SPEED * deltaTime, direction.y * MOVEMENT_SPEED * deltaTime);
+            float MOVEMENT_SPEED = 60.0f; // Adjust the speed
+
+            specialBehavior(deltaTime,direction,MOVEMENT_SPEED);
 
             bodyHitbox.set((float) (position.x+getWidth()/3.8*healthScale), position.y+getHeight()/10*healthScale, (float) (getWidth()/2.3)*healthScale, (float) (getHeight()/2.7*healthScale)); // Body hitbox (rectangle)
             headHitbox.set(position.x+getWidth()/2*healthScale, (float) (position.y+getHeight()/1.5*healthScale), getHeight()/5*healthScale); // Head hitbox (circle)
@@ -79,40 +81,30 @@ public  class Enemy {
             isFlipped = direction.x < 0;
 
             // Check for bullet collisions
-            Vector2 CollisionPosition = CheckBulletCollisions(Characterbullets, enemies);
-            if(CollisionPosition.x!=-1&&CollisionPosition.y!=-1)
-                return CollisionPosition;
+            CheckBulletCollisions(Characterbullets);
 
             shootTimer += deltaTime;
 
             final float SHOOT_INTERVAL = 1.0f;
-            if (shootTimer >= SHOOT_INTERVAL) {
-                shootBullet(enemyBullets);
-                shootTimer = 0f;
-            }
+
+            shootBullet(enemyBullets,SHOOT_INTERVAL);
+
         }
-        return new Vector2(-1, -1);
     }
 
-    public Vector2 CheckBulletCollisions(Array<CharacterBullet> bullets ,Array<Enemy> enemies ){
+    public void CheckBulletCollisions(Array<CharacterBullet> bullets ){
         for (CharacterBullet bullet : bullets) {
                 if (isCollidingWithBullet(bullet)) {
-                    if (takeDamage(bullet.getDamage(), enemies))
-                        return new Vector2(this.position.x + this.getWidth() / 2, this.position.y + this.getHeight() / 2);
+                    takeDamage(bullet.getDamage());
                     bullet.setActive(false); // Deactivate the bullet
                 }
-
         }
-        return new Vector2(-1, -1);
     }
 
 
-    public boolean isCollidingWithBullet(Bullet bullet) {
+    public boolean isCollidingWithBullet(CharacterBullet bullet) {
         // Check if the enemy's bounding box intersects with the bullet's position
-        if(position.x < bullet.getPosition().x + bullet.getWidth() &&
-                position.x + getWidth() > bullet.getPosition().x &&
-                position.y < bullet.getPosition().y + bullet.getHeight() &&
-                position.y + getHeight() > bullet.getPosition().y)
+        if(Intersector.overlaps(bullet.getHitBox(), headHitbox) || Intersector.overlaps(bullet.getHitBox(), bodyHitbox))
         {
             Boolean isCrit=isCrit();
             if(isCrit)
@@ -125,14 +117,9 @@ public  class Enemy {
         else return false;
     }
 
-    public Boolean takeDamage(float damage,Array<Enemy> enemies) {
+    public void takeDamage(float damage) {
         health -= damage;
-        if (health <= 0) {
-            enemies.removeValue(this, true);
-            return true;
-        }
         sound.play(soundVolume/100f);
-        return false;
     }
 
     public void render(SpriteBatch batch, OrthographicCamera camera) {
@@ -165,7 +152,7 @@ public  class Enemy {
         shapeRenderer.end();
     }
 
-    private TextureRegion getCurrentFrame() {
+    protected TextureRegion getCurrentFrame() {
         return walkAnimation.getKeyFrame(stateTime, true);
     }
 
@@ -184,15 +171,21 @@ public  class Enemy {
         return characterFrames;
     }
 
-    private void shootBullet(Array<EnemyBullet> enemyBullets) {
-        // Calculate the direction from the enemy to the player
-        Vector2 direction = playerPosition.cpy().sub(position).nor();
+    protected void shootBullet(Array<EnemyBullet> enemyBullets,float SHOOT_INTERVAL) {
 
-        // Create a new Bullet and set the damage
-        EnemyBullet bullet = new EnemyBullet(position.cpy(), direction.cpy().scl(400), 1, assets,soundVolume);
+        if(shootTimer >= SHOOT_INTERVAL) {
 
-        // Add bullet to array
-        enemyBullets.add(bullet);
+            shootTimer=0;
+
+            // Calculate the direction from the enemy to the player
+            Vector2 direction = playerPosition.cpy().sub(position).nor();
+
+            // Create a new Bullet and set the damage
+            EnemyBullet bullet = new EnemyBullet(position.cpy(), direction.cpy().scl(400), 1, assets, soundVolume);
+
+            // Add bullet to array
+            enemyBullets.add(bullet);
+        }
     }
 
     public float getWidth()
@@ -242,5 +235,12 @@ public  class Enemy {
         Random random = new Random();
         int randomNumber = random.nextInt(100) + 1;
         return randomNumber <= critRate;
+    }
+
+
+    //Override for each class with a special behavior
+    protected void specialBehavior(float deltaTime,Vector2 direction, float MOVEMENT_SPEED){
+        position.add(direction.x * MOVEMENT_SPEED * deltaTime, direction.y * MOVEMENT_SPEED * deltaTime);
+
     }
 }
