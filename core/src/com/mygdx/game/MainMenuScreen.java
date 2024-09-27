@@ -58,16 +58,13 @@ public class MainMenuScreen extends ScreenAdapter {
         backgroundImage.setSize(Gdx.graphics.getWidth() + 200, Gdx.graphics.getHeight() + 200);
         stage.addActor(backgroundImage);
         stage.addActor(mainTable);
-        optionsTable = new OptionsTable(assets, new MainMenuScreen.MainMenuCallback() {
-            @Override
-            public void backToMainMenu() {
-                stage.clear();
-                stage.addActor(backgroundImage);
-                stage.addActor(mainTable);
-                backgroundMusic.setVolume(optionsTable.getMusicVolume()/100f);
-                updateVloumes();
+        optionsTable = new OptionsTable(assets, () -> {
+            stage.clear();
+            stage.addActor(backgroundImage);
+            stage.addActor(mainTable);
+            backgroundMusic.setVolume(optionsTable.getMusicVolume()/100f);
+            updateVolumes();
 
-            }
         },musicVolume,soundVolume);
 
         optionsTable.setFillParent(true);
@@ -163,7 +160,7 @@ public class MainMenuScreen extends ScreenAdapter {
         void backToMainMenu();
     }
 
-    private void updateVloumes(){
+    private void updateVolumes(){
         musicVolume=optionsTable.getMusicVolume();
         soundVolume=optionsTable.getSoundVolume();
     }

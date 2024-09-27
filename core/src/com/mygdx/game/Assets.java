@@ -45,6 +45,7 @@ public class Assets {
     public static final AssetDescriptor<Texture> BorderHealthTexture = new AssetDescriptor<>("Environment/BorderHealth.png", Texture.class);
     public static final AssetDescriptor<Texture> HealthTexture = new AssetDescriptor<>("Environment/Texture.png", Texture.class);
     public static final AssetDescriptor<Music> bossMusic = new AssetDescriptor<>("mp3/BossSong.mp3", Music.class);
+
     public void loadMenuAssets() {
         assetManager.load(skin);
         assetManager.load(menuBackgroundTexture);

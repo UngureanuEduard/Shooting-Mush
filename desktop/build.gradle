@@ -1,4 +1,5 @@
-sourceCompatibility = 1.8
+sourceCompatibility = 11
+targetCompatibility = 11
 sourceSets.main.java.srcDirs = [ "src/" ]
 sourceSets.main.resources.srcDirs = ["../assets"]
 
@@ -28,7 +29,7 @@ tasks.register('debug', JavaExec) {
     standardInput = System.in
     workingDir = project.assetsDir
     ignoreExitValue = true as JavaExecSpec
-    debug = true
+    debug = true as JavaExec
 }
 
 tasks.register('dist', Jar) {

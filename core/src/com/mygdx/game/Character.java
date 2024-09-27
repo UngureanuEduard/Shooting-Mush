@@ -10,12 +10,17 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
-import com.badlogic.gdx.math.Circle;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.Array;
 
 public class Character {
+    private final float DASH_COOLDOWN_TIME = 10.0f;
+    private boolean isDashing = false;
+    private float dashDuration = 0.0f;
+    private float dashCooldown = DASH_COOLDOWN_TIME;
+    private final float dashSpeed;
+    private final float movementSpeed;
+    private boolean canDash = true;
     public float SPEED = 200;
     private final Vector2 position;
     private float stateTime;
@@ -30,7 +35,6 @@ public class Character {
     private final Texture heartTexture;
     private final Texture emptyHeartTexture;
     private float timeSinceLastLifeLost = 4.0f;
-    private float timeDashCooldown = 5.0f;
     private final Rectangle bodyHitbox;
     private final Circle headHitbox;
     private final ShapeRenderer shapeRenderer;
@@ -62,6 +66,8 @@ public class Character {
         bodyHitbox = new Rectangle();
         headHitbox = new Circle();
         shapeRenderer = new ShapeRenderer();
+        dashSpeed=SPEED*2;
+        movementSpeed=SPEED;
     }
 
     public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused, Array<EnemyBullet> enemyBullets) {
@@ -72,7 +78,8 @@ public class Character {
             boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
             boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
             boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
-            boolean dash = Gdx.input.isKeyPressed(Input.Keys.SPACE);
+
+            handleDash(deltaTime);
 
             //The potential new position based on input
             float potentialX = position.x;
@@ -81,19 +88,21 @@ public class Character {
             //The potential new position based on a buff distance (avoid overlaps of the character with the tile)
             float buffedpotentialX = position.x;
             float buffedpotentialY = position.y;
+
             isWalking = "";
+
+            if (isDashing) {
+                SPEED =dashSpeed;
+            }
+            else SPEED =movementSpeed;
 
             if (moveUp) {
                 potentialY += SPEED * deltaTime;
                 buffedpotentialY = potentialY + 10;
-                if(dash && timeDashCooldown >= 3.0f)
-                    potentialY= Dash(potentialY,true);
                 isWalking = "up";
             }
             if (moveDown) {
                 potentialY -= SPEED * deltaTime;
-                if(dash && timeDashCooldown >= 3.0f)
-                    potentialY= Dash(potentialY,false);
                 buffedpotentialY = potentialY - 4;
                 isWalking = "down";
             }
@@ -103,8 +112,6 @@ public class Character {
                     flipAnimations();
                     isFlipped = true;
                 }
-                if(dash && timeDashCooldown >= 3.0f)
-                    potentialX= Dash(potentialX,false);
                 buffedpotentialX = potentialX - 4;
                 isWalking = "left";
             }
@@ -114,8 +121,6 @@ public class Character {
                     flipAnimations();
                     isFlipped = false;
                 }
-                if(dash && timeDashCooldown >= 3.0f)
-                    potentialX= Dash(potentialX,true);
                 buffedpotentialX = potentialX + 15;
                 isWalking = "right";
             }
@@ -134,7 +139,7 @@ public class Character {
             // Check for enemy collisions
             for (Enemy enemy : enemies) {
                 if (isCollidingWithEnemy(enemy)) {
-                    if (timeSinceLastLifeLost >= 4.0f) {
+                    if (timeSinceLastLifeLost >= 5.0f) {
                         loseLife();
                     }
                 }
@@ -142,41 +147,33 @@ public class Character {
 
             // Check for bullet collisions
             for (EnemyBullet enemyBullet : enemyBullets) {
-                if (isCollidingWithBullet(enemyBullet)&&timeSinceLastLifeLost>=4.0f) {
+                if (isCollidingWithBullet(enemyBullet)&&timeSinceLastLifeLost>=5.0f) {
                     loseLife();
                     enemyBullet.setActive(false); // Deactivate the bullet
                 }
             }
 
             timeSinceLastLifeLost += deltaTime;
-            timeDashCooldown += deltaTime;
-
-
         }
 
     }
 
     public void render(SpriteBatch batch , OrthographicCamera camera) {
-        // Get the current frame from the appropriate animation
         TextureRegion currentFrame;
-        switch (isWalking) {
-            case "right":
-            case "left":
-                currentFrame = walkAnimationLeftAndRight.getKeyFrame(stateTime, true);
-                break;
-            case "up":
-                currentFrame = walkAnimationBack.getKeyFrame(stateTime, true);
-                break;
-            case "down":
-                currentFrame = walkAnimationFront.getKeyFrame(stateTime, true);
-                break;
-            default:
-                currentFrame = idleAnimationLeftAndRight.getKeyFrame(stateTime, true);
-                break;
-        }
 
-        // Draw the character at its current position
-        batch.draw(currentFrame, position.x, position.y);
+        // If the character is not invincible, show the animation as usual
+        if (!isInvincible()) {
+            currentFrame=getCurrentFrame();
+            batch.draw(currentFrame, position.x, position.y);
+        } else {
+            // If the character is invincible, make it flash by showing/hiding every 0.5 seconds
+            float flashTime = 0.3f;
+            if ((int) (timeSinceLastLifeLost / flashTime) % 2 == 0) {
+                // Only draw the character when the time divided by flashTime
+                currentFrame=getCurrentFrame();
+                batch.draw(currentFrame, position.x, position.y);
+            }
+        }
 
         batch.end();
 
@@ -184,6 +181,25 @@ public class Character {
         drawHitboxes(camera);
     }
 
+    private TextureRegion getCurrentFrame(){
+        switch (isWalking) {
+            case "right":
+            case "left":
+                return walkAnimationLeftAndRight.getKeyFrame(stateTime, true);
+            case "up":
+                return walkAnimationBack.getKeyFrame(stateTime, true);
+            case "down":
+                return walkAnimationFront.getKeyFrame(stateTime, true);
+            default:
+                return idleAnimationLeftAndRight.getKeyFrame(stateTime, true);
+        }
+    }
+
+    private boolean isInvincible() {
+        return timeSinceLastLifeLost < 5.0f; // Invincible for 4 seconds after losing a life
+    }
+
+    //Debugging
     private void drawHitboxes(OrthographicCamera camera) {
         shapeRenderer.setProjectionMatrix(camera.combined);
 
@@ -310,18 +326,35 @@ public class Character {
         return !(cell != null && cell.getTile().getProperties().containsKey("blocked"));
     }
 
-    // Increment direction for Dash action
-    private float Dash(float cardinalPoint , Boolean positive){
+    private void handleDash(float deltaTime) {
+        boolean dashPressed = Gdx.input.isKeyPressed(Input.Keys.SPACE);
 
-        if(positive)
-            {
-                timeDashCooldown = 0;
-                return cardinalPoint+80;
+        if (dashPressed && canDash) {
+            isDashing = true;
+            canDash = false;
+            dashDuration = 0;
+            dashCooldown = 0; // Reset cooldown timer when dash starts
+        }
+
+        if (isDashing) {
+            dashDuration += deltaTime;
+            float DASH_TIME = 5.0f;
+            if (dashDuration >= DASH_TIME || !dashPressed ) {
+                isDashing = false;
+
+                // Calculate remaining dash percentage
+                float dashPercentageUsed = dashDuration / DASH_TIME;
+                float remainingDashPercentage = 1 - dashPercentageUsed;
+
+                // Scale the cooldown based on the remaining dash percentage
+                dashCooldown = DASH_COOLDOWN_TIME * remainingDashPercentage;
             }
-            else {
-                    timeDashCooldown = 0;
-                    return cardinalPoint-80;
-                 }
+        } else {
+            dashCooldown += deltaTime;
+            if (dashCooldown >= DASH_COOLDOWN_TIME) {
+                canDash = true;
+            }
+        }
     }
 
     public void GainLife(){
@@ -332,12 +365,28 @@ public class Character {
         SPEED+=SPEED*10/100;
     }
 
-    private boolean isCollidingWithBullet(Bullet bullet) {
-        // Check if the enemy's bounding box intersects with the bullet's position
-        return position.x < bullet.getPosition().x + bullet.getWidth() &&
-                position.x + getWidth() > bullet.getPosition().x &&
-                position.y < bullet.getPosition().y + bullet.getHeight() &&
-                position.y + getHeight() > bullet.getPosition().y;
+    private boolean isCollidingWithBullet(EnemyBullet bullet) {
+        Polygon bulletPolygon = bullet.getHitBox(); // Assuming this is a Polygon already.
+
+        Polygon bodyPolygon = new Polygon(new float[]{
+                bodyHitbox.x, bodyHitbox.y,
+                bodyHitbox.x + bodyHitbox.width, bodyHitbox.y,
+                bodyHitbox.x + bodyHitbox.width, bodyHitbox.y + bodyHitbox.height,
+                bodyHitbox.x, bodyHitbox.y + bodyHitbox.height
+        });
+
+        // Convert the Circle to a Polygon approximation (8-sided for simplicity)
+        int numVertices = 8;
+        float[] circleVertices = new float[2 * numVertices];
+        for (int i = 0; i < numVertices; i++) {
+            double angle = 2 * Math.PI * i / numVertices;
+            circleVertices[2 * i] = (float) (headHitbox.x + headHitbox.radius * Math.cos(angle));
+            circleVertices[2 * i + 1] = (float) (headHitbox.y + headHitbox.radius * Math.sin(angle));
+        }
+        Polygon headPolygon = new Polygon(circleVertices);
+
+        return Intersector.overlapConvexPolygons(bulletPolygon, bodyPolygon) ||
+                Intersector.overlapConvexPolygons(bulletPolygon, headPolygon);
     }
 
     public Integer getLives(){return lives;}

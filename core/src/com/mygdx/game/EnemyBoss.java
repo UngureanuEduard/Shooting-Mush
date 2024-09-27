@@ -1,10 +1,8 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
@@ -43,22 +41,8 @@ public class EnemyBoss extends Enemy{
         stateTime = 0.0f; // Initialize the animation time
         System.out.println(healthScale);
     }
-
     @Override
-    public void render(SpriteBatch batch, OrthographicCamera camera) {
-        TextureRegion currentFrame = getCurrentFrame();
-        float scaledWidth = calculateScaledDimension(getWidth());
-        float scaledHeight = calculateScaledDimension(getHeight());
-
-        drawCurrentFrame(batch, currentFrame, scaledWidth, scaledHeight ,isFlipped);
-        renderDamageTexts(batch, Gdx.graphics.getDeltaTime());
-        batch.end();
-
-        //Debugging
-        drawHitboxes(camera);
-    }
-
-    private void drawHitboxes(OrthographicCamera camera) {
+    protected void drawHitboxes(OrthographicCamera camera) {
         shapeRenderer.setProjectionMatrix(camera.combined);
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -84,8 +68,8 @@ public class EnemyBoss extends Enemy{
 
 
     @Override
-    protected void shootBullet(Array<EnemyBullet> bullets , float SHOOT_INTERVAL) {
-        if(shootTimer >= SHOOT_INTERVAL&&!isBossMoving) {
+    protected void shootBullet(Array<EnemyBullet> bullets) {
+        if(shootTimer >= (float) 1.0 &&!isBossMoving) {
             shootTimer=0;
             float bulletSpeed = 450.0f;
             float angle = MathUtils.random(0, 3);

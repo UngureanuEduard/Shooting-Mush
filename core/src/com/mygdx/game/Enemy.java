@@ -39,6 +39,7 @@ public  class Enemy {
     protected Rectangle bodyHitbox;
     protected Circle headHitbox;
     private final ShapeRenderer shapeRenderer;
+    protected Vector2 direction;
 
 
     public Enemy(Vector2 position, Vector2 playerPosition,float health,Assets assets ,Integer soundVolume,Integer critRate) {
@@ -62,16 +63,19 @@ public  class Enemy {
         this.sound=assets.getAssetManager().get(Assets.duckSound);
         stateTime = 0.0f; // Initialize the animation time
         this.healthScale = 0.7f + health/ 300.0f;
-        System.out.println(healthScale);
     }
 
-    public void update(float deltaTime,Array<EnemyBullet> enemyBullets, Array<CharacterBullet> Characterbullets, boolean isPaused) {
+    public void update(float deltaTime,Array<EnemyBullet> enemyBullets, Array<CharacterBullet> Characterbullets, boolean isPaused,Array<Enemy> enemies) {
         if (!isPaused) {
             // Calculate the direction from the enemy to the player
-            Vector2 direction = playerPosition.cpy().sub(position).nor();
+            direction = playerPosition.cpy().sub(position).nor();
+
             float MOVEMENT_SPEED = 60.0f; // Adjust the speed
 
-            specialBehavior(deltaTime,direction,MOVEMENT_SPEED);
+            boolean isColliding = isCollidingWithEnemy(enemies);
+            if (!isColliding) {
+                specialBehavior(deltaTime, direction, MOVEMENT_SPEED);
+            }
 
             bodyHitbox.set((float) (position.x+getWidth()/3.8*healthScale), position.y+getHeight()/10*healthScale, (float) (getWidth()/2.3)*healthScale, (float) (getHeight()/2.7*healthScale)); // Body hitbox (rectangle)
             headHitbox.set(position.x+getWidth()/2*healthScale, (float) (position.y+getHeight()/1.5*healthScale), getHeight()/5*healthScale); // Head hitbox (circle)
@@ -85,11 +89,42 @@ public  class Enemy {
 
             shootTimer += deltaTime;
 
-            final float SHOOT_INTERVAL = 1.0f;
-
-            shootBullet(enemyBullets,SHOOT_INTERVAL);
+            shootBullet(enemyBullets);
 
         }
+    }
+
+    public boolean isCollidingWithEnemy(Array<Enemy> enemies) {
+        Array<Enemy> enemiesCopy = new Array<>(enemies);
+        for (Enemy otherEnemy : enemiesCopy) {
+            if (otherEnemy != this) {
+                // Check for collision with body hitbox
+                if (Intersector.overlaps(this.bodyHitbox, otherEnemy.bodyHitbox) ||
+                        Intersector.overlaps(this.headHitbox, otherEnemy.headHitbox)) {
+                    resolveCollisionWithEnemy(otherEnemy); // Resolve the collision
+                    return true;
+                }
+            }
+        }
+        return false;
+    }
+
+    private void resolveCollisionWithEnemy(Enemy otherEnemy) {
+        Vector2 collisionVector = new Vector2();
+
+        // Determine the direction to resolve the collision
+        if (Intersector.overlaps(this.bodyHitbox, otherEnemy.bodyHitbox)) {
+            collisionVector.set(otherEnemy.bodyHitbox.x - this.bodyHitbox.x, otherEnemy.bodyHitbox.y - this.bodyHitbox.y);
+        } else {
+            collisionVector.set(otherEnemy.headHitbox.x - this.headHitbox.x, otherEnemy.headHitbox.y - this.headHitbox.y);
+        }
+
+        // Normalize and scale the collision vector
+        collisionVector.nor().scl(0.5f);
+
+        // Adjust positions to prevent overlapping
+        this.position.sub(collisionVector);
+        otherEnemy.position.add(collisionVector);
     }
 
     public void CheckBulletCollisions(Array<CharacterBullet> bullets ){
@@ -117,6 +152,7 @@ public  class Enemy {
         else return false;
     }
 
+
     public void takeDamage(float damage) {
         health -= damage;
         sound.play(soundVolume/100f);
@@ -136,7 +172,7 @@ public  class Enemy {
         drawHitboxes(camera);
     }
 
-    private void drawHitboxes(OrthographicCamera camera) {
+    protected void drawHitboxes(OrthographicCamera camera) {
         shapeRenderer.setProjectionMatrix(camera.combined);
 
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
@@ -171,9 +207,9 @@ public  class Enemy {
         return characterFrames;
     }
 
-    protected void shootBullet(Array<EnemyBullet> enemyBullets,float SHOOT_INTERVAL) {
+    protected void shootBullet(Array<EnemyBullet> enemyBullets) {
 
-        if(shootTimer >= SHOOT_INTERVAL) {
+        if(shootTimer >= (float) 1.0) {
 
             shootTimer=0;
 
@@ -236,7 +272,6 @@ public  class Enemy {
         int randomNumber = random.nextInt(100) + 1;
         return randomNumber <= critRate;
     }
-
 
     //Override for each class with a special behavior
     protected void specialBehavior(float deltaTime,Vector2 direction, float MOVEMENT_SPEED){

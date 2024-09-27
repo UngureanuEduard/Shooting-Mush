@@ -263,7 +263,7 @@ public class GameScene extends ScreenAdapter {
 
 		// Update and render enemies
 		for (Enemy enemy : enemies) {
-			enemy.update(Gdx.graphics.getDeltaTime(),enemyBullets,characterBullets,isPaused);
+			enemy.update(Gdx.graphics.getDeltaTime(),enemyBullets,characterBullets,isPaused,enemies);
 
 			// Check if the enemy died
 			if(enemy.getHealth()<=0)
