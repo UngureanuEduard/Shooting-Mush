@@ -11,7 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
-public class EnemyBoss extends Enemy{
+public class EnemyBoss extends Enemy {
 
     private final Animation<TextureRegion> walkAnimation;
     private final Animation<TextureRegion> idleAnimation;
@@ -21,26 +21,26 @@ public class EnemyBoss extends Enemy{
 
     private final ShapeRenderer shapeRenderer;
 
-
-    public EnemyBoss(Vector2 position, Vector2 playerPosition,float health,Assets assets,Integer soundVolume,Integer critRate) {
-        super(position, playerPosition,health,assets,soundVolume,critRate);
+    public EnemyBoss(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate) {
+        super(position, playerPosition, health, assets, soundVolume, critRate);
 
         bodyHitbox = new Rectangle();
         headHitbox = new Circle();
         shapeRenderer = new ShapeRenderer();
+        sizeScale = 1.7f;
 
         Texture duckTexture;
         Texture duckIdleTexture;
-        duckTexture =assets.getAssetManager().get(Assets.bossTexture);
-        duckIdleTexture=assets.getAssetManager().get(Assets.idleBossTexture);
-        TextureRegion[] duckIdleFrame=splitEnemyTexture(duckIdleTexture,4);
+        duckTexture = assets.getAssetManager().get(Assets.bossTexture);
+        duckIdleTexture = assets.getAssetManager().get(Assets.idleBossTexture);
+        TextureRegion[] duckIdleFrame = splitEnemyTexture(duckIdleTexture, 4);
         idleAnimation = new Animation<>(0.1f, duckIdleFrame);
-        TextureRegion[] duckFrames = splitEnemyTexture(duckTexture,6);
+        TextureRegion[] duckFrames = splitEnemyTexture(duckTexture, 6);
         walkAnimation = new Animation<>(0.1f, duckFrames);
 
         stateTime = 0.0f; // Initialize the animation time
-        System.out.println(healthScale);
     }
+
     @Override
     protected void drawHitboxes(OrthographicCamera camera) {
         shapeRenderer.setProjectionMatrix(camera.combined);
@@ -57,6 +57,7 @@ public class EnemyBoss extends Enemy{
 
         shapeRenderer.end();
     }
+
     @Override
     protected TextureRegion getCurrentFrame() {
         if (isBossMoving) {
@@ -66,12 +67,11 @@ public class EnemyBoss extends Enemy{
         }
     }
 
-
     @Override
     protected void shootBullet(Array<EnemyBullet> bullets) {
-        if(shootTimer >= (float) 1.0 &&!isBossMoving) {
-            shootTimer=0;
-            float bulletSpeed = 450.0f;
+        if (shootTimer >= 1.0f && !isBossMoving) {
+            shootTimer = 0;
+            float bulletSpeed = 150.0f;
             float angle = MathUtils.random(0, 3);
 
             for (; angle < 360; angle += 15) {
@@ -83,8 +83,7 @@ public class EnemyBoss extends Enemy{
     }
 
     @Override
-    protected void specialBehavior(float deltaTime,Vector2 direction, float movementSpeed){
-
+    protected void specialBehavior(float deltaTime, Vector2 direction, float movementSpeed) {
         if (isBossMoving) {
             bossMovementTimer += deltaTime;
             if (bossMovementTimer >= 3.0f) {
@@ -92,15 +91,12 @@ public class EnemyBoss extends Enemy{
                 bossMovementTimer = 0.0f;
             }
             position.add(direction.x * movementSpeed * deltaTime, direction.y * movementSpeed * deltaTime);
-        } else{
+        } else {
             bossMovementTimer += deltaTime;
             if (bossMovementTimer >= 11.0f) {
                 isBossMoving = true;
                 bossMovementTimer = 0.0f;
             }
         }
-
     }
-
-
 }

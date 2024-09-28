@@ -34,7 +34,7 @@ public class Character {
     private int lostLives=0;
     private final Texture heartTexture;
     private final Texture emptyHeartTexture;
-    private float timeSinceLastLifeLost = 4.0f;
+    private float timeSinceLastLifeLost = 5.0f;
     private final Rectangle bodyHitbox;
     private final Circle headHitbox;
     private final ShapeRenderer shapeRenderer;
@@ -164,14 +164,14 @@ public class Character {
         // If the character is not invincible, show the animation as usual
         if (!isInvincible()) {
             currentFrame=getCurrentFrame();
-            batch.draw(currentFrame, position.x, position.y);
+            batch.draw(currentFrame, position.x, position.y,getWidth(),getHeight());
         } else {
             // If the character is invincible, make it flash by showing/hiding every 0.5 seconds
             float flashTime = 0.3f;
             if ((int) (timeSinceLastLifeLost / flashTime) % 2 == 0) {
                 // Only draw the character when the time divided by flashTime
                 currentFrame=getCurrentFrame();
-                batch.draw(currentFrame, position.x, position.y);
+                batch.draw(currentFrame, position.x, position.y,getWidth(),getHeight());
             }
         }
 
@@ -239,11 +239,11 @@ public class Character {
     }
 
     public float getWidth() {
-        return 48;
+        return 24;
     }
 
     public float getHeight() {
-        return 48;
+        return 24;
     }
 
     private TextureRegion[] splitCharacterTexture(Texture characterTexture, int n) {
@@ -304,10 +304,10 @@ public class Character {
         for (int i = 0; i < lives+lostLives; i++) {
             float heartContainerX = heartX + i * 40 *camera.zoom;
             if (i <lives) {
-                batch.draw(heartTexture, heartContainerX, heartY);
-                batch.draw(emptyHeartTexture, heartContainerX, heartY);
+                batch.draw(heartTexture, heartContainerX, heartY, (float) heartTexture.getWidth() /2, (float) heartTexture.getHeight() /2);
+                batch.draw(emptyHeartTexture, heartContainerX, heartY, (float) emptyHeartTexture.getWidth() /2, (float) emptyHeartTexture.getHeight() /2);
             } else {
-                batch.draw(emptyHeartTexture, heartContainerX, heartY);
+                batch.draw(emptyHeartTexture, heartContainerX, heartY, (float) emptyHeartTexture.getWidth() /2, (float) emptyHeartTexture.getHeight() /2);
             }
         }
     }

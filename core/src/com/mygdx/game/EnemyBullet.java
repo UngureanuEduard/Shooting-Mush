@@ -11,31 +11,34 @@ import com.badlogic.gdx.math.Vector2;
 
 public class EnemyBullet extends Bullet{
 
-    private final Polygon hitBox;
     private final ShapeRenderer shapeRenderer;
-
-    float[] vertices = {
-            0, 0, // bottom-left corner
-            20, 0, // bottom-right corner
-            10, 20  // top-center point
-    };
-
+    private final float width;
+    private final float height;
+    private final Polygon hitBox;
     public EnemyBullet(Vector2 position, Vector2 velocity, float damage, Assets assets, Integer soundVolume) {
         super(position, velocity, damage, assets);
         Texture bulletCornTexture = this.assets.getAssetManager().get(Assets.candyCornTexture);
+        width= (float) ((float) 216*0.04);
+        height= (float) ((float) 297*0.04);
         Sound soundEnemy = assets.getAssetManager().get(Assets.duckShootSound);
         texture = new TextureRegion(bulletCornTexture);
-        soundEnemy.play(soundVolume/100f);
-        hitBox=new Polygon(vertices);
-        hitBox.setOrigin(10,10);
+        soundEnemy.play(soundVolume / 100f);
         shapeRenderer = new ShapeRenderer();
-        hitBox.setRotation(angle);
 
+        // Define the isosceles triangle hitbox
+        float[] vertices = {
+                width / 2, height,
+                0, 0,
+                width, 0
+        };
+
+        hitBox = new Polygon(vertices);
+        hitBox.setOrigin(width / 2, height / 2);
     }
     public void update(float deltaTime){
         updatePosition(deltaTime);
+        hitBox.setPosition(position.x, position.y);
         hitBox.setRotation(angle);
-        hitBox.setPosition((float) (position.x+getWidth()/4.3), (float) (position.y+getWidth()/4.1));
     }
 
     public void render(SpriteBatch batch, OrthographicCamera camera){
@@ -44,15 +47,35 @@ public class EnemyBullet extends Bullet{
         drawHitboxes(camera);
         batch.begin();
     }
+
+    private void renderTexture(SpriteBatch batch) {
+        angle = (float) Math.atan2(velocity.y, velocity.x);
+        angle = (float) Math.toDegrees(angle) - 90;
+
+        if (angle < 0) {
+            angle += 360;
+        }
+        batch.draw(texture, position.x, position.y, getWidth() / 2, getHeight() / 2,
+                getWidth(), getHeight(), 1, 1, angle);
+
+    }
+
     private void drawHitboxes(OrthographicCamera camera) {
         shapeRenderer.setProjectionMatrix(camera.combined);
-
         shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-        // Draw the circle hitbox (head)
-        shapeRenderer.setColor(0, 1, 0, 1); // Green color for the circle
+        shapeRenderer.setColor(0, 1, 0, 1);
         shapeRenderer.polygon(hitBox.getTransformedVertices());
         shapeRenderer.end();
     }
+
+    private float getWidth() {
+        return width;
+    }
+
+    private float getHeight() {
+        return  height;
+    }
+
 
     public Polygon getHitBox(){return hitBox;}
 }

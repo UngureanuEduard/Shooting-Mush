@@ -25,9 +25,13 @@ public class CharacterBullet extends Bullet{
     }
 
     public void update(float deltaTime){
-
         updatePosition(deltaTime);
-        hitBox.set(getPosition().x+getWidth()/2,getPosition().y+getHeight()/2, (float) (getWidth()/2.8));
+
+        float centerX = position.x + getWidth() / 2;
+        float centerY = position.y + getHeight() / 2;
+
+        // Set hitbox center to be in the middle of the texture
+        hitBox.set(centerX, centerY, getWidth() / 4); // Adjust radius as needed
     }
 
     public void render(SpriteBatch batch, OrthographicCamera camera){
@@ -36,6 +40,24 @@ public class CharacterBullet extends Bullet{
         drawHitboxes(camera);
         batch.begin();
     }
+
+
+    private void renderTexture(SpriteBatch batch) {
+        angle = (float) Math.atan2(velocity.y, velocity.x);
+        angle = (float) Math.toDegrees(angle) - 90;
+
+        if (angle < 0) {
+            angle += 360;
+        }
+
+        batch.draw(texture,
+                position.x, position.y,        // x, y position of the bottom-left corner
+                getWidth() / 2, getHeight() / 2, // originX, originY (center for rotation)
+                getWidth(), getHeight(),        // width and height of the drawn region
+                (float) (damageScale-0.3), (float) (damageScale-0.3),       // scaleX and scaleY
+                angle);                         // rotation angle
+    }
+
     private void drawHitboxes(OrthographicCamera camera) {
         shapeRenderer.setProjectionMatrix(camera.combined);
 
@@ -46,8 +68,14 @@ public class CharacterBullet extends Bullet{
 
         shapeRenderer.end();
     }
+    private float getWidth() {
+        return (float) (35 *damageScale*0.8);
+    }
+
+    private float getHeight() {
+        return (float) (35 *damageScale*0.8);
+    }
 
     public Circle getHitBox(){return hitBox;}
-
 
 }
