@@ -1,33 +1,32 @@
 package com.mygdx.game;
 
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
-import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 
 public class EnemyBoss extends Enemy {
 
+    private static final float BOSS_MOVEMENT_DURATION = 3.0f;
+    private static final float BOSS_IDLE_DURATION = 11.0f;
+    private static final float BULLET_SPEED = 150.0f;
+    private static final float BULLET_COOLDOWN = 1.0f;
+    private static final float SCALE =  1.7f;
+    private static final float FIRE_ANGLE_STEP = 15.0f;
+
     private final Animation<TextureRegion> walkAnimation;
     private final Animation<TextureRegion> idleAnimation;
-
     private float bossMovementTimer = 0.0f;
     private boolean isBossMoving = true;
-
-    private final ShapeRenderer shapeRenderer;
 
     public EnemyBoss(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate) {
         super(position, playerPosition, health, assets, soundVolume, critRate);
 
-        bodyHitbox = new Rectangle();
-        headHitbox = new Circle();
         shapeRenderer = new ShapeRenderer();
-        sizeScale = 1.7f;
+        sizeScale = SCALE;
 
         Texture duckTexture;
         Texture duckIdleTexture;
@@ -37,63 +36,40 @@ public class EnemyBoss extends Enemy {
         idleAnimation = new Animation<>(0.1f, duckIdleFrame);
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture, 6);
         walkAnimation = new Animation<>(0.1f, duckFrames);
-
-        stateTime = 0.0f; // Initialize the animation time
-    }
-
-    @Override
-    protected void drawHitboxes(OrthographicCamera camera) {
-        shapeRenderer.setProjectionMatrix(camera.combined);
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        // Draw the rectangle hitbox (body)
-        shapeRenderer.setColor(1, 0, 0, 1); // Red color for the rectangle
-        shapeRenderer.rect(bodyHitbox.x, bodyHitbox.y, bodyHitbox.width, bodyHitbox.height);
-
-        // Draw the circle hitbox (head)
-        shapeRenderer.setColor(0, 1, 0, 1); // Green color for the circle
-        shapeRenderer.circle(headHitbox.x, headHitbox.y, headHitbox.radius);
-
-        shapeRenderer.end();
     }
 
     @Override
     protected TextureRegion getCurrentFrame() {
-        if (isBossMoving) {
-            return walkAnimation.getKeyFrame(stateTime, true);
-        } else {
-            return idleAnimation.getKeyFrame(stateTime, true);
-        }
+        return isBossMoving ? walkAnimation.getKeyFrame(stateTime, true) : idleAnimation.getKeyFrame(stateTime, true);
     }
 
     @Override
     protected void shootBullet(Array<EnemyBullet> bullets) {
-        if (shootTimer >= 1.0f && !isBossMoving) {
+        if (shootTimer >= BULLET_COOLDOWN && !isBossMoving) {
             shootTimer = 0;
-            float bulletSpeed = 150.0f;
-            float angle = MathUtils.random(0, 3);
 
-            for (; angle < 360; angle += 15) {
-                Vector2 direction = new Vector2(MathUtils.cosDeg(angle), MathUtils.sinDeg(angle));
-                EnemyBullet bullet = new EnemyBullet(new Vector2(position.x + getWidth(), position.y), direction.cpy().scl(bulletSpeed), 1, assets, soundVolume);
+            Vector2 bulletPosition = new Vector2(bodyHitbox.x + bodyHitbox.width / 2, bodyHitbox.y + bodyHitbox.height / 2);
+
+            for (float angle = 0; angle < 360; angle += FIRE_ANGLE_STEP) {
+                Vector2 direction = new Vector2(MathUtils.cosDeg(angle), MathUtils.sinDeg(angle)).scl(BULLET_SPEED);
+                EnemyBullet bullet = new EnemyBullet(bulletPosition.cpy(), direction, 1, assets, soundVolume);
                 bullets.add(bullet);
             }
         }
     }
 
     @Override
-    protected void specialBehavior(float deltaTime, Vector2 direction, float movementSpeed) {
+    protected void specialBehavior(float deltaTime, Vector2 direction) {
+        bossMovementTimer += deltaTime;
+
         if (isBossMoving) {
-            bossMovementTimer += deltaTime;
-            if (bossMovementTimer >= 3.0f) {
+            if (bossMovementTimer >= BOSS_MOVEMENT_DURATION) {
                 isBossMoving = false;
                 bossMovementTimer = 0.0f;
             }
-            position.add(direction.x * movementSpeed * deltaTime, direction.y * movementSpeed * deltaTime);
+            position.add(direction.x * MOVEMENT_SPEED * deltaTime, direction.y * MOVEMENT_SPEED * deltaTime);
         } else {
-            bossMovementTimer += deltaTime;
-            if (bossMovementTimer >= 11.0f) {
+            if (bossMovementTimer >= BOSS_IDLE_DURATION) {
                 isBossMoving = true;
                 bossMovementTimer = 0.0f;
             }

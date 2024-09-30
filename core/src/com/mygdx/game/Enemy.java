@@ -19,6 +19,11 @@ import java.util.Random;
 
 public class Enemy {
 
+    protected static final float MOVEMENT_SPEED = 40.0f;
+    private static final float BULLET_COOLDOWN = 5.0f;
+    private static final float SCALE = 0.8f;
+    private static final Random RANDOM = new Random();
+
     protected final Vector2 position;
     protected final Vector2 playerPosition;
     protected Animation<TextureRegion> walkAnimation;
@@ -39,7 +44,7 @@ public class Enemy {
 
     protected Rectangle bodyHitbox;
     protected Circle headHitbox;
-    private final ShapeRenderer shapeRenderer;
+    protected ShapeRenderer shapeRenderer;
     protected Vector2 direction;
 
     public Enemy(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate) {
@@ -50,7 +55,7 @@ public class Enemy {
         this.soundVolume = soundVolume;
         this.critRate = critRate;
 
-        sizeScale = 0.8f;
+        sizeScale = SCALE;
 
         bodyHitbox = new Rectangle();
         headHitbox = new Circle();
@@ -70,15 +75,13 @@ public class Enemy {
             // Calculate the direction from the enemy to the player
             direction = playerPosition.cpy().sub(position).nor();
 
-            float MOVEMENT_SPEED = 60.0f; // Adjust the speed
-
             boolean isColliding = isCollidingWithEnemy(enemies);
             if (!isColliding) {
-                specialBehavior(deltaTime, direction, MOVEMENT_SPEED);
+                specialBehavior(deltaTime, direction);
             }
 
-            bodyHitbox.set((float) (position.x + getWidth() / 3.8 * sizeScale), position.y + getHeight() / 10 * sizeScale, (float) (getWidth() / 2.3) * sizeScale, (float) (getHeight() / 2.7 * sizeScale)); // Body hitbox (rectangle)
-            headHitbox.set(position.x + getWidth() / 2 * sizeScale, (float) (position.y + getHeight() / 1.5 * sizeScale), getHeight() / 5 * sizeScale); // Head hitbox (circle)
+            updateHitboxes();
+
             // Update animation stateTime
             stateTime += deltaTime;
             // Determine if the enemy should be flipped
@@ -88,9 +91,13 @@ public class Enemy {
             CheckBulletCollisions(Characterbullets);
 
             shootTimer += deltaTime;
-
             shootBullet(enemyBullets);
         }
+    }
+
+    private void updateHitboxes() {
+        bodyHitbox.set(position.x + getWidth() / 3.8f * sizeScale, position.y + getHeight() / 10.0f * sizeScale, getWidth() / 2.3f * sizeScale, getHeight() / 2.7f * sizeScale);
+        headHitbox.set(position.x + getWidth() / 2.0f * sizeScale, position.y + getHeight() / 1.5f * sizeScale, getHeight() / 5.0f * sizeScale);
     }
 
     public boolean isCollidingWithEnemy(Array<Enemy> enemies) {
@@ -162,8 +169,7 @@ public class Enemy {
 
         batch.end();
 
-        // Debugging
-        drawHitboxes(camera);
+        drawHitboxes(camera);  // Debugging
     }
 
     protected void drawHitboxes(OrthographicCamera camera) {
@@ -202,16 +208,10 @@ public class Enemy {
     }
 
     protected void shootBullet(Array<EnemyBullet> enemyBullets) {
-        if (shootTimer >= 5.0f) {
+        if (shootTimer >= BULLET_COOLDOWN) {
             shootTimer = 0;
-
-            // Calculate the direction from the enemy to the player
             Vector2 direction = playerPosition.cpy().sub(position).nor();
-
-            // Create a new Bullet and set the damage
             EnemyBullet bullet = new EnemyBullet(position.cpy(), direction.cpy().scl(200), 1, assets, soundVolume);
-
-            // Add bullet to array
             enemyBullets.add(bullet);
         }
     }
@@ -243,7 +243,7 @@ public class Enemy {
             damageText.update(deltaTime);
             float newY = damageText.getPosition().y + 20 * deltaTime;
             damageText.getPosition().set(damageText.getPosition().x, newY);
-            float textScale = 0.5f; // Adjust this value as needed to change the size
+            float textScale = 0.5f; // Adjust this value to change the size
             defaultFont.getData().setScale(textScale, textScale);
 
             if (!damageText.getIsCrit()) {
@@ -263,13 +263,12 @@ public class Enemy {
     }
 
     public Boolean isCrit() {
-        Random random = new Random();
-        int randomNumber = random.nextInt(100) + 1;
+        int randomNumber = RANDOM.nextInt(100) + 1;
         return randomNumber <= critRate;
     }
 
     // Override for each class with a special behavior
-    protected void specialBehavior(float deltaTime, Vector2 direction, float MOVEMENT_SPEED) {
-        position.add(direction.x * MOVEMENT_SPEED * deltaTime, direction.y * MOVEMENT_SPEED * deltaTime);
+    protected void specialBehavior(float deltaTime, Vector2 direction) {
+        position.add(direction.x * Enemy.MOVEMENT_SPEED * deltaTime, direction.y * Enemy.MOVEMENT_SPEED * deltaTime);
     }
 }

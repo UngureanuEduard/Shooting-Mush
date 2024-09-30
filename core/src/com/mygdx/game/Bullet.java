@@ -5,6 +5,10 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 
 public class Bullet {
+    private static final float MAX_LIFETIME = 3.5f;
+    private static final float DAMAGE_SCALE_BASE = 0.8f;
+    private static final float DAMAGE_SCALE_FACTOR = 200.0f;
+
     protected Vector2 position;
     protected final Vector2 velocity;
     protected TextureRegion texture;
@@ -19,7 +23,7 @@ public class Bullet {
 
         this.assets=assets;
         this.damage=damage;
-        this.damageScale = 0.8f + damage / 200.0f;
+        this.damageScale = DAMAGE_SCALE_BASE + damage / DAMAGE_SCALE_FACTOR;
         this.position = position;
         this.velocity = velocity;
     }
@@ -34,8 +38,17 @@ public class Bullet {
         lifeTimer += deltaTime;
 
         // Check if lifeTimer exceeds 3.5 seconds
-        if (lifeTimer >= 3.5f) {
+        if (lifeTimer >= MAX_LIFETIME) {
             isActive = false;
+        }
+    }
+
+    protected void updateAngle() {
+        angle = (float) Math.atan2(velocity.y, velocity.x);
+        angle = (float) Math.toDegrees(angle) - 90;
+
+        if (angle < 0) {
+            angle += 360;
         }
     }
 

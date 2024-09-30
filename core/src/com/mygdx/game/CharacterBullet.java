@@ -11,6 +11,8 @@ import com.badlogic.gdx.math.Vector2;
 
 public class CharacterBullet extends Bullet{
 
+    private static final float BULLET_SIZE = 35f;
+    private static final float HITBOX_RADIUS_SCALE = 0.25f;
     private final Circle hitBox;
     private final ShapeRenderer shapeRenderer;
 
@@ -26,12 +28,13 @@ public class CharacterBullet extends Bullet{
 
     public void update(float deltaTime){
         updatePosition(deltaTime);
+        updateAngle();
 
         float centerX = position.x + getWidth() / 2;
         float centerY = position.y + getHeight() / 2;
 
         // Set hitbox center to be in the middle of the texture
-        hitBox.set(centerX, centerY, getWidth() / 4); // Adjust radius as needed
+        hitBox.set(centerX, centerY, getWidth() *HITBOX_RADIUS_SCALE); // Adjust radius as needed
     }
 
     public void render(SpriteBatch batch, OrthographicCamera camera){
@@ -43,13 +46,6 @@ public class CharacterBullet extends Bullet{
 
 
     private void renderTexture(SpriteBatch batch) {
-        angle = (float) Math.atan2(velocity.y, velocity.x);
-        angle = (float) Math.toDegrees(angle) - 90;
-
-        if (angle < 0) {
-            angle += 360;
-        }
-
         batch.draw(texture,
                 position.x, position.y,        // x, y position of the bottom-left corner
                 getWidth() / 2, getHeight() / 2, // originX, originY (center for rotation)
@@ -69,11 +65,11 @@ public class CharacterBullet extends Bullet{
         shapeRenderer.end();
     }
     private float getWidth() {
-        return (float) (35 *damageScale*0.8);
+        return BULLET_SIZE * damageScale * 0.8f;
     }
 
     private float getHeight() {
-        return (float) (35 *damageScale*0.8);
+        return BULLET_SIZE * damageScale * 0.8f;
     }
 
     public Circle getHitBox(){return hitBox;}
