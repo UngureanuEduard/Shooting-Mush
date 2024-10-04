@@ -19,7 +19,7 @@ import java.util.Random;
 
 public class Enemy {
 
-    protected static final float MOVEMENT_SPEED = 40.0f;
+    public static final float MOVEMENT_SPEED = 40.0f;
     private static final float BULLET_COOLDOWN = 5.0f;
     private static final float SCALE = 0.8f;
     private static final Random RANDOM = new Random();
@@ -270,5 +270,9 @@ public class Enemy {
     // Override for each class with a special behavior
     protected void specialBehavior(float deltaTime, Vector2 direction) {
         position.add(direction.x * Enemy.MOVEMENT_SPEED * deltaTime, direction.y * Enemy.MOVEMENT_SPEED * deltaTime);
+    }
+
+    public float getSpeed() {
+        return MOVEMENT_SPEED;
     }
 }

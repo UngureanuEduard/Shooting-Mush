@@ -98,12 +98,12 @@ public class Character {
 
             if (moveUp) {
                 potentialY += SPEED * deltaTime;
-                buffedpotentialY = potentialY + 10;
+                buffedpotentialY = potentialY + 5;
                 isWalking = "up";
             }
             if (moveDown) {
                 potentialY -= SPEED * deltaTime;
-                buffedpotentialY = potentialY - 4;
+                buffedpotentialY = potentialY;
                 isWalking = "down";
             }
             if (moveLeft) {
@@ -112,7 +112,7 @@ public class Character {
                     flipAnimations();
                     isFlipped = true;
                 }
-                buffedpotentialX = potentialX - 4;
+                buffedpotentialX = potentialX;
                 isWalking = "left";
             }
             if (moveRight) {
@@ -121,17 +121,16 @@ public class Character {
                     flipAnimations();
                     isFlipped = false;
                 }
-                buffedpotentialX = potentialX + 15;
+                buffedpotentialX = potentialX + 5;
                 isWalking = "right";
             }
 
             // Check if the potential new position collides with blocked tiles
             if (isTileBlocked(buffedpotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedpotentialY, tiledMap)) {
                 position.set(potentialX, potentialY);
-                bodyHitbox.set(potentialX+getWidth()*29/100, potentialY+getHeight()*10/100, (float) (getWidth()*41.66/100), (float) (getHeight()*31.25/100)); // Body hitbox (rectangle)
-                headHitbox.set(potentialX+getWidth()/2, (float) (potentialY+getHeight()/1.7), (float) (getWidth() / 3.1)); // Head hitbox (circle)
+                bodyHitbox.set(potentialX + getWidth() * 29 / 100, potentialY + getHeight() * 10 / 100, (float) (getWidth() * 41.66 / 100), (float) (getHeight() * 31.25 / 100)); // Body hitbox (rectangle)
+                headHitbox.set(potentialX + getWidth() / 2, (float) (potentialY + getHeight() / 1.7), (float) (getWidth() / 3.1)); // Head hitbox (circle)
             }
-
 
             // Update animation stateTime
             stateTime += deltaTime;
@@ -313,7 +312,7 @@ public class Character {
     }
     private boolean isTileBlocked(float x, float y, TiledMap tiledMap) {
         // Get the collision layer from the TiledMap
-        TiledMapTileLayer collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Tile Layer 3");
+        TiledMapTileLayer collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Block");
 
         // Calculate the tile indices for the given position
         int tileX = (int) (x / 15.9);

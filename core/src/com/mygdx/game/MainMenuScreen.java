@@ -72,7 +72,14 @@ public class MainMenuScreen extends ScreenAdapter {
         addButton("Play").addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScene(game,musicVolume,soundVolume));
+                game.setScreen(new VideoScreen(game));
+            }
+
+        });
+        addButton("Arena").addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new GameScene(game,musicVolume,soundVolume,GameScene.GameMode.ARENA));
             }
 
         });
