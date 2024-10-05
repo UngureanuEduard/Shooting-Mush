@@ -272,7 +272,4 @@ public class Enemy {
         position.add(direction.x * Enemy.MOVEMENT_SPEED * deltaTime, direction.y * Enemy.MOVEMENT_SPEED * deltaTime);
     }
 
-    public float getSpeed() {
-        return MOVEMENT_SPEED;
-    }
 }

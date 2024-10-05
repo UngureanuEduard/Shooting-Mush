@@ -29,14 +29,14 @@ public class MainMenuScreen extends ScreenAdapter {
 
     private final SpriteBatch batch;
     private float screenWidth;
-    boolean isFlipped = false;
+    private boolean isFlipped = false;
     private boolean moveRight = true;
     private Music backgroundMusic;
     float moveSpeed = 50;
     private OptionsTable optionsTable;
     private Image backgroundImage;
-    int musicVolume=100;
-    int soundVolume=100;
+    private int musicVolume=100;
+    private int soundVolume=100;
     public MainMenuScreen(MyGdxGame game) {
         this.game = game;
         batch = new SpriteBatch();
@@ -72,7 +72,7 @@ public class MainMenuScreen extends ScreenAdapter {
         addButton("Play").addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new VideoScreen(game));
+                game.setScreen(new VideoScreen(game , musicVolume , soundVolume));
             }
 
         });
