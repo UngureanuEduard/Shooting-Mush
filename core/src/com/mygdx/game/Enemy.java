@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.ai.EnemyArenaBehaviorTree;
 
 import java.util.Random;
 
@@ -26,19 +27,22 @@ public class Enemy {
 
     protected final Vector2 position;
     protected final Vector2 playerPosition;
+    protected Texture duckTexture;
+    protected Texture idleTexture;
     protected Animation<TextureRegion> walkAnimation;
+    protected Animation<TextureRegion> idleAnimation;
 
     protected float stateTime;
     protected boolean isFlipped = false;
     protected float health;
     protected float sizeScale;
-    protected final Sound sound;
+    protected Sound sound;
     protected float shootTimer = 0.0f;
 
     protected final Integer soundVolume;
     Array<DamageText> damageTexts = new Array<>();
     protected Assets assets;
-    protected final BitmapFont defaultFont;
+    protected BitmapFont defaultFont;
 
     protected final Integer critRate;
 
@@ -46,6 +50,18 @@ public class Enemy {
     protected Circle headHitbox;
     protected ShapeRenderer shapeRenderer;
     protected Vector2 direction;
+
+    private EnemyArenaBehaviorTree behaviorTree;
+
+    private Array<EnemyBullet> enemyBullets;
+
+    public enum BehaviorStatus {
+        MOVING,
+        IDLE
+    }
+
+    protected BehaviorStatus behaviorStatus;
+
 
     public Enemy(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate) {
         this.assets = assets;
@@ -55,29 +71,40 @@ public class Enemy {
         this.soundVolume = soundVolume;
         this.critRate = critRate;
 
-        sizeScale = SCALE;
+        init();
 
+    }
+
+    protected void init(){
+        sizeScale = SCALE;
         bodyHitbox = new Rectangle();
         headHitbox = new Circle();
         shapeRenderer = new ShapeRenderer();
         defaultFont = new BitmapFont();
-        Texture duckTexture;
-        duckTexture = assets.getAssetManager().get(Assets.duckTexture);
-
+        loadEnemyTextures();
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture, 6);
+        TextureRegion[] duckIdleFrames = splitEnemyTexture(idleTexture, 4);
         walkAnimation = new Animation<>(0.1f, duckFrames);
+        idleAnimation = new Animation<>(0.1f, duckIdleFrames);
         this.sound = assets.getAssetManager().get(Assets.duckSound);
         stateTime = 0.0f; // Initialize the animation time
+        behaviorTree = new EnemyArenaBehaviorTree(this);
     }
 
-    public void update(float deltaTime, Array<EnemyBullet> enemyBullets, Array<CharacterBullet> Characterbullets, boolean isPaused, Array<Enemy> enemies) {
+    protected void loadEnemyTextures(){
+        duckTexture = assets.getAssetManager().get(Assets.duckTexture);
+        idleTexture = assets.getAssetManager().get(Assets.idleEnemyTexture);
+    }
+
+    public void update(float deltaTime, Array<EnemyBullet> enemyBullets, Array<CharacterBullet> characterBullets, boolean isPaused, Array<Enemy> enemies) {
         if (!isPaused) {
+            this.enemyBullets=enemyBullets;
             // Calculate the direction from the enemy to the player
             direction = playerPosition.cpy().sub(position).nor();
-
             boolean isColliding = isCollidingWithEnemy(enemies);
+
             if (!isColliding) {
-                specialBehavior(deltaTime, direction);
+                behaviorTree.update();
             }
 
             updateHitboxes();
@@ -88,10 +115,10 @@ public class Enemy {
             isFlipped = direction.x < 0;
 
             // Check for bullet collisions
-            CheckBulletCollisions(Characterbullets);
+            CheckBulletCollisions(characterBullets);
 
             shootTimer += deltaTime;
-            shootBullet(enemyBullets);
+
         }
     }
 
@@ -189,7 +216,9 @@ public class Enemy {
     }
 
     protected TextureRegion getCurrentFrame() {
-        return walkAnimation.getKeyFrame(stateTime, true);
+        if(behaviorStatus == BehaviorStatus.IDLE)
+        return idleAnimation.getKeyFrame(stateTime, true);
+            else return walkAnimation.getKeyFrame(stateTime, true);
     }
 
     protected float calculateScaledDimension(float dimension) {
@@ -207,7 +236,7 @@ public class Enemy {
         return characterFrames;
     }
 
-    protected void shootBullet(Array<EnemyBullet> enemyBullets) {
+    public void shootBullet(Array<EnemyBullet> enemyBullets) {
         if (shootTimer >= BULLET_COOLDOWN) {
             shootTimer = 0;
             Vector2 direction = playerPosition.cpy().sub(position).nor();
@@ -234,6 +263,14 @@ public class Enemy {
 
     public float getHealth() {
         return health;
+    }
+
+    public Vector2 getPlayerPosition() {
+        return playerPosition;
+    }
+
+    public Array<EnemyBullet> getEnemyBullet(){
+        return enemyBullets;
     }
 
     public void renderDamageTexts(SpriteBatch batch, float deltaTime) {
@@ -267,9 +304,8 @@ public class Enemy {
         return randomNumber <= critRate;
     }
 
-    // Override for each class with a special behavior
-    protected void specialBehavior(float deltaTime, Vector2 direction) {
-        position.add(direction.x * Enemy.MOVEMENT_SPEED * deltaTime, direction.y * Enemy.MOVEMENT_SPEED * deltaTime);
+    public void setBehaviorStatus(BehaviorStatus behaviorStatus) {
+        this.behaviorStatus = behaviorStatus;
     }
 
 }

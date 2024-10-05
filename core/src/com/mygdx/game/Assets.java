@@ -42,6 +42,7 @@ public class Assets {
     public static final AssetDescriptor<Sound> duckShootSound = new AssetDescriptor<>("mp3/duckShoot.mp3",Sound.class);
     public static final AssetDescriptor<Texture> bossTexture = new AssetDescriptor<>("Environment/boss.png", Texture.class);
     public static final AssetDescriptor<Texture> idleBossTexture = new AssetDescriptor<>("Environment/IdleDuckBoss.png", Texture.class);
+    public static final AssetDescriptor<Texture> idleEnemyTexture = new AssetDescriptor<>("Environment/IdleEnemy.png", Texture.class);
 
     public static final AssetDescriptor<Texture> BorderHealthTexture = new AssetDescriptor<>("Environment/BorderHealth.png", Texture.class);
     public static final AssetDescriptor<Texture> HealthTexture = new AssetDescriptor<>("Environment/Texture.png", Texture.class);
@@ -76,6 +77,7 @@ public class Assets {
         assetManager.load(bossTexture);
         assetManager.load(duckShootSound);
         assetManager.load(idleBossTexture);
+        assetManager.load(idleEnemyTexture);
         assetManager.load(BorderHealthTexture);
         assetManager.load(HealthTexture);
         assetManager.load(bossMusic);

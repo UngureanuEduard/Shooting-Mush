@@ -146,7 +146,7 @@
             characterBullets = new Array<>();
             enemies = new Array<>();
             waves = new Array<>();
-            waves.add(new Wave(1, 0, 2, 0.5f, 90, damage));
+            waves.add(new Wave(1, 0, 1, 0.5f, 90, damage));
             waves.add(new Wave(2, 1, 0, 0.4f, 500, damage));
             particleEffects = new Array<>();
             imageActor.setPosition((float) Gdx.graphics.getWidth() / 2 - imageActor.getWidth(), (float) (Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 10) + imageActor.getHeight() / 3);
