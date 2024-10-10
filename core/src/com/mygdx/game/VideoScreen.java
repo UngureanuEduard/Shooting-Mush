@@ -46,7 +46,9 @@ public class VideoScreen implements Screen {
             videoPlayer.play(Gdx.files.local("assets/intro.webm"));
             audio.play(musicVolume / 100f);
         } catch (FileNotFoundException e) {
-            Gdx.app.error("gdx-video", "Oh no!");
+            Gdx.app.error("gdx-video", "Video file not found!", e);
+        } catch (Exception e) {
+            Gdx.app.error("gdx-video", "An error occurred while playing the video.", e);
         }
     }
 
@@ -105,13 +107,13 @@ public class VideoScreen implements Screen {
 
     @Override
     public void hide() {
-        batch.dispose();
-        videoPlayer.dispose();
-        audio.dispose();
-        font.dispose();
     }
 
     @Override
     public void dispose() {
+        batch.dispose();
+        videoPlayer.dispose();
+        audio.dispose();
+        font.dispose();
     }
 }

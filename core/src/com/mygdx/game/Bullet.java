@@ -3,29 +3,35 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Pool;
 
-public class Bullet {
-    private static final float MAX_LIFETIME = 3.5f;
-    private static final float DAMAGE_SCALE_BASE = 0.8f;
-    private static final float DAMAGE_SCALE_FACTOR = 200.0f;
+public class Bullet implements Pool.Poolable {
+    protected static final float MAX_LIFETIME = 3.5f;
+    protected static final float DAMAGE_SCALE_BASE = 0.8f;
+    protected static final float DAMAGE_SCALE_FACTOR = 200.0f;
 
     protected Vector2 position;
-    protected final Vector2 velocity;
+    protected Vector2 velocity;
     protected TextureRegion texture;
     protected float damage;
-    protected boolean isActive = true;
     protected float damageScale;
-    protected float lifeTimer = 0.0f; // Tracks the lifetime of a bullet
+    protected float lifeTimer; // Tracks the lifetime of a bullet
     protected float angle;
     Assets assets;
 
-    public Bullet(Vector2 position, Vector2 velocity, float damage, Assets assets ) {
+    protected boolean alive;
 
-        this.assets=assets;
-        this.damage=damage;
-        this.damageScale = DAMAGE_SCALE_BASE + damage / DAMAGE_SCALE_FACTOR;
-        this.position = position;
-        this.velocity = velocity;
+    public Bullet(){
+        this.alive=false;
+        this.position=new Vector2();
+        this.lifeTimer= 0.0f;
+    }
+
+    @Override
+    public void reset() {
+        position.set(-1,-1);
+        this.alive = false;
+        this.lifeTimer=0.0f;
     }
 
     protected void updatePosition(float deltaTime) {
@@ -39,7 +45,7 @@ public class Bullet {
 
         // Check if lifeTimer exceeds 3.5 seconds
         if (lifeTimer >= MAX_LIFETIME) {
-            isActive = false;
+            this.alive = false;
         }
     }
 
@@ -60,12 +66,10 @@ public class Bullet {
         return damage;
     }
 
-    public boolean isActive() {
-        return !isActive;
-    }
+    public boolean getAlive_n(){return !this.alive;}
 
-    public void setActive(boolean active) {
-        isActive = active;
+    public void setAlive(boolean setAlive) {
+        this.alive = setAlive;
     }
 
     public Vector2 getPosition() {

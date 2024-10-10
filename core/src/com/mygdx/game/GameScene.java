@@ -6,8 +6,6 @@
     import com.badlogic.gdx.audio.Music;
     import com.badlogic.gdx.graphics.OrthographicCamera;
     import com.badlogic.gdx.graphics.Texture;
-    import com.badlogic.gdx.graphics.g2d.ParticleEffect;
-    import com.badlogic.gdx.graphics.g2d.ParticleEmitter;
     import com.badlogic.gdx.graphics.g2d.SpriteBatch;
     import com.badlogic.gdx.maps.tiled.TiledMap;
     import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
@@ -22,7 +20,6 @@
     import com.badlogic.gdx.utils.ScreenUtils;
     import com.badlogic.gdx.utils.viewport.ExtendViewport;
     import com.badlogic.gdx.utils.viewport.Viewport;
-    import java.util.Iterator;
 
     public class GameScene extends ScreenAdapter {
 
@@ -38,21 +35,15 @@
         OrthogonalTiledMapRenderer tiledMapRenderer;
         OrthographicCamera camera;
         Character character;
-        Array<EnemyBullet> enemyBullets;
-        Array<CharacterBullet> characterBullets;
         private float minCameraX;
         private float minCameraY;
         private float maxCameraX;
         private float maxCameraY;
         private float enemySpawnTimer = 0.0f;
-        Array<Enemy> enemies;
         private float timeSinceLastShot = 0.0f;
         public float damage = 5;
         Array<Wave> waves;
         Assets assets;
-        Array<ParticleEffect> particleEffects;
-        Boolean scaled = false;
-        private int score = 0;
         private int enemiesLeftToKill;
         Image imageActor;
         Music gameMusic;
@@ -77,21 +68,25 @@
 
         private final GameMode gameMode;
 
+        CharacterBulletsManager characterBulletsManager = new CharacterBulletsManager();
+        EnemyBulletsManager enemyBulletsManager = new EnemyBulletsManager();
+        EnemyManager enemyManager =new EnemyManager();
+        ParticleEffectsManager particleEffectsManager;
+
         public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume , GameMode gameMode) {
             this.game = game;
             this.soundVolume = soundVolume;
             this.musicVolume = musicVolume;
             this.gameMode = gameMode;
+            assets = new Assets();
+            assets.loadGameAssets();
+            assets.getAssetManager().finishLoading();
+            particleEffectsManager= new ParticleEffectsManager(assets);
+            loadAssets();
         }
 
         @Override
         public void show() {
-
-            assets = new Assets();
-            assets.loadGameAssets();
-            assets.getAssetManager().finishLoading();
-
-            loadAssets();
 
             batch = new SpriteBatch();
 
@@ -142,30 +137,29 @@
 
         private void initArenaGameElements(){
             character = new Character(new Vector2(800, 800),assets );
-            enemyBullets = new Array<>();
-            characterBullets = new Array<>();
-            enemies = new Array<>();
             waves = new Array<>();
             waves.add(new Wave(1, 0, 1, 0.5f, 90, damage));
             waves.add(new Wave(2, 1, 0, 0.4f, 500, damage));
-            particleEffects = new Array<>();
             imageActor.setPosition((float) Gdx.graphics.getWidth() / 2 - imageActor.getWidth(), (float) (Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 10) + imageActor.getHeight() / 3);
             imageActor.setSize(imageActor.getWidth() / 1.5f, imageActor.getHeight() / 1.5f);
             enemiesLeftToKill = waves.first().getNumEnemies();
             waveCompleteTable = new WaveCompleteTable(skin, assets, this);
             waveCompleteTable.center();
             waveCompleteTable.setPosition(Gdx.graphics.getWidth() / 2f - waveCompleteTable.getWidth() / 2f, Gdx.graphics.getHeight() / 2f - waveCompleteTable.getHeight() / 2f);
-
+            characterBulletsManager.fillPool(20);
+            enemyBulletsManager.fillPool(20);
+            enemyManager.fillPool(10);
+            particleEffectsManager.fillPool(5);
         }
 
         private void initStoryGameElements(){
             character = new Character(new Vector2(120, 100), assets);
-            enemyBullets = new Array<>();
-            characterBullets = new Array<>();
-            enemies = new Array<>();
-            particleEffects = new Array<>();
             imageActor.setPosition((float) Gdx.graphics.getWidth() / 2 - imageActor.getWidth(), (float) (Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 10) + imageActor.getHeight() / 3);
             imageActor.setSize(imageActor.getWidth() / 1.5f, imageActor.getHeight() / 1.5f);
+            characterBulletsManager.fillPool(20);
+            enemyBulletsManager.fillPool(20);
+            enemyManager.fillPool(10);
+            particleEffectsManager.fillPool(5);
         }
 
 
@@ -208,13 +202,8 @@
             tiledMap.dispose();
             tiledMapRenderer.dispose();
             character.dispose();
-            for (CharacterBullet bullet : characterBullets) {
-                bullet.dispose();
-            }
-            for (EnemyBullet bullet : enemyBullets) {
-                bullet.dispose();
-            }
-
+            characterBulletsManager.dispose();
+            enemyBulletsManager.dispose();
             stage.dispose();
             assets.dispose();
             gameMusic.dispose();
@@ -232,11 +221,7 @@
             // Normalize the direction vector and scale it to the bullet's speed.
             directionToCursor.nor().scl(BULLET_SPEED);
 
-            // Create a new Bullet and set the damage.
-            CharacterBullet bullet = new CharacterBullet(bulletStartPosition, directionToCursor, damage, assets, soundVolume);
-
-            // Add the bullet to the array.
-            characterBullets.add(bullet);
+            characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, damage, assets, soundVolume);
         }
 
         private Vector2 calculateDirectionToCursor(Vector2 startingPoint) {
@@ -256,12 +241,7 @@
         private void spawnEnemy(float health) {
             // Generate a random position for the enemy
             Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
-
-            // Create an enemy instance and pass the player's position
-            Enemy enemy = new Enemy(enemyPosition, character.getPosition(), health, assets, soundVolume, critRate);
-
-            // Add the enemy to a list or array to manage multiple enemies
-            enemies.add(enemy);
+            enemyManager.spawnEnemy(enemyPosition,character.getPosition(),health,assets,soundVolume,critRate);
         }
 
         private void spawnBoss(float health) {
@@ -271,7 +251,7 @@
             EnemyBoss enemy = new EnemyBoss(enemyPosition, character.getPosition(), health, assets, soundVolume, critRate);
 
             // Add the enemy to a list or array to manage multiple enemies
-            enemies.add(enemy);
+            enemyManager.getActiveEnemies().add(enemy);
         }
 
         private void drawWaveNumberAndScore() {
@@ -286,7 +266,7 @@
                 Label.setPosition(TextX, TextY);
                 stage.addActor(Label);
                 // Score
-                Text = "Score: " + score;
+                Text = "Score: " + enemyManager.getScore();
                 Label = new Label(Text, skin);
                 TextX = Gdx.graphics.getWidth() - (float) Gdx.graphics.getWidth() / 6;
                 TextY = Gdx.graphics.getHeight() - Label.getHeight();
@@ -304,23 +284,12 @@
             Gdx.input.setInputProcessor(stage);
         }
 
-        private void DeathParticles(Vector2 position, float scale) {
-            ParticleEffect particleEffect = assets.getAssetManager().get(Assets.explosionParticleEffect);
-            ParticleEmitter emitter = particleEffect.getEmitters().first();
-            emitter.setPosition(position.x, position.y);
-            if (!scaled) {
-                emitter.scaleSize(scale);
-            }
-            particleEffect.start();
-            particleEffects.add(particleEffect);
-        }
-
         private void drawBossHealthBar(OrthographicCamera camera) {
             Vector2 healthBarPosition = new Vector2(
                     camera.position.x - (healthBarWidth * camera.zoom) ,
                     camera.position.y + (Gdx.graphics.getHeight() * camera.zoom) / 3
             );
-            float bossHealthPercentage = enemies.first().getHealth() / maxBossHealth;
+            float bossHealthPercentage = enemyManager.getActiveEnemies().first().getHealth() / maxBossHealth;
             float healthBarFillWidth = healthBarWidth * bossHealthPercentage;
 
             // Draw the border and the fill of the health bar
@@ -340,11 +309,12 @@
             healthBarWidth = (float) Gdx.graphics.getWidth() / 5;
             healthBarHeight = (float) Gdx.graphics.getHeight() / 36;
             maxBossHealth = 500;
+
         }
 
         private void arenaGameModeRender(){
             // Update character and camera
-            character.update(enemies, tiledMap, isPaused, enemyBullets);
+            character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused, enemyBulletsManager.getActiveEnemyBullets());
             updateCamera();
 
             timeSinceLastShot += Gdx.graphics.getDeltaTime();
@@ -359,9 +329,7 @@
             // Set the camera's projection matrix
             batch.setProjectionMatrix(camera.combined);
 
-            for (ParticleEffect particle : particleEffects) {
-                particle.update(Gdx.graphics.getDeltaTime());
-            }
+           particleEffectsManager.update();
 
             // Begin the batch
             batch.begin();
@@ -376,28 +344,11 @@
             batch.begin();
 
 
-            // Render the bullets
-            for (Iterator<EnemyBullet> iter = enemyBullets.iterator(); iter.hasNext(); ) {
-                EnemyBullet enemyBullet = iter.next();
-                enemyBullet.update(Gdx.graphics.getDeltaTime());
-                if (enemyBullet.isActive()) {
-                    iter.remove(); // Remove the inactive bullet
-                } else {
-                    enemyBullet.render(batch, camera);
-                }
-            }
+            // Render and Update the enemy bullets
+            enemyBulletsManager.updateAndRender(batch, camera);
 
-            // Render the bullets
-            for (Iterator<CharacterBullet> iter = characterBullets.iterator(); iter.hasNext(); ) {
-                CharacterBullet characterBullet = iter.next();
-                characterBullet.update(Gdx.graphics.getDeltaTime());
-                if (characterBullet.isActive()) {
-                    iter.remove(); // Remove the inactive bullet
-                } else {
-                    characterBullet.render(batch, camera);
-                }
-            }
-
+            // Render and render the character bullets
+            characterBulletsManager.updateAndRender(batch, camera);
 
             if (!waves.isEmpty()) {
 
@@ -419,9 +370,9 @@
                 }
 
                 // Check if the current wave is completed
-                if (currentWave.getNumEnemies() == 0 && enemies.isEmpty() && currentWave.getNumBossEnemies() == 0) {
+                if (currentWave.getNumEnemies() == 0 && enemyManager.getActiveEnemies().isEmpty() && currentWave.getNumBossEnemies() == 0) {
                     waves.removeIndex(0);
-                    scaled = false;
+                    enemyManager.setScaled(false);
                     if (!waves.isEmpty()) {
                         enemiesLeftToKill = waves.first().getNumEnemies();
                     }
@@ -436,22 +387,7 @@
             }
 
             // Update and render enemies
-            for (Enemy enemy : enemies) {
-                enemy.update(Gdx.graphics.getDeltaTime(), enemyBullets, characterBullets, isPaused, enemies);
-
-                // Check if the enemy died
-                if (enemy.getHealth() <= 0) {
-                    Vector2 poz = new Vector2(enemy.getPosition());
-                    DeathParticles(poz, enemy.getSizeScale());
-                    scaled = true;
-                    score += (int) waves.first().getEnemyHealth();
-                    enemies.removeValue(enemy, true);
-                    enemiesLeftToKill -= 1;
-                }
-
-                enemy.render(batch, camera);
-                batch.begin();
-            }
+           enemyManager.updateAndRender(batch,camera,enemyBulletsManager,characterBulletsManager,isPaused,enemiesLeftToKill,particleEffectsManager);
 
             if (!waves.isEmpty()) {
                 drawWaveNumberAndScore();
@@ -461,12 +397,10 @@
             character.drawHearts(batch, camera);
 
             // Draw the particle effects
-            for (ParticleEffect particle : particleEffects) {
-                particle.draw(batch);
-            }
+            particleEffectsManager.draw(batch);
 
             //Draw health bar for boss enemies
-            if (!enemies.isEmpty() && !isPaused && enemies.first() instanceof EnemyBoss) {
+            if (!enemyManager.getActiveEnemies().isEmpty() && !isPaused && enemyManager.getActiveEnemies().first() instanceof EnemyBoss) {
                 drawBossHealthBar(camera);
             }
             // End the batch
@@ -495,7 +429,7 @@
         }
 
         private void storyGameModeRender(){
-            character.update(enemies, tiledMap, isPaused, enemyBullets);
+            character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused, enemyBulletsManager.getActiveEnemyBullets());
             updateCamera();
 
             timeSinceLastShot += Gdx.graphics.getDeltaTime();
@@ -507,9 +441,7 @@
 
             batch.setProjectionMatrix(camera.combined);
 
-            for (ParticleEffect particle : particleEffects) {
-                particle.update(Gdx.graphics.getDeltaTime());
-            }
+            particleEffectsManager.update();
 
             batch.begin();
 
@@ -522,57 +454,25 @@
 
 
             // Render the bullets
-            for (Iterator<EnemyBullet> iter = enemyBullets.iterator(); iter.hasNext(); ) {
-                EnemyBullet enemyBullet = iter.next();
-                enemyBullet.update(Gdx.graphics.getDeltaTime());
-                if (enemyBullet.isActive()) {
-                    iter.remove(); // Remove the inactive bullet
-                } else {
-                    enemyBullet.render(batch, camera);
-                }
-            }
+            enemyBulletsManager.updateAndRender(batch, camera);
 
-            // Render the bullets
-            for (Iterator<CharacterBullet> iter = characterBullets.iterator(); iter.hasNext(); ) {
-                CharacterBullet characterBullet = iter.next();
-                characterBullet.update(Gdx.graphics.getDeltaTime());
-                if (characterBullet.isActive()) {
-                    iter.remove(); // Remove the inactive bullet
-                } else {
-                    characterBullet.render(batch, camera);
-                }
-            }
-
-
+            // Render and render the bullets
+            characterBulletsManager.updateAndRender(batch, camera);
 
             // Update and render enemies
-            for (Enemy enemy : enemies) {
-                enemy.update(Gdx.graphics.getDeltaTime(), enemyBullets, characterBullets, isPaused, enemies);
-
-                // Check if the enemy died
-                if (enemy.getHealth() <= 0) {
-                    Vector2 poz = new Vector2(enemy.getPosition());
-                    DeathParticles(poz, enemy.getSizeScale());
-                    scaled = true;
-                    enemies.removeValue(enemy, true);
-                }
-
-                enemy.render(batch, camera);
-                batch.begin();
-            }
+            enemyManager.updateAndRender(batch,camera,enemyBulletsManager,characterBulletsManager,isPaused,enemiesLeftToKill,particleEffectsManager);
 
             //draw Hearts
             character.drawHearts(batch, camera);
 
             // Draw the particle effects
-            for (ParticleEffect particle : particleEffects) {
-                particle.draw(batch);
-            }
+            particleEffectsManager.draw(batch);
 
             //Draw health bar for boss enemies
-            if (!enemies.isEmpty() && !isPaused && enemies.first() instanceof EnemyBoss) {
+            if (!enemyManager.getActiveEnemies().isEmpty() && !isPaused && enemyManager.getActiveEnemies().first() instanceof EnemyBoss) {
                 drawBossHealthBar(camera);
             }
+
             // End the batch
             batch.end();
             stage.act(Gdx.graphics.getDeltaTime());

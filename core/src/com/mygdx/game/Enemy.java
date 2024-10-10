@@ -14,19 +14,20 @@ import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.ai.EnemyArenaBehaviorTree;
+import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.ai.EnemyBehaviorTree;
 
 import java.util.Random;
 
-public class Enemy {
+public class Enemy implements Pool.Poolable{
 
     public static final float MOVEMENT_SPEED = 40.0f;
     private static final float BULLET_COOLDOWN = 5.0f;
     private static final float SCALE = 0.8f;
     private static final Random RANDOM = new Random();
 
-    protected final Vector2 position;
-    protected final Vector2 playerPosition;
+    protected Vector2 position;
+    protected Vector2 playerPosition;
     protected Texture duckTexture;
     protected Texture idleTexture;
     protected Animation<TextureRegion> walkAnimation;
@@ -39,21 +40,21 @@ public class Enemy {
     protected Sound sound;
     protected float shootTimer = 0.0f;
 
-    protected final Integer soundVolume;
+    protected Integer soundVolume;
     Array<DamageText> damageTexts = new Array<>();
     protected Assets assets;
     protected BitmapFont defaultFont;
 
-    protected final Integer critRate;
+    protected Integer critRate;
 
     protected Rectangle bodyHitbox;
     protected Circle headHitbox;
     protected ShapeRenderer shapeRenderer;
     protected Vector2 direction;
 
-    private EnemyArenaBehaviorTree behaviorTree;
+    private EnemyBehaviorTree behaviorTree;
 
-    private Array<EnemyBullet> enemyBullets;
+    protected EnemyBulletsManager enemyBulletsManager;
 
     public enum BehaviorStatus {
         MOVING,
@@ -63,24 +64,32 @@ public class Enemy {
     protected BehaviorStatus behaviorStatus;
 
 
-    public Enemy(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate) {
+    private boolean alive;
+
+    public Enemy(){
+        this.alive=false;
+        this.position=new Vector2();
+    }
+
+    @Override
+    public void reset() {
+        position.set(-1,-1);
+        this.alive = false;
+    }
+
+    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate){
         this.assets = assets;
         this.health = health;
         this.position = position;
         this.playerPosition = playerPosition;
         this.soundVolume = soundVolume;
         this.critRate = critRate;
-
-        init();
-
-    }
-
-    protected void init(){
-        sizeScale = SCALE;
-        bodyHitbox = new Rectangle();
-        headHitbox = new Circle();
-        shapeRenderer = new ShapeRenderer();
-        defaultFont = new BitmapFont();
+        this.alive = true;
+        this.sizeScale = SCALE;
+        this.bodyHitbox = new Rectangle();
+        this.headHitbox = new Circle();
+        this.shapeRenderer = new ShapeRenderer();
+        this.defaultFont = new BitmapFont();
         loadEnemyTextures();
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture, 6);
         TextureRegion[] duckIdleFrames = splitEnemyTexture(idleTexture, 4);
@@ -88,7 +97,7 @@ public class Enemy {
         idleAnimation = new Animation<>(0.1f, duckIdleFrames);
         this.sound = assets.getAssetManager().get(Assets.duckSound);
         stateTime = 0.0f; // Initialize the animation time
-        behaviorTree = new EnemyArenaBehaviorTree(this);
+        behaviorTree = new EnemyBehaviorTree(this);
     }
 
     protected void loadEnemyTextures(){
@@ -96,9 +105,9 @@ public class Enemy {
         idleTexture = assets.getAssetManager().get(Assets.idleEnemyTexture);
     }
 
-    public void update(float deltaTime, Array<EnemyBullet> enemyBullets, Array<CharacterBullet> characterBullets, boolean isPaused, Array<Enemy> enemies) {
+    public void update(float deltaTime, EnemyBulletsManager enemyBulletsManager, Array<CharacterBullet> characterBullets, boolean isPaused, Array<Enemy> enemies ) {
         if (!isPaused) {
-            this.enemyBullets=enemyBullets;
+            this.enemyBulletsManager=enemyBulletsManager;
             // Calculate the direction from the enemy to the player
             direction = playerPosition.cpy().sub(position).nor();
             boolean isColliding = isCollidingWithEnemy(enemies);
@@ -164,7 +173,7 @@ public class Enemy {
         for (CharacterBullet bullet : bullets) {
             if (isCollidingWithBullet(bullet)) {
                 takeDamage(bullet.getDamage());
-                bullet.setActive(false); // Deactivate the bullet
+                bullet.setAlive(false); // Deactivate the bullet
             }
         }
     }
@@ -176,7 +185,7 @@ public class Enemy {
             if (isCrit) {
                 bullet.setDamage(bullet.getDamage() * 4);
             }
-            damageTexts.add(new DamageText(bullet.getDamage(), bullet.getPosition(), 1f, isCrit));
+            damageTexts.add(new DamageText(bullet.getDamage(), new Vector2(bullet.getPosition()), 1f, isCrit));
             return true;
         } else return false;
     }
@@ -184,6 +193,9 @@ public class Enemy {
     public void takeDamage(float damage) {
         health -= damage;
         sound.play(soundVolume / 100f);
+        if (health <= 0) {
+            this.alive = false;
+        }
     }
 
     public void render(SpriteBatch batch, OrthographicCamera camera) {
@@ -236,12 +248,11 @@ public class Enemy {
         return characterFrames;
     }
 
-    public void shootBullet(Array<EnemyBullet> enemyBullets) {
+    public void shootBullet() {
         if (shootTimer >= BULLET_COOLDOWN) {
             shootTimer = 0;
             Vector2 direction = playerPosition.cpy().sub(position).nor();
-            EnemyBullet bullet = new EnemyBullet(position.cpy(), direction.cpy().scl(200), 1, assets, soundVolume);
-            enemyBullets.add(bullet);
+            enemyBulletsManager.generateBullet(position.cpy(),direction.cpy().scl(200), 1, assets, soundVolume);
         }
     }
 
@@ -269,10 +280,6 @@ public class Enemy {
         return playerPosition;
     }
 
-    public Array<EnemyBullet> getEnemyBullet(){
-        return enemyBullets;
-    }
-
     public void renderDamageTexts(SpriteBatch batch, float deltaTime) {
         Array<DamageText> textsToRemove = new Array<>();
 
@@ -280,7 +287,7 @@ public class Enemy {
             damageText.update(deltaTime);
             float newY = damageText.getPosition().y + 20 * deltaTime;
             damageText.getPosition().set(damageText.getPosition().x, newY);
-            float textScale = 0.5f; // Adjust this value to change the size
+            float textScale = 0.5f;
             defaultFont.getData().setScale(textScale, textScale);
 
             if (!damageText.getIsCrit()) {
@@ -308,4 +315,7 @@ public class Enemy {
         this.behaviorStatus = behaviorStatus;
     }
 
+    public boolean isAlive(){
+        return this.alive;
+    }
 }

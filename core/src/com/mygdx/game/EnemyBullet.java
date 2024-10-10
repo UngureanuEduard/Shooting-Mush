@@ -13,14 +13,22 @@ public class EnemyBullet extends Bullet{
     private static final float WIDTH_SCALE = 216 * 0.04f;
     private static final float HEIGHT_SCALE = 297 * 0.04f;
 
-    private final ShapeRenderer shapeRenderer;
-    private final float width;
-    private final float height;
-    private final Polygon hitBox;
+    private  ShapeRenderer shapeRenderer;
+    private  float width;
+    private  float height;
+    private  Polygon hitBox;
 
-    public EnemyBullet(Vector2 position, Vector2 velocity, float damage, Assets assets, Integer soundVolume) {
-        super(position, velocity, damage, assets);
-        Texture bulletCornTexture = this.assets.getAssetManager().get(Assets.candyCornTexture);
+    public EnemyBullet(){
+        super();
+    }
+
+    public void init(Vector2 position , Vector2 velocity, float damage, Assets assets , Integer soundVolume) {
+        this.position.set(position);
+        this.velocity=velocity;
+        this.damage=damage;
+        this.assets=assets;
+        this.alive=true;
+        Texture bulletCornTexture = assets.getAssetManager().get(Assets.candyCornTexture);
         width = WIDTH_SCALE;
         height = HEIGHT_SCALE;
         Sound soundEnemy = assets.getAssetManager().get(Assets.duckShootSound);
@@ -38,6 +46,7 @@ public class EnemyBullet extends Bullet{
         hitBox = new Polygon(vertices);
         hitBox.setOrigin(width / 2, height / 2);
     }
+
     public void update(float deltaTime){
         updatePosition(deltaTime);
         updateAngle();

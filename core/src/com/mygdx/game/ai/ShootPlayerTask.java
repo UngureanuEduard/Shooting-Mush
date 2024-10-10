@@ -3,9 +3,7 @@ package com.mygdx.game.ai;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.Enemy;
-import com.mygdx.game.EnemyBullet;
 
 public class ShootPlayerTask extends LeafTask<Enemy> {
 
@@ -17,8 +15,7 @@ public class ShootPlayerTask extends LeafTask<Enemy> {
         enemy.setBehaviorStatus(Enemy.BehaviorStatus.IDLE);
 
         if (enemyPosition.dst(playerPosition) <= 150f) {
-            Array<EnemyBullet> bullets = enemy.getEnemyBullet();
-            enemy.shootBullet(bullets);
+            enemy.shootBullet();
             return Status.RUNNING;
         } else {
             return Status.FAILED;

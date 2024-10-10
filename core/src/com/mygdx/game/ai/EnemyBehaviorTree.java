@@ -7,11 +7,11 @@ import com.badlogic.gdx.ai.btree.branch.Selector;
 import com.badlogic.gdx.ai.btree.branch.Sequence;
 import com.mygdx.game.Enemy;
 
-public class EnemyArenaBehaviorTree {
+public class EnemyBehaviorTree {
 
     private final BehaviorTree<Enemy> behaviorTree;
 
-    public EnemyArenaBehaviorTree(Enemy enemy) {
+    public EnemyBehaviorTree(Enemy enemy) {
         // Create tasks
         Task<Enemy> moveToPlayer = new MoveToPlayerTask();
         Task<Enemy> shootPlayer = new ShootPlayerTask();

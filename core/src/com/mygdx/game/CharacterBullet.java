@@ -13,11 +13,20 @@ public class CharacterBullet extends Bullet{
 
     private static final float BULLET_SIZE = 35f;
     private static final float HITBOX_RADIUS_SCALE = 0.25f;
-    private final Circle hitBox;
-    private final ShapeRenderer shapeRenderer;
+    private  Circle hitBox;
+    private  ShapeRenderer shapeRenderer;
 
-    public CharacterBullet(Vector2 position, Vector2 velocity, float damage, Assets assets, Integer soundVolume) {
-        super(position, velocity, damage, assets);
+    public CharacterBullet(){
+        super();
+    }
+
+    public void init(Vector2 position , Vector2 velocity, float damage, Assets assets , Integer soundVolume) {
+        this.position.set(position);
+        this.alive = true;
+        this.velocity = velocity;
+        this.damage = damage;
+        this.damageScale = DAMAGE_SCALE_BASE + damage / DAMAGE_SCALE_FACTOR;
+        this.assets=assets;
         Texture bulletAppleTexture = this.assets.getAssetManager().get(Assets.bulletTexture);
         Sound soundCharacter = assets.getAssetManager().get(Assets.throwSound);
         texture = new TextureRegion(bulletAppleTexture);
@@ -30,11 +39,8 @@ public class CharacterBullet extends Bullet{
         updatePosition(deltaTime);
         updateAngle();
 
-        float centerX = position.x + getWidth() / 2;
-        float centerY = position.y + getHeight() / 2;
-
         // Set hitbox center to be in the middle of the texture
-        hitBox.set(centerX, centerY, getWidth() *HITBOX_RADIUS_SCALE); // Adjust radius as needed
+        hitBox.set(position.x + getWidth() / 2, position.y + getHeight() / 2, getWidth() *HITBOX_RADIUS_SCALE); // Adjust radius as needed
     }
 
     public void render(SpriteBatch batch, OrthographicCamera camera){

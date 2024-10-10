@@ -148,7 +148,7 @@ public class Character {
             for (EnemyBullet enemyBullet : enemyBullets) {
                 if (isCollidingWithBullet(enemyBullet)&&timeSinceLastLifeLost>=5.0f) {
                     loseLife();
-                    enemyBullet.setActive(false); // Deactivate the bullet
+                    enemyBullet.setAlive(false); // Deactivate the bullet
                 }
             }
 
