@@ -2,13 +2,11 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Intersector;
 import com.badlogic.gdx.math.Rectangle;
@@ -16,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.ai.EnemyBehaviorTree;
+import com.mygdx.game.poolmanagers.EnemyBulletsManager;
 
 import java.util.Random;
 
@@ -49,7 +48,6 @@ public class Enemy implements Pool.Poolable{
 
     protected Rectangle bodyHitbox;
     protected Circle headHitbox;
-    protected ShapeRenderer shapeRenderer;
     protected Vector2 direction;
 
     private EnemyBehaviorTree behaviorTree;
@@ -88,7 +86,6 @@ public class Enemy implements Pool.Poolable{
         this.sizeScale = SCALE;
         this.bodyHitbox = new Rectangle();
         this.headHitbox = new Circle();
-        this.shapeRenderer = new ShapeRenderer();
         this.defaultFont = new BitmapFont();
         loadEnemyTextures();
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture, 6);
@@ -198,33 +195,13 @@ public class Enemy implements Pool.Poolable{
         }
     }
 
-    public void render(SpriteBatch batch, OrthographicCamera camera) {
+    public void render(SpriteBatch batch ) {
         TextureRegion currentFrame = getCurrentFrame();
         float scaledWidth = calculateScaledDimension(getWidth());
         float scaledHeight = calculateScaledDimension(getHeight());
 
         drawCurrentFrame(batch, currentFrame, scaledWidth, scaledHeight, isFlipped);
         renderDamageTexts(batch, Gdx.graphics.getDeltaTime());
-
-        batch.end();
-
-        drawHitboxes(camera);  // Debugging
-    }
-
-    protected void drawHitboxes(OrthographicCamera camera) {
-        shapeRenderer.setProjectionMatrix(camera.combined);
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        // Draw the rectangle hitbox (body)
-        shapeRenderer.setColor(1, 0, 0, 1); // Red color for the rectangle
-        shapeRenderer.rect(bodyHitbox.x, bodyHitbox.y, bodyHitbox.width, bodyHitbox.height);
-
-        // Draw the circle hitbox (head)
-        shapeRenderer.setColor(0, 1, 0, 1); // Green color for the circle
-        shapeRenderer.circle(headHitbox.x, headHitbox.y, headHitbox.radius);
-
-        shapeRenderer.end();
     }
 
     protected TextureRegion getCurrentFrame() {

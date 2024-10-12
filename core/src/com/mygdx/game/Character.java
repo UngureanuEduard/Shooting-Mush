@@ -7,7 +7,6 @@ import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
@@ -37,8 +36,9 @@ public class Character {
     private float timeSinceLastLifeLost = 5.0f;
     private final Rectangle bodyHitbox;
     private final Circle headHitbox;
-    private final ShapeRenderer shapeRenderer;
-
+ 
+    
+    
 
 
     public Character( Vector2 initialPosition,Assets assets) {
@@ -65,7 +65,6 @@ public class Character {
         lives = 3; // Start with 3 lives
         bodyHitbox = new Rectangle();
         headHitbox = new Circle();
-        shapeRenderer = new ShapeRenderer();
         dashSpeed=SPEED*2;
         movementSpeed=SPEED;
     }
@@ -157,7 +156,7 @@ public class Character {
 
     }
 
-    public void render(SpriteBatch batch , OrthographicCamera camera) {
+    public void render(SpriteBatch batch ) {
         TextureRegion currentFrame;
 
         // If the character is not invincible, show the animation as usual
@@ -173,11 +172,6 @@ public class Character {
                 batch.draw(currentFrame, position.x, position.y,getWidth(),getHeight());
             }
         }
-
-        batch.end();
-
-        //Debugging
-        drawHitboxes(camera);
     }
 
     private TextureRegion getCurrentFrame(){
@@ -196,23 +190,6 @@ public class Character {
 
     private boolean isInvincible() {
         return timeSinceLastLifeLost < 5.0f; // Invincible for 4 seconds after losing a life
-    }
-
-    //Debugging
-    private void drawHitboxes(OrthographicCamera camera) {
-        shapeRenderer.setProjectionMatrix(camera.combined);
-
-        shapeRenderer.begin(ShapeRenderer.ShapeType.Line);
-
-        // Draw the rectangle hitbox (body)
-        shapeRenderer.setColor(1, 0, 0, 1); // Red color for the rectangle
-        shapeRenderer.rect(bodyHitbox.x, bodyHitbox.y, bodyHitbox.width, bodyHitbox.height);
-
-        // Draw the circle hitbox (head)
-        shapeRenderer.setColor(0, 1, 0, 1); // Green color for the circle
-        shapeRenderer.circle(headHitbox.x, headHitbox.y, headHitbox.radius);
-
-        shapeRenderer.end();
     }
 
     public void dispose() {

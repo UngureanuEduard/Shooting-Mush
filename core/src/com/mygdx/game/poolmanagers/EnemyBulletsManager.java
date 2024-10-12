@@ -1,11 +1,12 @@
-package com.mygdx.game;
+package com.mygdx.game.poolmanagers;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.Assets;
+import com.mygdx.game.EnemyBullet;
 
 public class EnemyBulletsManager {
 
@@ -33,14 +34,14 @@ public class EnemyBulletsManager {
         return activeEnemyBullets;
     }
 
-    public void updateAndRender(SpriteBatch batch , OrthographicCamera camera){
+    public void updateAndRender(SpriteBatch batch){
         for (EnemyBullet enemyBullet : activeEnemyBullets) {
             enemyBullet.update(Gdx.graphics.getDeltaTime());
             if (enemyBullet.getAlive_n()) {
                 activeEnemyBullets.removeValue(enemyBullet, true);
                 enemyBulletPool.free(enemyBullet);
             } else {
-                enemyBullet.render(batch, camera);
+                enemyBullet.render(batch);
             }
         }
     }

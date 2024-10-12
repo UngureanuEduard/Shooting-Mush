@@ -20,6 +20,10 @@
     import com.badlogic.gdx.utils.ScreenUtils;
     import com.badlogic.gdx.utils.viewport.ExtendViewport;
     import com.badlogic.gdx.utils.viewport.Viewport;
+    import com.mygdx.game.poolmanagers.CharacterBulletsManager;
+    import com.mygdx.game.poolmanagers.EnemyBulletsManager;
+    import com.mygdx.game.poolmanagers.EnemyManager;
+    import com.mygdx.game.poolmanagers.ParticleEffectsManager;
 
     public class GameScene extends ScreenAdapter {
 
@@ -135,8 +139,20 @@
             maxCameraY = mapHeightInUnits - camera.viewportHeight * camera.zoom / 2;
         }
 
-        private void initArenaGameElements(){
-            character = new Character(new Vector2(800, 800),assets );
+        private void initGameModeElements(){
+            characterBulletsManager.fillPool(20);
+            enemyBulletsManager.fillPool(20);
+            enemyManager.fillPool(10);
+            particleEffectsManager.fillPool(5);
+
+            if (gameMode == GameMode.ARENA) {
+                character = new  Character(new Vector2(800, 800), assets);
+                initArenaWaves();
+            } else {
+                character = new Character(new Vector2(120, 100), assets);
+            }
+        }
+        private void initArenaWaves() {
             waves = new Array<>();
             waves.add(new Wave(1, 0, 1, 0.5f, 90, damage));
             waves.add(new Wave(2, 1, 0, 0.4f, 500, damage));
@@ -146,23 +162,7 @@
             waveCompleteTable = new WaveCompleteTable(skin, assets, this);
             waveCompleteTable.center();
             waveCompleteTable.setPosition(Gdx.graphics.getWidth() / 2f - waveCompleteTable.getWidth() / 2f, Gdx.graphics.getHeight() / 2f - waveCompleteTable.getHeight() / 2f);
-            characterBulletsManager.fillPool(20);
-            enemyBulletsManager.fillPool(20);
-            enemyManager.fillPool(10);
-            particleEffectsManager.fillPool(5);
         }
-
-        private void initStoryGameElements(){
-            character = new Character(new Vector2(120, 100), assets);
-            imageActor.setPosition((float) Gdx.graphics.getWidth() / 2 - imageActor.getWidth(), (float) (Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 10) + imageActor.getHeight() / 3);
-            imageActor.setSize(imageActor.getWidth() / 1.5f, imageActor.getHeight() / 1.5f);
-            characterBulletsManager.fillPool(20);
-            enemyBulletsManager.fillPool(20);
-            enemyManager.fillPool(10);
-            particleEffectsManager.fillPool(5);
-        }
-
-
 
         private void setupMusic() {
             gameMusic.setLooping(true);
@@ -177,21 +177,60 @@
             // Clear the screen
             ScreenUtils.clear(1, 0, 0, 1);
 
-            if(gameMode == GameMode.ARENA){
-                arenaGameModeRender();
-            }else {
-                storyGameModeRender();
-            }
+            batch.begin();
 
+            character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused, enemyBulletsManager.getActiveEnemyBullets());
+            updateCamera();
+            handleShootLogic(delta);
+            batch.setProjectionMatrix(camera.combined);
+            particleEffectsManager.update();
+            tiledMapRenderer.setView(camera);
+            tiledMapRenderer.render();
+            renderCommonElements(batch, camera);
+            if(gameMode == GameMode.ARENA){
+                arenaWaveRender();
+            }
+            batch.end();
+            stage.act(Gdx.graphics.getDeltaTime());
+            stage.draw();
+            handleGameOver();
         }
 
+        private void renderCommonElements(SpriteBatch batch, OrthographicCamera camera) {
+            character.render(batch);
+            enemyBulletsManager.updateAndRender(batch);
+            characterBulletsManager.updateAndRender(batch);
+            enemyManager.updateAndRender(batch, enemyBulletsManager, characterBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager);
+            character.drawHearts(batch,camera);
+            particleEffectsManager.draw(batch);
+            if (shouldDrawBossHealthBar()) {
+                drawBossHealthBar(camera);
+            }
+        }
+
+        private boolean shouldDrawBossHealthBar() {
+            return !enemyManager.getActiveEnemies().isEmpty() && !isPaused && enemyManager.getActiveEnemies().first() instanceof EnemyBoss;
+        }
+
+        private void handleShootLogic(float delta) {
+            timeSinceLastShot += delta;
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && timeSinceLastShot >= SHOOT_COOLDOWN && !isPaused) {
+                shootBullet();
+                timeSinceLastShot = 0.0f;
+            }
+        }
+
+        private void handleGameOver() {
+            if (character.getLives() <= 0 || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                gameMusic.dispose();
+                bossMusic.dispose();
+                game.setScreen(new MainMenuScreen(game));
+            }
+        }
 
         private void updateCamera() {
-            // Center the camera on the character's position
             camera.position.x = MathUtils.clamp(character.getPosition().x + character.getWidth() / 2, minCameraX, maxCameraX);
             camera.position.y = MathUtils.clamp(character.getPosition().y + character.getHeight() / 2, minCameraY, maxCameraY);
-
-            // Update the camera's matrices
             camera.update();
         }
 
@@ -258,14 +297,12 @@
 
             if (!isPaused) {
                 stage.clear();
-                // Wave
                 String Text = "Wave: " + waves.first().getWaveNumber();
                 Label Label = new Label(Text, skin);
                 float TextX = (float) Gdx.graphics.getWidth() / 2 - Label.getWidth() / 2;
                 float TextY = Gdx.graphics.getHeight() - Label.getHeight();
                 Label.setPosition(TextX, TextY);
                 stage.addActor(Label);
-                // Score
                 Text = "Score: " + enemyManager.getScore();
                 Label = new Label(Text, skin);
                 TextX = Gdx.graphics.getWidth() - (float) Gdx.graphics.getWidth() / 6;
@@ -302,7 +339,7 @@
 
             initCamera();
 
-            initArenaGameElements();
+            initGameModeElements();
 
             setupMusic();
 
@@ -312,44 +349,7 @@
 
         }
 
-        private void arenaGameModeRender(){
-            // Update character and camera
-            character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused, enemyBulletsManager.getActiveEnemyBullets());
-            updateCamera();
-
-            timeSinceLastShot += Gdx.graphics.getDeltaTime();
-
-            // Handle shooting bullets if the cooldown has expired , 0.2f = cooldown
-
-            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && timeSinceLastShot >= SHOOT_COOLDOWN && !isPaused) {
-                shootBullet();
-                timeSinceLastShot = 0.0f;
-            }
-
-            // Set the camera's projection matrix
-            batch.setProjectionMatrix(camera.combined);
-
-           particleEffectsManager.update();
-
-            // Begin the batch
-            batch.begin();
-
-            // Render the map
-            tiledMapRenderer.setView(camera);
-            tiledMapRenderer.render();
-
-            // Render the character
-            character.render(batch, camera);
-
-            batch.begin();
-
-
-            // Render and Update the enemy bullets
-            enemyBulletsManager.updateAndRender(batch, camera);
-
-            // Render and render the character bullets
-            characterBulletsManager.updateAndRender(batch, camera);
-
+        private void arenaWaveRender(){
             if (!waves.isEmpty()) {
 
                 currentWave = waves.first();
@@ -385,103 +385,20 @@
             } else {
                 game.setScreen(new MainMenuScreen(game));
             }
-
-            // Update and render enemies
-           enemyManager.updateAndRender(batch,camera,enemyBulletsManager,characterBulletsManager,isPaused,enemiesLeftToKill,particleEffectsManager);
-
-            if (!waves.isEmpty()) {
-                drawWaveNumberAndScore();
-            }
-
-            //draw Hearts
-            character.drawHearts(batch, camera);
-
-            // Draw the particle effects
-            particleEffectsManager.draw(batch);
-
-            //Draw health bar for boss enemies
-            if (!enemyManager.getActiveEnemies().isEmpty() && !isPaused && enemyManager.getActiveEnemies().first() instanceof EnemyBoss) {
-                drawBossHealthBar(camera);
-            }
-            // End the batch
-            batch.end();
-            stage.act(Gdx.graphics.getDeltaTime());
-            stage.draw();
-
-            if (character.getLives() <= 0 || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-                gameMusic.dispose();
-                bossMusic.dispose();
-                game.setScreen(new MainMenuScreen(game));
-            }
+            drawWaveNumberAndScore();
         }
+
         private void storyGameModeInit(){
             tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
 
             initCamera();
 
-            initStoryGameElements();
+            initGameModeElements();
 
             setupMusic();
 
             healthBarWidth = (float) Gdx.graphics.getWidth() / 5;
             healthBarHeight = (float) Gdx.graphics.getHeight() / 36;
             maxBossHealth = 500;
-        }
-
-        private void storyGameModeRender(){
-            character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused, enemyBulletsManager.getActiveEnemyBullets());
-            updateCamera();
-
-            timeSinceLastShot += Gdx.graphics.getDeltaTime();
-
-            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && timeSinceLastShot >= SHOOT_COOLDOWN && !isPaused) {
-                shootBullet();
-                timeSinceLastShot = 0.0f;
-            }
-
-            batch.setProjectionMatrix(camera.combined);
-
-            particleEffectsManager.update();
-
-            batch.begin();
-
-            tiledMapRenderer.setView(camera);
-            tiledMapRenderer.render();
-
-            character.render(batch, camera);
-
-            batch.begin();
-
-
-            // Render the bullets
-            enemyBulletsManager.updateAndRender(batch, camera);
-
-            // Render and render the bullets
-            characterBulletsManager.updateAndRender(batch, camera);
-
-            // Update and render enemies
-            enemyManager.updateAndRender(batch,camera,enemyBulletsManager,characterBulletsManager,isPaused,enemiesLeftToKill,particleEffectsManager);
-
-            //draw Hearts
-            character.drawHearts(batch, camera);
-
-            // Draw the particle effects
-            particleEffectsManager.draw(batch);
-
-            //Draw health bar for boss enemies
-            if (!enemyManager.getActiveEnemies().isEmpty() && !isPaused && enemyManager.getActiveEnemies().first() instanceof EnemyBoss) {
-                drawBossHealthBar(camera);
-            }
-
-            // End the batch
-            batch.end();
-            stage.act(Gdx.graphics.getDeltaTime());
-            stage.draw();
-
-            if (character.getLives() <= 0 || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-                gameMusic.dispose();
-                bossMusic.dispose();
-                game.setScreen(new MainMenuScreen(game));
-            }
         }
     }

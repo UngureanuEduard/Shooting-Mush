@@ -1,11 +1,13 @@
-package com.mygdx.game;
+package com.mygdx.game.poolmanagers;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.Assets;
+import com.mygdx.game.Enemy;
+import com.mygdx.game.EnemyBoss;
 
 public class EnemyManager {
 
@@ -41,7 +43,7 @@ public class EnemyManager {
         enemiesPool.clear();
     }
 
-    public void updateAndRender(SpriteBatch batch , OrthographicCamera camera , EnemyBulletsManager enemyBulletsManager , CharacterBulletsManager characterBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects){
+    public void updateAndRender(SpriteBatch batch , EnemyBulletsManager enemyBulletsManager , CharacterBulletsManager characterBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects){
         for (Enemy enemy : activeEnemies) {
             enemy.update(Gdx.graphics.getDeltaTime(), enemyBulletsManager, characterBulletsManager.getActiveCharacterBullets(), isPaused, activeEnemies );
             if (!enemy.isAlive()) {
@@ -54,8 +56,7 @@ public class EnemyManager {
                 enemiesPool.free(enemy);
 
             } else {
-                enemy.render(batch, camera);
-                batch.begin();
+                enemy.render(batch);
             }
         }
     }

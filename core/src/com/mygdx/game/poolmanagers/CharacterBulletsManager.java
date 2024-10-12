@@ -1,11 +1,12 @@
-package com.mygdx.game;
+package com.mygdx.game.poolmanagers;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.Assets;
+import com.mygdx.game.CharacterBullet;
 
 public class CharacterBulletsManager {
 
@@ -35,7 +36,7 @@ public class CharacterBulletsManager {
         characterBulletPool.fill(amount);
     }
 
-    public void updateAndRender(SpriteBatch batch , OrthographicCamera camera){
+    public void updateAndRender(SpriteBatch batch  ){
         for (CharacterBullet characterBullet : activeCharacterBullets) {
             characterBullet.update(Gdx.graphics.getDeltaTime());
             if (characterBullet.getAlive_n()) {
@@ -43,7 +44,7 @@ public class CharacterBulletsManager {
                 characterBulletPool.free(characterBullet);
 
             } else {
-                characterBullet.render(batch, camera);
+                characterBullet.render(batch);
             }
         }
     }

@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.poolmanagers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.ParticleEffect;
@@ -7,6 +7,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.Assets;
 
 public class ParticleEffectsManager {
     private final Array<ParticleEffect> activeParticleEffects = new Array<>();
