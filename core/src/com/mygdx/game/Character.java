@@ -36,10 +36,6 @@ public class Character {
     private float timeSinceLastLifeLost = 5.0f;
     private final Rectangle bodyHitbox;
     private final Circle headHitbox;
- 
-    
-    
-
 
     public Character( Vector2 initialPosition,Assets assets) {
 

@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.Assets;
 import com.mygdx.game.Enemy;
 import com.mygdx.game.EnemyBoss;
+import com.mygdx.game.GameScene;
 
 public class EnemyManager {
 
@@ -22,16 +23,17 @@ public class EnemyManager {
 
     private Boolean scaled = false;
     private int score = 0;
+    private final GameScene.GameMode gameMode;
 
-    public EnemyManager() {
-
+    public EnemyManager(GameScene.GameMode gameMode) {
+    this.gameMode = gameMode;
     }
     public void fillPool(int amount){
         enemiesPool.fill(amount);
     }
     public void spawnEnemy(Vector2 enemyPosition , Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate){
         Enemy item = enemiesPool.obtain();
-        item.init(enemyPosition, playerPosition, health, assets, soundVolume,critRate);
+        item.init(enemyPosition, playerPosition, health, assets, soundVolume,critRate ,gameMode);
         activeEnemies.add(item);
     }
 

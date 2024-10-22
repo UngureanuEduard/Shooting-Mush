@@ -74,7 +74,7 @@
 
         CharacterBulletsManager characterBulletsManager = new CharacterBulletsManager();
         EnemyBulletsManager enemyBulletsManager = new EnemyBulletsManager();
-        EnemyManager enemyManager =new EnemyManager();
+        EnemyManager enemyManager;
         ParticleEffectsManager particleEffectsManager;
 
         public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume , GameMode gameMode) {
@@ -82,6 +82,7 @@
             this.soundVolume = soundVolume;
             this.musicVolume = musicVolume;
             this.gameMode = gameMode;
+            enemyManager =new EnemyManager(gameMode);
             assets = new Assets();
             assets.loadGameAssets();
             assets.getAssetManager().finishLoading();
@@ -154,7 +155,7 @@
         }
         private void initArenaWaves() {
             waves = new Array<>();
-            waves.add(new Wave(1, 0, 1, 0.5f, 90, damage));
+            waves.add(new Wave(1, 0, 3, 0.5f, 90, damage));
             waves.add(new Wave(2, 1, 0, 0.4f, 500, damage));
             imageActor.setPosition((float) Gdx.graphics.getWidth() / 2 - imageActor.getWidth(), (float) (Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 10) + imageActor.getHeight() / 3);
             imageActor.setSize(imageActor.getWidth() / 1.5f, imageActor.getHeight() / 1.5f);
@@ -287,7 +288,7 @@
             Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
 
             // Create an enemy instance and pass the player's position
-            EnemyBoss enemy = new EnemyBoss(enemyPosition, character.getPosition(), health, assets, soundVolume, critRate);
+            EnemyBoss enemy = new EnemyBoss(enemyPosition, character.getPosition(), health, assets, soundVolume, critRate , gameMode);
 
             // Add the enemy to a list or array to manage multiple enemies
             enemyManager.getActiveEnemies().add(enemy);

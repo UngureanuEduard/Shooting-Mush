@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -13,18 +14,19 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.mygdx.game.ai.EnemyBehaviorTree;
+import com.mygdx.game.ai.ArenaEnemyBehaviorTree;
 import com.mygdx.game.poolmanagers.EnemyBulletsManager;
+import com.mygdx.game.ai.StoryEnemyBehaviorTree;
 
 import java.util.Random;
 
 public class Enemy implements Pool.Poolable{
 
-    public static final float MOVEMENT_SPEED = 40.0f;
+    public static final float MOVEMENT_SPEED = 10.0f;
     private static final float BULLET_COOLDOWN = 5.0f;
     private static final float SCALE = 0.8f;
     private static final Random RANDOM = new Random();
-
+    private BehaviorTree<Enemy> behaviorTree;
     protected Vector2 position;
     protected Vector2 playerPosition;
     protected Texture duckTexture;
@@ -50,9 +52,9 @@ public class Enemy implements Pool.Poolable{
     protected Circle headHitbox;
     protected Vector2 direction;
 
-    private EnemyBehaviorTree behaviorTree;
-
     protected EnemyBulletsManager enemyBulletsManager;
+
+    private Vector2 spawnPosition;
 
     public enum BehaviorStatus {
         MOVING,
@@ -64,8 +66,11 @@ public class Enemy implements Pool.Poolable{
 
     private boolean alive;
 
+    private boolean isAttacked;
+
     public Enemy(){
         this.alive=false;
+        this.isAttacked=false;
         this.position=new Vector2();
     }
 
@@ -73,16 +78,19 @@ public class Enemy implements Pool.Poolable{
     public void reset() {
         position.set(-1,-1);
         this.alive = false;
+        this.isAttacked = false;
     }
 
-    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate){
+    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode){
         this.assets = assets;
         this.health = health;
         this.position = position;
+        this.spawnPosition = position.cpy();
         this.playerPosition = playerPosition;
         this.soundVolume = soundVolume;
         this.critRate = critRate;
         this.alive = true;
+        this.isAttacked = false;
         this.sizeScale = SCALE;
         this.bodyHitbox = new Rectangle();
         this.headHitbox = new Circle();
@@ -94,7 +102,10 @@ public class Enemy implements Pool.Poolable{
         idleAnimation = new Animation<>(0.1f, duckIdleFrames);
         this.sound = assets.getAssetManager().get(Assets.duckSound);
         stateTime = 0.0f; // Initialize the animation time
-        behaviorTree = new EnemyBehaviorTree(this);
+
+        if(gameMode == GameScene.GameMode.STORY)
+        behaviorTree = new StoryEnemyBehaviorTree(this);
+        else behaviorTree = new ArenaEnemyBehaviorTree(this);
     }
 
     protected void loadEnemyTextures(){
@@ -110,15 +121,13 @@ public class Enemy implements Pool.Poolable{
             boolean isColliding = isCollidingWithEnemy(enemies);
 
             if (!isColliding) {
-                behaviorTree.update();
+                behaviorTree.step();
             }
 
             updateHitboxes();
 
             // Update animation stateTime
             stateTime += deltaTime;
-            // Determine if the enemy should be flipped
-            isFlipped = direction.x < 0;
 
             // Check for bullet collisions
             CheckBulletCollisions(characterBullets);
@@ -170,6 +179,7 @@ public class Enemy implements Pool.Poolable{
         for (CharacterBullet bullet : bullets) {
             if (isCollidingWithBullet(bullet)) {
                 takeDamage(bullet.getDamage());
+                isAttacked = true;
                 bullet.setAlive(false); // Deactivate the bullet
             }
         }
@@ -294,5 +304,21 @@ public class Enemy implements Pool.Poolable{
 
     public boolean isAlive(){
         return this.alive;
+    }
+
+    public Vector2 getSpawnPosition() {
+        return spawnPosition;
+    }
+
+    public boolean getIsAttacked() {
+        return isAttacked;
+    }
+
+    public void setIsAttacked(boolean setAttacked) {
+        isAttacked = setAttacked;
+    }
+
+    public void setIsFlipped(boolean setFlipped) {
+        isFlipped = setFlipped;
     }
 }

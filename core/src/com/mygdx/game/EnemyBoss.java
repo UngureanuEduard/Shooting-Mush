@@ -11,8 +11,8 @@ public class EnemyBoss extends Enemy {
     private static final float SCALE = 1.7f;
     private static final float FIRE_ANGLE_STEP = 15.0f;
 
-    public EnemyBoss(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate) {
-        init(position, playerPosition, health, assets, soundVolume, critRate);
+    public EnemyBoss(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode) {
+        init(position, playerPosition, health, assets, soundVolume, critRate , gameMode);
         sizeScale = SCALE;
     }
 
