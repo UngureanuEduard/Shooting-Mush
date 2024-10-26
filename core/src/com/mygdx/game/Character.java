@@ -362,4 +362,8 @@ public class Character {
     }
 
     public Integer getLives(){return lives;}
+
+    public void setPosition(Vector2 position) {
+        this.position.set(position);
+    }
 }

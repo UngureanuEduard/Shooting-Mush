@@ -17,7 +17,7 @@ public class Assets {
 
     // Asset descriptors
     public static final AssetDescriptor<Skin> skin = new AssetDescriptor<>("Font/menu.json", Skin.class);
-    public static final AssetDescriptor<TiledMap> tiledMap = new AssetDescriptor<>("map.tmx", TiledMap.class);
+    public static final AssetDescriptor<TiledMap> arenaTiledMap = new AssetDescriptor<>("map.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> storyTiledMap = new AssetDescriptor<>("StoryMap.tmx", TiledMap.class);
     public static final AssetDescriptor<Texture> walkTexture = new AssetDescriptor<>("Character/Character Walking Side.png", Texture.class);
     public static final AssetDescriptor<Texture> idleTexture = new AssetDescriptor<>("Character/Character Idle Side.png", Texture.class);
@@ -57,7 +57,7 @@ public class Assets {
 
     public void loadGameAssets() {
         assetManager.load(skin);
-        assetManager.load(tiledMap);
+        assetManager.load(arenaTiledMap);
         assetManager.load(storyTiledMap);
         assetManager.load(walkTexture);
         assetManager.load(idleTexture);

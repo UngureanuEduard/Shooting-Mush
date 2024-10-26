@@ -64,7 +64,9 @@
         Wave currentWave;
         public Integer critRate = 15;
         MyGdxGame game;
-
+        TransitionArea transitionArea;
+        Array<MapDetails> maps = new Array<>();
+        private int currentMapIndex = 0;
         public enum GameMode {
             ARENA,
             STORY
@@ -106,10 +108,10 @@
             try {
                 skin = assets.getAssetManager().get(Assets.skin);
                 if(gameMode == GameMode.ARENA) {
-                    tiledMap = assets.getAssetManager().get(Assets.tiledMap);
+                    tiledMap = assets.getAssetManager().get(Assets.arenaTiledMap);
                 }
                 else{
-                    tiledMap = assets.getAssetManager().get(Assets.storyTiledMap);
+                    initializeMaps();
                 }
                 imageActor = new Image(assets.getAssetManager().get(Assets.skullTexture));
                 gameMusic = assets.getAssetManager().get(Assets.gameMusic);
@@ -149,8 +151,6 @@
             if (gameMode == GameMode.ARENA) {
                 character = new  Character(new Vector2(800, 800), assets);
                 initArenaWaves();
-            } else {
-                character = new Character(new Vector2(120, 100), assets);
             }
         }
         private void initArenaWaves() {
@@ -179,7 +179,6 @@
             ScreenUtils.clear(1, 0, 0, 1);
 
             batch.begin();
-
             character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused, enemyBulletsManager.getActiveEnemyBullets());
             updateCamera();
             handleShootLogic(delta);
@@ -188,13 +187,20 @@
             tiledMapRenderer.setView(camera);
             tiledMapRenderer.render();
             renderCommonElements(batch, camera);
+
             if(gameMode == GameMode.ARENA){
                 arenaWaveRender();
+            }
+            else if(transitionArea.isWithinArea(character.getPosition().x, character.getPosition().y)){
+                loadNextMap();
+            }
+
+            if (character.getLives() <= 0 || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)){
+                handleGameOver();
             }
             batch.end();
             stage.act(Gdx.graphics.getDeltaTime());
             stage.draw();
-            handleGameOver();
         }
 
         private void renderCommonElements(SpriteBatch batch, OrthographicCamera camera) {
@@ -222,11 +228,10 @@
         }
 
         private void handleGameOver() {
-            if (character.getLives() <= 0 || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+                Gdx.input.setInputProcessor(null);
                 gameMusic.dispose();
                 bossMusic.dispose();
                 game.setScreen(new MainMenuScreen(game));
-            }
         }
 
         private void updateCamera() {
@@ -251,31 +256,17 @@
         }
 
         private void shootBullet() {
-            // Calculate the starting position of the bullet at the center of the character.
-            Vector2 bulletStartPosition = new Vector2(character.getPosition().x ,
-                    character.getPosition().y );
-
-            // Calculate the direction to the cursor.
+            Vector2 bulletStartPosition = new Vector2(character.getPosition().x , character.getPosition().y );
             Vector2 directionToCursor = calculateDirectionToCursor(bulletStartPosition);
-
-            // Normalize the direction vector and scale it to the bullet's speed.
             directionToCursor.nor().scl(BULLET_SPEED);
-
             characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, damage, assets, soundVolume);
         }
 
         private Vector2 calculateDirectionToCursor(Vector2 startingPoint) {
-            // Get the cursor position in screen coordinates.
             Vector3 cursorPositionScreen = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
-
-            // Convert the screen coordinates to world coordinates.
             Vector3 cursorPositionWorld = camera.unproject(cursorPositionScreen);
-
-            // Create a 2D vector for the cursor's world position.
             Vector2 cursorPositionWorld2D = new Vector2(cursorPositionWorld.x, cursorPositionWorld.y);
-
-            // Return the direction vector from the starting point to the cursor position.
-            return cursorPositionWorld2D.sub(startingPoint).nor(); // Normalize the direction vector.
+            return cursorPositionWorld2D.sub(startingPoint).nor();
         }
 
         private void spawnEnemy(float health) {
@@ -286,11 +277,7 @@
 
         private void spawnBoss(float health) {
             Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
-
-            // Create an enemy instance and pass the player's position
             EnemyBoss enemy = new EnemyBoss(enemyPosition, character.getPosition(), health, assets, soundVolume, critRate , gameMode);
-
-            // Add the enemy to a list or array to manage multiple enemies
             enemyManager.getActiveEnemies().add(enemy);
         }
 
@@ -329,8 +316,6 @@
             );
             float bossHealthPercentage = enemyManager.getActiveEnemies().first().getHealth() / maxBossHealth;
             float healthBarFillWidth = healthBarWidth * bossHealthPercentage;
-
-            // Draw the border and the fill of the health bar
             batch.draw(healthBarTexture, healthBarPosition.x, healthBarPosition.y, healthBarWidth/2, healthBarHeight/2);
             batch.draw(healthFillTexture, healthBarPosition.x+healthBarWidth/90, healthBarPosition.y+healthBarHeight/25, healthBarFillWidth/2-healthBarWidth/50, healthBarHeight/2-healthBarHeight/10);
         }
@@ -347,7 +332,6 @@
             healthBarWidth = (float) Gdx.graphics.getWidth() / 5;
             healthBarHeight = (float) Gdx.graphics.getHeight() / 36;
             maxBossHealth = 500;
-
         }
 
         private void arenaWaveRender(){
@@ -390,16 +374,41 @@
         }
 
         private void storyGameModeInit(){
-            tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
-
-            initCamera();
-
-            initGameModeElements();
-
-            setupMusic();
-
+            currentMapIndex = 0;
+            character = new Character(new Vector2(120, 100), assets);
+            loadMap(currentMapIndex);
             healthBarWidth = (float) Gdx.graphics.getWidth() / 5;
             healthBarHeight = (float) Gdx.graphics.getHeight() / 36;
             maxBossHealth = 500;
+        }
+
+        private void initializeMaps() {
+            maps.add(new MapDetails(Assets.storyTiledMap.fileName, new Vector2(120, 100), new TransitionArea(1380, 1290, 128, 192)));
+            maps.add(new MapDetails(Assets.arenaTiledMap.fileName, new Vector2(800, 800), new TransitionArea(900, 900, 128, 192)));
+            maps.add(new MapDetails(Assets.storyTiledMap.fileName, new Vector2(120, 100), new TransitionArea(1380, 1290, 128, 192)));
+            maps.add(new MapDetails(Assets.storyTiledMap.fileName, new Vector2(120, 100), new TransitionArea(1380, 1290, 128, 192)));
+        }
+
+        private void loadMap(int index) {
+            if (index < maps.size) {
+                MapDetails mapDetails = maps.get(index);
+                tiledMap = assets.getAssetManager().get(mapDetails.mapAsset);
+                tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
+
+                character.setPosition(mapDetails.spawnPoint);
+                transitionArea = mapDetails.transitionArea;
+            }
+            initCamera();
+            initGameModeElements();
+            setupMusic();
+        }
+
+        private void loadNextMap() {
+            currentMapIndex++;
+            if (currentMapIndex < maps.size) {
+                loadMap(currentMapIndex);
+            } else {
+                handleGameOver();
+            }
         }
     }
