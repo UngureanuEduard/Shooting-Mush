@@ -4,6 +4,8 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
+import com.badlogic.gdx.utils.JsonReader;
+import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.Assets;
 import com.mygdx.game.Enemy;
@@ -24,6 +26,7 @@ public class EnemyManager {
     private Boolean scaled = false;
     private int score = 0;
     private final GameScene.GameMode gameMode;
+    private final Array<EnemyMapLocationsInfo> mapInfos = new Array<>();
 
     public EnemyManager(GameScene.GameMode gameMode) {
     this.gameMode = gameMode;
@@ -69,6 +72,27 @@ public class EnemyManager {
 
     public int getScore() {
         return this.score;
+    }
+
+    public void loadEnemiesFromJson(String filePath) {
+        JsonReader json = new JsonReader();
+        JsonValue base = json.parse(Gdx.files.internal(filePath));
+
+        for (JsonValue map : base.get("maps")) {
+            String mapName = map.getString("mapName");
+            EnemyMapLocationsInfo mapInfo = new EnemyMapLocationsInfo(mapName);
+            for (JsonValue enemy : map.get("enemies")) {
+                float x = enemy.getFloat("x");
+                float y = enemy.getFloat("y");
+                String type = enemy.getString("type");
+                mapInfo.addEnemy(new EnemyBasicInfo(new Vector2(x, y), type));
+            }
+            mapInfos.add(mapInfo);
+        }
+    }
+
+    public Array<EnemyMapLocationsInfo> getEnemyMapLocationsInfos() {
+        return mapInfos;
     }
 
 }

@@ -1,0 +1,49 @@
+{
+  "maps": [
+    {
+      "mapName": "storyMap1",
+      "enemies": [
+        {
+          "x": 130,
+          "y": 100,
+          "type": "normal"
+        },
+        {
+          "x": 700,
+          "y": 500,
+          "type": "normal"
+        },
+        {
+          "x": 700,
+          "y": 222,
+          "type": "normal"
+        },
+        {
+          "x": 333,
+          "y": 500,
+          "type": "normal"
+        },
+        {
+          "x": 1280,
+          "y": 1290,
+          "type": "boss"
+        }
+      ]
+    },
+    {
+      "mapName": "secondMap",
+      "enemies": [
+        {
+          "x": 800,
+          "y": 600,
+          "type": "normal"
+        },
+        {
+          "x": 900,
+          "y": 400,
+          "type": "normal"
+        }
+      ]
+    }
+  ]
+}

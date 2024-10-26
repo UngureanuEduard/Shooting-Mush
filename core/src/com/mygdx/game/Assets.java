@@ -17,8 +17,8 @@ public class Assets {
 
     // Asset descriptors
     public static final AssetDescriptor<Skin> skin = new AssetDescriptor<>("Font/menu.json", Skin.class);
-    public static final AssetDescriptor<TiledMap> arenaTiledMap = new AssetDescriptor<>("map.tmx", TiledMap.class);
-    public static final AssetDescriptor<TiledMap> storyTiledMap = new AssetDescriptor<>("StoryMap.tmx", TiledMap.class);
+    public static final AssetDescriptor<TiledMap> arenaTiledMap = new AssetDescriptor<>("arenaMap.tmx", TiledMap.class);
+    public static final AssetDescriptor<TiledMap> storyTiledMap = new AssetDescriptor<>("storyMap1.tmx", TiledMap.class);
     public static final AssetDescriptor<Texture> walkTexture = new AssetDescriptor<>("Character/Character Walking Side.png", Texture.class);
     public static final AssetDescriptor<Texture> idleTexture = new AssetDescriptor<>("Character/Character Idle Side.png", Texture.class);
     public static final AssetDescriptor<Texture> walkFrontTexture = new AssetDescriptor<>("Character/Character Walking Front.png", Texture.class);

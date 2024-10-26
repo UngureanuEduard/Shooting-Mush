@@ -20,10 +20,7 @@
     import com.badlogic.gdx.utils.ScreenUtils;
     import com.badlogic.gdx.utils.viewport.ExtendViewport;
     import com.badlogic.gdx.utils.viewport.Viewport;
-    import com.mygdx.game.poolmanagers.CharacterBulletsManager;
-    import com.mygdx.game.poolmanagers.EnemyBulletsManager;
-    import com.mygdx.game.poolmanagers.EnemyManager;
-    import com.mygdx.game.poolmanagers.ParticleEffectsManager;
+    import com.mygdx.game.poolmanagers.*;
 
     public class GameScene extends ScreenAdapter {
 
@@ -45,6 +42,7 @@
         private float maxCameraY;
         private float enemySpawnTimer = 0.0f;
         private float timeSinceLastShot = 0.0f;
+        private float bossHealthPercentage=0.0f;
         public float damage = 5;
         Array<Wave> waves;
         Assets assets;
@@ -85,6 +83,7 @@
             this.musicVolume = musicVolume;
             this.gameMode = gameMode;
             enemyManager =new EnemyManager(gameMode);
+            enemyManager.loadEnemiesFromJson("storyEnemies.json");
             assets = new Assets();
             assets.loadGameAssets();
             assets.getAssetManager().finishLoading();
@@ -188,12 +187,15 @@
             tiledMapRenderer.render();
             renderCommonElements(batch, camera);
 
-            if(gameMode == GameMode.ARENA){
+            if(gameMode == GameMode.ARENA) {
                 arenaWaveRender();
             }
-            else if(transitionArea.isWithinArea(character.getPosition().x, character.getPosition().y)){
-                loadNextMap();
+            else {
+                spawnStoryEnemy();
+                if(transitionArea.isWithinArea(character.getPosition().x, character.getPosition().y)&&enemyManager.getActiveEnemies().isEmpty())
+                        loadNextMap();
             }
+
 
             if (character.getLives() <= 0 || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)){
                 handleGameOver();
@@ -201,6 +203,25 @@
             batch.end();
             stage.act(Gdx.graphics.getDeltaTime());
             stage.draw();
+        }
+
+        private void spawnStoryEnemy(){
+            System.out.println(character.getPosition().x + ", " + character.getPosition().y);
+            EnemyMapLocationsInfo enemyMapLocationsInfo = enemyManager.getEnemyMapLocationsInfos().get(currentMapIndex);
+            System.out.println("Current Map Name: " + enemyMapLocationsInfo.getMapName());
+            for (EnemyBasicInfo enemyInfo : enemyMapLocationsInfo.getEnemies()) {
+                Vector2 enemyPosition = enemyInfo.getPosition();
+                String type = enemyInfo.getType();
+                if(type.equals("normal")){
+                    enemyManager.spawnEnemy(enemyPosition,character.getPosition(),100,assets,soundVolume,critRate);
+                    System.out.println("Enemy Position: (" + enemyPosition.x + ", " + enemyPosition.y + "), Type: " + type);
+                    enemyMapLocationsInfo.removeEnemy(enemyInfo);
+                }else if(character.getPosition().x>transitionArea.getX()-480 && character.getPosition().y > transitionArea.getY() - 90){
+                    spawnBoss(500,enemyPosition);
+                    System.out.println("Enemy Boss Position: (" + enemyPosition.x + ", " + enemyPosition.y + "), Type: " + type);
+                    enemyMapLocationsInfo.removeEnemy(enemyInfo);
+                }
+            }
         }
 
         private void renderCommonElements(SpriteBatch batch, OrthographicCamera camera) {
@@ -216,7 +237,16 @@
         }
 
         private boolean shouldDrawBossHealthBar() {
-            return !enemyManager.getActiveEnemies().isEmpty() && !isPaused && enemyManager.getActiveEnemies().first() instanceof EnemyBoss;
+            if(!enemyManager.getActiveEnemies().isEmpty() && !isPaused)
+            {for (Enemy enemy : enemyManager.getActiveEnemies()) {
+                    if (enemy instanceof EnemyBoss) {
+                        bossHealthPercentage = enemy.getHealth()/maxBossHealth;
+                        return true;
+                    }
+                }
+                return false;
+            }
+            return false;
         }
 
         private void handleShootLogic(float delta) {
@@ -269,16 +299,17 @@
             return cursorPositionWorld2D.sub(startingPoint).nor();
         }
 
-        private void spawnEnemy(float health) {
+        private void spawnArenaEnemy(float health) {
             // Generate a random position for the enemy
             Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
             enemyManager.spawnEnemy(enemyPosition,character.getPosition(),health,assets,soundVolume,critRate);
         }
 
-        private void spawnBoss(float health) {
-            Vector2 enemyPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
-            EnemyBoss enemy = new EnemyBoss(enemyPosition, character.getPosition(), health, assets, soundVolume, critRate , gameMode);
+        private void spawnBoss(float health , Vector2 bossPosition) {
+            EnemyBoss enemy = new EnemyBoss(bossPosition, character.getPosition(), health, assets, soundVolume, critRate , gameMode);
             enemyManager.getActiveEnemies().add(enemy);
+            gameMusic.stop();
+            bossMusic.play();
         }
 
         private void drawWaveNumberAndScore() {
@@ -314,7 +345,6 @@
                     camera.position.x - (healthBarWidth * camera.zoom) ,
                     camera.position.y + (Gdx.graphics.getHeight() * camera.zoom) / 3
             );
-            float bossHealthPercentage = enemyManager.getActiveEnemies().first().getHealth() / maxBossHealth;
             float healthBarFillWidth = healthBarWidth * bossHealthPercentage;
             batch.draw(healthBarTexture, healthBarPosition.x, healthBarPosition.y, healthBarWidth/2, healthBarHeight/2);
             batch.draw(healthFillTexture, healthBarPosition.x+healthBarWidth/90, healthBarPosition.y+healthBarHeight/25, healthBarFillWidth/2-healthBarWidth/50, healthBarHeight/2-healthBarHeight/10);
@@ -342,14 +372,15 @@
                 damage = currentWave.getBulletDamage();
 
                 if (currentWave.getNumEnemies() > 0 && enemySpawnTimer >= currentWave.getEnemySpawnInterval() && !isPaused) {
-                    spawnEnemy(currentWave.getEnemyHealth());
+                    spawnArenaEnemy(currentWave.getEnemyHealth());
                     enemySpawnTimer = 0.0f;
                     currentWave.setNumEnemies(currentWave.getNumEnemies() - 1);
                 }
 
                 if (currentWave.getNumBossEnemies() > 0 && !isPaused) {
                     int health = 500;
-                    spawnBoss(health);
+                    Vector2 bossPosition = new Vector2(MathUtils.random(minCameraX, maxCameraX), MathUtils.random(minCameraY, maxCameraY));
+                    spawnBoss(health , bossPosition);
                     enemySpawnTimer = 0.0f;
                     currentWave.setNumBossEnemies(currentWave.getNumBossEnemies() - 1);
                 }
@@ -362,10 +393,6 @@
                         enemiesLeftToKill = waves.first().getNumEnemies();
                     }
                     isPaused = true;
-                    if (waves.size == 1) {
-                        gameMusic.stop();
-                        bossMusic.play();
-                    }
                 }
             } else {
                 game.setScreen(new MainMenuScreen(game));
@@ -405,6 +432,7 @@
 
         private void loadNextMap() {
             currentMapIndex++;
+            bossMusic.stop();
             if (currentMapIndex < maps.size) {
                 loadMap(currentMapIndex);
             } else {
