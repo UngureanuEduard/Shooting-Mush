@@ -5,7 +5,7 @@ import com.badlogic.gdx.ai.btree.Task;
 import com.mygdx.game.Enemy;
 
 public class IsPlayerInRangeCondition extends LeafTask<Enemy> {
-    private static final float RANGE = 100.0f;
+    private static final float RANGE = 200.0f;
 
     @Override
     public Status execute() {

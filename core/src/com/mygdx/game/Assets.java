@@ -28,9 +28,6 @@ public class Assets {
     public static final AssetDescriptor<Texture> bulletTexture = new AssetDescriptor<>("Environment/apple.png", Texture.class);
     public static final AssetDescriptor<Sound> throwSound = new AssetDescriptor<>("mp3/throw.mp3",Sound.class);
     public static final AssetDescriptor<ParticleEffect> explosionParticleEffect = new AssetDescriptor<>("Environment/explosion/explosion.party", ParticleEffect.class);
-    public Assets() {
-        assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
-    }
     public static final AssetDescriptor<Texture> skullTexture = new AssetDescriptor<>("Environment/skull.png", Texture.class);
     public static final AssetDescriptor<Texture> menuBackgroundTexture = new AssetDescriptor<>("Font/Background.jpg", Texture.class);
     public static final AssetDescriptor<Texture> duckTexture = new AssetDescriptor<>("Environment/Duck.png", Texture.class);
@@ -43,11 +40,13 @@ public class Assets {
     public static final AssetDescriptor<Texture> bossTexture = new AssetDescriptor<>("Environment/boss.png", Texture.class);
     public static final AssetDescriptor<Texture> idleBossTexture = new AssetDescriptor<>("Environment/IdleDuckBoss.png", Texture.class);
     public static final AssetDescriptor<Texture> idleEnemyTexture = new AssetDescriptor<>("Environment/IdleEnemy.png", Texture.class);
-
+    public static final AssetDescriptor<Texture> idleShoomTexture = new AssetDescriptor<>("Environment/Shoom/Shoom_Idle.png", Texture.class);
     public static final AssetDescriptor<Texture> BorderHealthTexture = new AssetDescriptor<>("Environment/BorderHealth.png", Texture.class);
     public static final AssetDescriptor<Texture> HealthTexture = new AssetDescriptor<>("Environment/Texture.png", Texture.class);
     public static final AssetDescriptor<Music> bossMusic = new AssetDescriptor<>("mp3/BossSong.mp3", Music.class);
-
+    public Assets() {
+        assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
+    }
     public void loadMenuAssets() {
         assetManager.load(skin);
         assetManager.load(menuBackgroundTexture);
@@ -70,6 +69,7 @@ public class Assets {
         assetManager.load(explosionParticleEffect);
         assetManager.load(skullTexture);
         assetManager.load(duckTexture);
+        assetManager.load(idleShoomTexture);
         assetManager.load(lightningBoltTexture);
         assetManager.load(candyCornTexture);
         assetManager.load(duckSound);

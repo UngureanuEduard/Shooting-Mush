@@ -65,105 +65,100 @@ public class Character {
         movementSpeed=SPEED;
     }
 
-    public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused, Array<EnemyBullet> enemyBullets) {
+    public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog) {
         if(!isPaused) {
             float deltaTime = Gdx.graphics.getDeltaTime();
-
-            boolean moveLeft = Gdx.input.isKeyPressed(Input.Keys.A);
-            boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
-            boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
-            boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
-
-            handleDash(deltaTime);
-
-            //The potential new position based on input
-            float potentialX = position.x;
-            float potentialY = position.y;
-
-            //The potential new position based on a buff distance (avoid overlaps of the character with the tile)
-            float buffedpotentialX = position.x;
-            float buffedpotentialY = position.y;
-
-            isWalking = "";
-
-            if (isDashing) {
-                SPEED =dashSpeed;
-            }
-            else SPEED =movementSpeed;
-
-            if (moveUp) {
-                potentialY += SPEED * deltaTime;
-                buffedpotentialY = potentialY + 5;
-                isWalking = "up";
-            }
-            if (moveDown) {
-                potentialY -= SPEED * deltaTime;
-                buffedpotentialY = potentialY;
-                isWalking = "down";
-            }
-            if (moveLeft) {
-                potentialX -= SPEED * deltaTime;
-                if (!isFlipped) {
-                    flipAnimations();
-                    isFlipped = true;
-                }
-                buffedpotentialX = potentialX;
-                isWalking = "left";
-            }
-            if (moveRight) {
-                potentialX += SPEED * deltaTime;
-                if (isFlipped) {
-                    flipAnimations();
-                    isFlipped = false;
-                }
-                buffedpotentialX = potentialX + 5;
-                isWalking = "right";
-            }
-
-            // Check if the potential new position collides with blocked tiles
-            if (isTileBlocked(buffedpotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedpotentialY, tiledMap)) {
-                position.set(potentialX, potentialY);
-                bodyHitbox.set(potentialX + getWidth() * 29 / 100, potentialY + getHeight() * 10 / 100, (float) (getWidth() * 41.66 / 100), (float) (getHeight() * 31.25 / 100)); // Body hitbox (rectangle)
-                headHitbox.set(potentialX + getWidth() / 2, (float) (potentialY + getHeight() / 1.7), (float) (getWidth() / 3.1)); // Head hitbox (circle)
-            }
-
-            // Update animation stateTime
             stateTime += deltaTime;
+            if(!inDialog){
+                boolean moveLeft = Gdx.input.isKeyPressed(Input.Keys.A);
+                boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
+                boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
+                boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
 
-            // Check for enemy collisions
-            for (Enemy enemy : enemies) {
-                if (isCollidingWithEnemy(enemy)) {
-                    if (timeSinceLastLifeLost >= 5.0f) {
-                        loseLife();
+                handleDash(deltaTime);
+
+                //The potential new position based on input
+                float potentialX = position.x;
+                float potentialY = position.y;
+
+                //The potential new position based on a buff distance (avoid overlaps of the character with the tile)
+                float buffedpotentialX = position.x;
+                float buffedpotentialY = position.y;
+
+                isWalking = "";
+
+                if (isDashing) {
+                    SPEED =dashSpeed;
+                }
+                else SPEED =movementSpeed;
+
+                if (moveUp) {
+                    potentialY += SPEED * deltaTime;
+                    buffedpotentialY = potentialY + 5;
+                    isWalking = "up";
+                }
+                if (moveDown) {
+                    potentialY -= SPEED * deltaTime;
+                    buffedpotentialY = potentialY;
+                    isWalking = "down";
+                }
+                if (moveLeft) {
+                    potentialX -= SPEED * deltaTime;
+                    if (!isFlipped) {
+                        flipAnimations();
+                        isFlipped = true;
+                    }
+                    buffedpotentialX = potentialX;
+                    isWalking = "left";
+                }
+                if (moveRight) {
+                    potentialX += SPEED * deltaTime;
+                    if (isFlipped) {
+                        flipAnimations();
+                        isFlipped = false;
+                    }
+                    buffedpotentialX = potentialX + 5;
+                    isWalking = "right";
+                }
+
+                // Check if the potential new position collides with blocked tiles
+                if (isTileBlocked(buffedpotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedpotentialY, tiledMap)) {
+                    position.set(potentialX, potentialY);
+                    bodyHitbox.set(potentialX + getWidth() * 29 / 100, potentialY + getHeight() * 10 / 100, (float) (getWidth() * 41.66 / 100), (float) (getHeight() * 31.25 / 100)); // Body hitbox (rectangle)
+                    headHitbox.set(potentialX + getWidth() / 2, (float) (potentialY + getHeight() / 1.7), (float) (getWidth() / 3.1)); // Head hitbox (circle)
+                }
+
+                // Check for enemy collisions
+                for (Enemy enemy : enemies) {
+                    if (isCollidingWithEnemy(enemy)) {
+                        if (timeSinceLastLifeLost >= 5.0f) {
+                            loseLife();
+                        }
                     }
                 }
-            }
 
-            // Check for bullet collisions
-            for (EnemyBullet enemyBullet : enemyBullets) {
-                if (isCollidingWithBullet(enemyBullet)&&timeSinceLastLifeLost>=5.0f) {
-                    loseLife();
-                    enemyBullet.setAlive(false); // Deactivate the bullet
+                // Check for bullet collisions
+                for (EnemyBullet enemyBullet : enemyBullets) {
+                    if (isCollidingWithBullet(enemyBullet)&&timeSinceLastLifeLost>=5.0f) {
+                        loseLife();
+                        enemyBullet.setAlive(false); // Deactivate the bullet
+                    }
                 }
-            }
 
-            timeSinceLastLifeLost += deltaTime;
+                timeSinceLastLifeLost += deltaTime;
+            }
         }
 
     }
 
     public void render(SpriteBatch batch ) {
         TextureRegion currentFrame;
-
-        // If the character is not invincible, show the animation as usual
         if (!isInvincible()) {
             currentFrame=getCurrentFrame();
             batch.draw(currentFrame, position.x, position.y,getWidth(),getHeight());
         } else {
-            // If the character is invincible, make it flash by showing/hiding every 0.5 seconds
             float flashTime = 0.3f;
             if ((int) (timeSinceLastLifeLost / flashTime) % 2 == 0) {
-                // Only draw the character when the time divided by flashTime
                 currentFrame=getCurrentFrame();
                 batch.draw(currentFrame, position.x, position.y,getWidth(),getHeight());
             }
@@ -189,7 +184,6 @@ public class Character {
     }
 
     public void dispose() {
-        // Dispose of character textures here
         walkAnimationLeftAndRight.getKeyFrames()[0].getTexture().dispose();
         walkAnimationLeftAndRight.getKeyFrames()[1].getTexture().dispose();
         walkAnimationLeftAndRight.getKeyFrames()[2].getTexture().dispose();
@@ -250,7 +244,6 @@ public class Character {
     }
 
     private boolean isCollidingWithEnemy(Enemy enemy) {
-        // Calculate the hit-box of the character and the enemy
         float characterLeft = position.x;
         float characterRight = position.x + getWidth();
         float characterTop = position.y + getHeight();
@@ -261,7 +254,6 @@ public class Character {
         float enemyTop = enemy.getPosition().y + enemy.getHeight();
         float enemyBottom = enemy.getPosition().y;
 
-        // Check for collision by comparing the hit-boxes
         boolean horizontalCollision = characterRight > enemyLeft && characterLeft < enemyRight;
         boolean verticalCollision = characterTop > enemyBottom && characterBottom < enemyTop;
 
@@ -287,14 +279,11 @@ public class Character {
         // Get the collision layer from the TiledMap
         TiledMapTileLayer collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Block");
 
-        // Calculate the tile indices for the given position
         int tileX = (int) (x / 15.9);
         int tileY = (int) (y / 15.9);
 
-        // Get the cell at the calculated tile indices
         TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
 
-        // Check if the cell exists and has the "blocked" property
         return !(cell != null && cell.getTile().getProperties().containsKey("blocked"));
     }
 
@@ -305,7 +294,7 @@ public class Character {
             isDashing = true;
             canDash = false;
             dashDuration = 0;
-            dashCooldown = 0; // Reset cooldown timer when dash starts
+            dashCooldown = 0;
         }
 
         if (isDashing) {
@@ -314,11 +303,9 @@ public class Character {
             if (dashDuration >= DASH_TIME || !dashPressed ) {
                 isDashing = false;
 
-                // Calculate remaining dash percentage
                 float dashPercentageUsed = dashDuration / DASH_TIME;
                 float remainingDashPercentage = 1 - dashPercentageUsed;
 
-                // Scale the cooldown based on the remaining dash percentage
                 dashCooldown = DASH_COOLDOWN_TIME * remainingDashPercentage;
             }
         } else {
@@ -338,7 +325,7 @@ public class Character {
     }
 
     private boolean isCollidingWithBullet(EnemyBullet bullet) {
-        Polygon bulletPolygon = bullet.getHitBox(); // Assuming this is a Polygon already.
+        Polygon bulletPolygon = bullet.getHitBox();
 
         Polygon bodyPolygon = new Polygon(new float[]{
                 bodyHitbox.x, bodyHitbox.y,
@@ -347,7 +334,6 @@ public class Character {
                 bodyHitbox.x, bodyHitbox.y + bodyHitbox.height
         });
 
-        // Convert the Circle to a Polygon approximation (8-sided for simplicity)
         int numVertices = 8;
         float[] circleVertices = new float[2 * numVertices];
         for (int i = 0; i < numVertices; i++) {

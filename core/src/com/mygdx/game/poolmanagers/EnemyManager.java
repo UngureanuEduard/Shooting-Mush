@@ -80,7 +80,11 @@ public class EnemyManager {
 
         for (JsonValue map : base.get("maps")) {
             String mapName = map.getString("mapName");
-            EnemyMapLocationsInfo mapInfo = new EnemyMapLocationsInfo(mapName);
+            JsonValue npcLocation = map.get("npcLocation");
+            float frogX = npcLocation.getFloat("x");
+            float frogY = npcLocation.getFloat("y");
+            Vector2 npcPosition = new Vector2(frogX, frogY);
+            EnemyMapLocationsInfo mapInfo = new EnemyMapLocationsInfo(mapName , npcPosition);
             for (JsonValue enemy : map.get("enemies")) {
                 float x = enemy.getFloat("x");
                 float y = enemy.getFloat("y");
