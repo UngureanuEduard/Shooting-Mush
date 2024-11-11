@@ -14,6 +14,7 @@ public class EnemyBoss extends Enemy {
     public EnemyBoss(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode) {
         init(position, playerPosition, health, assets, soundVolume, critRate , gameMode);
         sizeScale = SCALE;
+        PUSH_BACK_FORCE = 10.0f;
     }
 
     @Override

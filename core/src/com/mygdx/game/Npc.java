@@ -2,6 +2,7 @@ package com.mygdx.game;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
+import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -29,9 +30,12 @@ public class Npc {
     private int currentLineIndex = 0;
     private final String dialogPrompt;
     private boolean isDialogPromptVisible = false;
+    private final List<Sound> dialogueSounds;
+    private final int soundVolume;
 
-    public Npc(Vector2 position, Assets assets) {
+    public Npc(Vector2 position, Assets assets , int soundVolume) {
         this.position = position;
+        this.soundVolume = soundVolume;
         Texture idleTexture = assets.getAssetManager().get(Assets.idleShoomTexture);
         TextureRegion[] frogFrames = splitTexture(idleTexture,6);
         idleAnimation = new Animation<>(0.15f, frogFrames);
@@ -39,10 +43,14 @@ public class Npc {
         height = idleAnimation.getKeyFrame(stateTime, true).getRegionHeight();
         npcRectangle = new Rectangle(position.x-width, position.y-height, width*2, height*2);
         dialogueLines = new ArrayList<>();
-        dialogueLines.add("{EASE} Hello, world!");
-        dialogueLines.add("{EASE} The {WAIT}{WAVE} DUCKS {ENDWAVE}");
-        dialogueLines.add("{EASE} You need to stop them!");
+        dialogueLines.add("{EASE}{SLOW} MYLO!                 ");
+        dialogueLines.add("{EASE}{SLOW} The DUCKS!            ");
+        dialogueLines.add("{EASE}{SLOW} You need to stop them!");
         dialogPrompt = "T";
+        dialogueSounds = new ArrayList<>();
+        dialogueSounds.add(assets.getAssetManager().get(Assets.DialogueNPC1Line1));
+        dialogueSounds.add(assets.getAssetManager().get(Assets.DialogueNPC1Line2));
+        dialogueSounds.add(assets.getAssetManager().get(Assets.DialogueNPC1Line3));
     }
 
     public void setPosition(Vector2 position) {
@@ -93,9 +101,9 @@ public class Npc {
 
             label = new TypingLabel(text, skin);
             label.setFontScale(0.60f);
-            label.setPosition((float) (position.x + stage.getWidth() / 4.7), (float) (position.y + stage.getHeight() / 2.3));
+            label.setPosition( (position.x + stage.getWidth() /2  - label.getPrefWidth()), (float) (position.y + stage.getHeight() / 2.3));
             stage.addActor(label);
-
+            dialogueSounds.get(currentLineIndex).play(soundVolume / 100f);
             currentLineIndex++;
 
         } else {

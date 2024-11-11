@@ -44,6 +44,9 @@ public class Assets {
     public static final AssetDescriptor<Texture> BorderHealthTexture = new AssetDescriptor<>("Environment/BorderHealth.png", Texture.class);
     public static final AssetDescriptor<Texture> HealthTexture = new AssetDescriptor<>("Environment/Texture.png", Texture.class);
     public static final AssetDescriptor<Music> bossMusic = new AssetDescriptor<>("mp3/BossSong.mp3", Music.class);
+    public static final AssetDescriptor<Sound> DialogueNPC1Line1 = new AssetDescriptor<>("mp3/Mylo 1.wav",Sound.class);
+    public static final AssetDescriptor<Sound> DialogueNPC1Line2 = new AssetDescriptor<>("mp3/The Ducks 1.wav",Sound.class);
+    public static final AssetDescriptor<Sound> DialogueNPC1Line3 = new AssetDescriptor<>("mp3/You need to stop them 1.wav",Sound.class);
     public Assets() {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
     }
@@ -81,6 +84,9 @@ public class Assets {
         assetManager.load(BorderHealthTexture);
         assetManager.load(HealthTexture);
         assetManager.load(bossMusic);
+        assetManager.load(DialogueNPC1Line1);
+        assetManager.load(DialogueNPC1Line2);
+        assetManager.load(DialogueNPC1Line3);
     }
 
     public AssetManager getAssetManager() {

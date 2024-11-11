@@ -47,7 +47,7 @@ public class Enemy implements Pool.Poolable{
     protected BitmapFont defaultFont;
 
     protected Integer critRate;
-
+    private float damagedDelay = 0.0f;
     protected Rectangle bodyHitbox;
     protected Circle headHitbox;
     protected Vector2 direction;
@@ -67,6 +67,10 @@ public class Enemy implements Pool.Poolable{
     private boolean alive;
 
     private boolean isAttacked;
+
+    protected final Vector2 pushBackDirection = new Vector2(0, 0);
+    protected float pushBackTime = 0f;
+    protected float PUSH_BACK_FORCE;
 
     public Enemy(){
         this.alive=false;
@@ -102,10 +106,11 @@ public class Enemy implements Pool.Poolable{
         idleAnimation = new Animation<>(0.1f, duckIdleFrames);
         this.sound = assets.getAssetManager().get(Assets.duckSound);
         stateTime = 0.0f; // Initialize the animation time
-
+        damagedDelay = 0.0f;
         if(gameMode == GameScene.GameMode.STORY)
         behaviorTree = new StoryEnemyBehaviorTree(this);
         else behaviorTree = new ArenaEnemyBehaviorTree(this);
+        PUSH_BACK_FORCE = 50.0f;
     }
 
     protected void loadEnemyTextures(){
@@ -134,6 +139,12 @@ public class Enemy implements Pool.Poolable{
 
             shootTimer += deltaTime;
 
+            damagedDelay += deltaTime;
+
+            if (pushBackTime < 0.5f) {
+                pushBackTime += deltaTime;
+                position.add(pushBackDirection.scl(PUSH_BACK_FORCE * deltaTime));
+            }
         }
     }
 
@@ -180,18 +191,22 @@ public class Enemy implements Pool.Poolable{
             if (isCollidingWithBullet(bullet)) {
                 takeDamage(bullet.getDamage());
                 isAttacked = true;
-                bullet.setAlive(false); // Deactivate the bullet
+                Vector2 bulletDirection = new Vector2(position).sub(bullet.getPosition()).nor();
+                pushBackDirection.set(bulletDirection);
+                pushBackTime = 0f;
+                bullet.setAlive(false);
             }
         }
     }
 
     public boolean isCollidingWithBullet(CharacterBullet bullet) {
-        // Check if the enemy's bounding box intersects with the bullet's position
         if (Intersector.overlaps(bullet.getHitBox(), headHitbox) || Intersector.overlaps(bullet.getHitBox(), bodyHitbox)) {
             Boolean isCrit = isCrit();
             if (isCrit) {
                 bullet.setDamage(bullet.getDamage() * 4);
+                PUSH_BACK_FORCE = PUSH_BACK_FORCE +10;
             }
+            else PUSH_BACK_FORCE = 50.0f;
             damageTexts.add(new DamageText(bullet.getDamage(), new Vector2(bullet.getPosition()), 1f, isCrit));
             return true;
         } else return false;
@@ -199,7 +214,11 @@ public class Enemy implements Pool.Poolable{
 
     public void takeDamage(float damage) {
         health -= damage;
-        sound.play(soundVolume / 100f);
+        if(damagedDelay >= 2.0f)
+        {
+            sound.play(soundVolume / 100f);
+            damagedDelay = 0;
+        }
         if (health <= 0) {
             this.alive = false;
         }

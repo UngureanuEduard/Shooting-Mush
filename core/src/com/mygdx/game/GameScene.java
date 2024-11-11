@@ -12,6 +12,8 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
@@ -28,6 +30,7 @@ public class GameScene extends ScreenAdapter {
     private static final float BULLET_SPEED = 300f;
     private static final float SHOOT_COOLDOWN = 0.2f;
 
+    private final World box2dWorld;
     Viewport viewport = new ExtendViewport(1920, 1080);
     Skin skin;
     private final Stage stage = new Stage(viewport);
@@ -79,12 +82,14 @@ public class GameScene extends ScreenAdapter {
     EnemyBulletsManager enemyBulletsManager = new EnemyBulletsManager();
     EnemyManager enemyManager;
     ParticleEffectsManager particleEffectsManager;
-
+    Box2DDebugRenderer debugRenderer;
     public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume, GameMode gameMode) {
         this.game = game;
         this.soundVolume = soundVolume;
         this.musicVolume = musicVolume;
         this.gameMode = gameMode;
+        box2dWorld = new World(new Vector2(0, -10), true);
+        debugRenderer = new Box2DDebugRenderer();
         enemyManager = new EnemyManager(gameMode);
         enemyManager.loadEnemiesFromJson("storyInfo.json");
         assets = new Assets();
@@ -109,6 +114,8 @@ public class GameScene extends ScreenAdapter {
         ScreenUtils.clear(1, 0, 0, 1);
         batch.begin();
         updateCamera();
+        box2dWorld.step(1/60f, 6, 2);
+        debugRenderer.render(box2dWorld, camera.combined);
         character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused, enemyBulletsManager.getActiveEnemyBullets(),inDialog);
         handleShootLogic(delta);
         batch.setProjectionMatrix(camera.combined);
@@ -150,6 +157,7 @@ public class GameScene extends ScreenAdapter {
         assets.dispose();
         gameMusic.dispose();
         bossMusic.dispose();
+        box2dWorld.dispose();
     }
 
     private void loadAssets() {
@@ -195,7 +203,7 @@ public class GameScene extends ScreenAdapter {
         enemyManager.fillPool(10);
         particleEffectsManager.fillPool(5);
         if (gameMode == GameMode.ARENA) {
-            character = new Character(new Vector2(800, 800), assets);
+            character = new Character(new Vector2(800, 800), assets , box2dWorld);
             initArenaWaves();
         }
     }
@@ -219,8 +227,8 @@ public class GameScene extends ScreenAdapter {
 
     private void storyGameModeInit() {
         currentMapIndex = 0;
-        character = new Character(new Vector2(120, 100), assets);
-        npc = new Npc(enemyManager.getEnemyMapLocationsInfos().get(0).getNpcPosition(), assets);
+        character = new Character(new Vector2(120, 100) , assets , box2dWorld);
+        npc = new Npc(enemyManager.getEnemyMapLocationsInfos().get(0).getNpcPosition(), assets , soundVolume);
         loadMap(currentMapIndex);
         healthBarWidth = (float) Gdx.graphics.getWidth() / 5;
         healthBarHeight = (float) Gdx.graphics.getHeight() / 36;
@@ -268,7 +276,7 @@ public class GameScene extends ScreenAdapter {
     }
 
     private void spawnStoryEnemy() {
-        if (enemyManager.getActiveEnemies().size < 5) {
+        if (enemyManager.getActiveEnemies().size < 9) {
             EnemyMapLocationsInfo enemyMapLocationsInfo = enemyManager.getEnemyMapLocationsInfos().get(currentMapIndex);
             for (EnemyBasicInfo enemyInfo : enemyMapLocationsInfo.getEnemies()) {
                 Vector2 enemyPosition = enemyInfo.getPosition();

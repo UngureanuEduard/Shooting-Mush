@@ -111,9 +111,19 @@ public class VideoScreen implements Screen {
 
     @Override
     public void dispose() {
+        if (videoPlayer != null) {
+            if (videoPlayer.isPlaying()) {
+                videoPlayer.stop();
+            }
+            videoPlayer.dispose();
+        }
+        if (audio != null) {
+            audio.stop();
+            audio.dispose();
+        }
         batch.dispose();
-        videoPlayer.dispose();
-        audio.dispose();
-        font.dispose();
+        if (font != null) {
+            font.dispose();
+        }
     }
 }

@@ -10,10 +10,12 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 
 public class Character {
     private final float DASH_COOLDOWN_TIME = 10.0f;
+    private final float PUSH_BACK_FORCE = 50.0f;
     private boolean isDashing = false;
     private float dashDuration = 0.0f;
     private float dashCooldown = DASH_COOLDOWN_TIME;
@@ -36,12 +38,15 @@ public class Character {
     private float timeSinceLastLifeLost = 5.0f;
     private final Rectangle bodyHitbox;
     private final Circle headHitbox;
+    private Body body;
+    private final World world;
 
-    public Character( Vector2 initialPosition,Assets assets) {
+    private final Vector2 pushBackDirection = new Vector2(0, 0);
+    private float pushBackTime = 0f;
 
-        // Set the initial position of the character
+    public Character( Vector2 initialPosition,Assets assets , World world) {
+        this.world = world;
         position = initialPosition;
-
         Texture walkTexture = assets.getAssetManager().get(Assets.walkTexture);
         Texture idleTexture = assets.getAssetManager().get(Assets.idleTexture);
         Texture walkFrontTexture = assets.getAssetManager().get(Assets.walkFrontTexture);
@@ -63,6 +68,7 @@ public class Character {
         headHitbox = new Circle();
         dashSpeed=SPEED*2;
         movementSpeed=SPEED;
+        createPhysicsBody();
     }
 
     public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog) {
@@ -70,6 +76,7 @@ public class Character {
             float deltaTime = Gdx.graphics.getDeltaTime();
             stateTime += deltaTime;
             if(!inDialog){
+
                 boolean moveLeft = Gdx.input.isKeyPressed(Input.Keys.A);
                 boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
                 boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
@@ -121,12 +128,16 @@ public class Character {
                     isWalking = "right";
                 }
 
+
+
                 // Check if the potential new position collides with blocked tiles
                 if (isTileBlocked(buffedpotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedpotentialY, tiledMap)) {
                     position.set(potentialX, potentialY);
                     bodyHitbox.set(potentialX + getWidth() * 29 / 100, potentialY + getHeight() * 10 / 100, (float) (getWidth() * 41.66 / 100), (float) (getHeight() * 31.25 / 100)); // Body hitbox (rectangle)
                     headHitbox.set(potentialX + getWidth() / 2, (float) (potentialY + getHeight() / 1.7), (float) (getWidth() / 3.1)); // Head hitbox (circle)
+                    body.setTransform(potentialX, potentialY, 0); // No rotation for this character
                 }
+                System.out.println(position.x +" "+ bodyHitbox.x +" "+ body.getPosition().x);
 
                 // Check for enemy collisions
                 for (Enemy enemy : enemies) {
@@ -141,11 +152,19 @@ public class Character {
                 for (EnemyBullet enemyBullet : enemyBullets) {
                     if (isCollidingWithBullet(enemyBullet)&&timeSinceLastLifeLost>=5.0f) {
                         loseLife();
-                        enemyBullet.setAlive(false); // Deactivate the bullet
+                        Vector2 bulletDirection = new Vector2(position).sub(enemyBullet.getPosition()).nor(); // Reverse the direction
+                        pushBackDirection.set(bulletDirection);
+                        pushBackTime = 0f;
+                        enemyBullet.setAlive(false);
                     }
                 }
 
                 timeSinceLastLifeLost += deltaTime;
+
+                if (pushBackTime < 0.5f) {
+                    pushBackTime += deltaTime;
+                    position.add(pushBackDirection.scl(PUSH_BACK_FORCE * deltaTime));
+                }
             }
         }
 
@@ -351,5 +370,43 @@ public class Character {
 
     public void setPosition(Vector2 position) {
         this.position.set(position);
+    }
+
+    private void createPhysicsBody() {
+        // Define the body
+        BodyDef bodyDef = new BodyDef();
+        bodyDef.type = BodyDef.BodyType.DynamicBody;
+        bodyDef.position.set(position); // Set initial position
+
+        // Create the body in the world
+        body = world.createBody(bodyDef);
+
+        // Create a rectangle shape for the body
+        PolygonShape bodyShape = new PolygonShape();
+        bodyShape.setAsBox(getWidth() / 2, getHeight() / 2);
+
+        // Create a fixture for the body
+        FixtureDef bodyFixture = new FixtureDef();
+        bodyFixture.shape = bodyShape;
+        bodyFixture.density = 1.0f;
+        bodyFixture.friction = 0.5f;
+        bodyFixture.restitution = 0.2f; // Bounciness
+
+        // Attach the fixture to the body
+        body.createFixture(bodyFixture);
+        bodyShape.dispose();
+
+        // Create the head as a circle shape
+        CircleShape headShape = new CircleShape();
+        headShape.setRadius(getWidth() / 6); // Example radius for head
+
+        // Create a fixture for the head
+        FixtureDef headFixture = new FixtureDef();
+        headFixture.shape = headShape;
+        headFixture.density = 0.5f;
+
+        // Attach the fixture to the body
+        body.createFixture(headFixture);
+        headShape.dispose();
     }
 }
