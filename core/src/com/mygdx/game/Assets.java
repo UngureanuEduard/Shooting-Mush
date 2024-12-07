@@ -50,6 +50,7 @@ public class Assets {
     public static final AssetDescriptor<Sound> DialogueNPC1Line2 = new AssetDescriptor<>("mp3/The Ducks 1.wav",Sound.class);
     public static final AssetDescriptor<Sound> DialogueNPC1Line3 = new AssetDescriptor<>("mp3/You need to stop them 1.wav",Sound.class);
     public static final AssetDescriptor<Texture> fallingLeafTexture = new AssetDescriptor<>("Environment/Leaf.png", Texture.class);
+    public static final AssetDescriptor<Texture> dialogTexture = new AssetDescriptor<>("Environment/Dialog.png", Texture.class);
     public Assets() {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
     }
@@ -93,6 +94,7 @@ public class Assets {
         assetManager.load(DialogueNPC1Line2);
         assetManager.load(DialogueNPC1Line3);
         assetManager.load(fallingLeafTexture);
+        assetManager.load(dialogTexture);
     }
 
     public AssetManager getAssetManager() {

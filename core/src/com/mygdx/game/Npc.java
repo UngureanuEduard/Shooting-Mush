@@ -19,16 +19,15 @@ import java.util.List;
 public class Npc {
     private Vector2 position;
     private final Animation<TextureRegion> idleAnimation;
+    private final Animation<TextureRegion> dialogPromptAnimation;
     private float stateTime=0.0f;
     private final Rectangle npcRectangle;
     private final float width;
     private final float height;
     TypingLabel label;
-    TypingLabel promptLabel;
     private Boolean inDialog = false;
     private final List<String> dialogueLines;
     private int currentLineIndex = 0;
-    private final String dialogPrompt;
     private boolean isDialogPromptVisible = false;
     private final List<Sound> dialogueSounds;
     private final int soundVolume;
@@ -37,8 +36,11 @@ public class Npc {
         this.position = position;
         this.soundVolume = soundVolume;
         Texture idleTexture = assets.getAssetManager().get(Assets.idleShoomTexture);
-        TextureRegion[] frogFrames = splitTexture(idleTexture,6);
-        idleAnimation = new Animation<>(0.15f, frogFrames);
+        TextureRegion[] npcFrames = splitTexture(idleTexture,6, 64 ,64);
+        Texture dialogTexture = assets.getAssetManager().get(Assets.dialogTexture);
+        TextureRegion[] dialogFrames = splitTexture(dialogTexture,4, 20 ,16);
+        idleAnimation = new Animation<>(0.15f, npcFrames);
+        dialogPromptAnimation = new Animation<>(0.5f, dialogFrames);
         width = idleAnimation.getKeyFrame(stateTime, true).getRegionWidth();
         height = idleAnimation.getKeyFrame(stateTime, true).getRegionHeight();
         npcRectangle = new Rectangle(position.x-width, position.y-height, width*2, height*2);
@@ -46,7 +48,6 @@ public class Npc {
         dialogueLines.add("{EASE}{SLOW} MYLO!                 ");
         dialogueLines.add("{EASE}{SLOW} The DUCKS!            ");
         dialogueLines.add("{EASE}{SLOW} You need to stop them!");
-        dialogPrompt = "T";
         dialogueSounds = new ArrayList<>();
         dialogueSounds.add(assets.getAssetManager().get(Assets.DialogueNPC1Line1));
         dialogueSounds.add(assets.getAssetManager().get(Assets.DialogueNPC1Line2));
@@ -58,37 +59,50 @@ public class Npc {
         npcRectangle.setPosition(position.x, position.y-50);
     }
 
-    private TextureRegion[] splitTexture(Texture characterTexture , int n) {
-        TextureRegion[][] tmp = TextureRegion.split(characterTexture, 64, 64);
+    private TextureRegion[] splitTexture(Texture texture , int n , int tileWidth , int tileHeight) {
+        TextureRegion[][] tmp = TextureRegion.split(texture, tileWidth, tileHeight);
         TextureRegion[] characterFrames = new TextureRegion[n];
         System.arraycopy(tmp[0], 0, characterFrames, 0, n);
         return characterFrames;
     }
 
-    public void update(float deltaTime , boolean isPaused , Vector2 playerPosition , Stage stage , Skin skin) {
+    public void update(float deltaTime, boolean isPaused, Vector2 playerPosition, Stage stage, Skin skin) {
         if (!isPaused) {
-            stateTime += deltaTime;
-            if(npcRectangle.contains(playerPosition)){
-            if (Gdx.input.isKeyJustPressed(Input.Keys.T)) {
-                inDialog = true;
-                updateDialogue(stage , skin);
-                isDialogPromptVisible = false;
-                promptLabel.remove();
-            }
-            if(!inDialog && !isDialogPromptVisible ) {
-                showDialogPrompt(skin , stage);
-                isDialogPromptVisible= true;
-            }
-            }
-            else if(isDialogPromptVisible){
-                isDialogPromptVisible = false;
-                promptLabel.remove();
-            }
+            updateStateTime(deltaTime);
+            checkPlayerInteraction(playerPosition, stage, skin);
         }
+    }
+
+    private void updateStateTime(float deltaTime) {
+        stateTime += deltaTime;
+    }
+
+    private void checkPlayerInteraction(Vector2 playerPosition, Stage stage, Skin skin) {
+        if (npcRectangle.contains(playerPosition)) {
+            handlePlayerNearby(stage, skin);
+        } else if (isDialogPromptVisible) {
+            isDialogPromptVisible = false;
+        }
+    }
+
+    private void handlePlayerNearby(Stage stage, Skin skin) {
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE)) {
+            initiateDialogue(stage, skin);
+        }
+        isDialogPromptVisible = !inDialog;
+    }
+
+    private void initiateDialogue(Stage stage, Skin skin) {
+        inDialog = true;
+        updateDialogue(stage, skin);
+        isDialogPromptVisible = false;
     }
 
     public void render(SpriteBatch batch) {
         batch.draw(idleAnimation.getKeyFrame(stateTime, true), position.x, position.y, (float) (width/1.5), (float) (height/1.5));
+        if (isDialogPromptVisible) {
+            batch.draw(dialogPromptAnimation.getKeyFrame(stateTime, true), position.x+15 , position.y + 30);
+        }
     }
 
     private void updateDialogue(Stage stage, Skin skin) {
@@ -114,13 +128,6 @@ public class Npc {
             inDialog = false;
             currentLineIndex = 0;
         }
-    }
-
-    private void showDialogPrompt(Skin skin , Stage stage) {
-        promptLabel = new TypingLabel(dialogPrompt, skin);
-        promptLabel.setFontScale(0.60f);
-        promptLabel.setPosition((float) (position.x + stage.getWidth() / 3.75), (float) (position.y + stage.getHeight() /2.3 ));
-        stage.addActor(promptLabel);
     }
 
     public Boolean getInDialog(){
