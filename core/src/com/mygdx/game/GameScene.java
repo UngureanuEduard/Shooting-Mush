@@ -12,7 +12,6 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
-import com.badlogic.gdx.physics.box2d.Box2DDebugRenderer;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
@@ -82,19 +81,21 @@ public class GameScene extends ScreenAdapter {
     EnemyBulletsManager enemyBulletsManager = new EnemyBulletsManager();
     EnemyManager enemyManager;
     ParticleEffectsManager particleEffectsManager;
-    Box2DDebugRenderer debugRenderer;
+
+    private final LeafFallingAnimation leafFallingAnimation;
+
     public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume, GameMode gameMode) {
         this.game = game;
         this.soundVolume = soundVolume;
         this.musicVolume = musicVolume;
         this.gameMode = gameMode;
         box2dWorld = new World(new Vector2(0, -10), true);
-        debugRenderer = new Box2DDebugRenderer();
         enemyManager = new EnemyManager(gameMode);
         enemyManager.loadEnemiesFromJson("storyInfo.json");
         assets = new Assets();
         assets.loadGameAssets();
         assets.getAssetManager().finishLoading();
+        leafFallingAnimation = new LeafFallingAnimation(assets);
         particleEffectsManager = new ParticleEffectsManager(assets);
         loadAssets();
     }
@@ -114,8 +115,6 @@ public class GameScene extends ScreenAdapter {
         ScreenUtils.clear(1, 0, 0, 1);
         batch.begin();
         updateCamera();
-        box2dWorld.step(1/60f, 6, 2);
-        debugRenderer.render(box2dWorld, camera.combined);
         character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused, enemyBulletsManager.getActiveEnemyBullets(),inDialog);
         handleShootLogic(delta);
         batch.setProjectionMatrix(camera.combined);
@@ -129,6 +128,7 @@ public class GameScene extends ScreenAdapter {
             spawnStoryEnemy();
             npc.update(delta , isPaused , character.getPosition() , stage , skin);
             npc.render(batch);
+            leafFallingAnimation.updateAndRender(batch , camera);
             if (transitionArea.isWithinArea(character.getPosition().x, character.getPosition().y) && enemyManager.getActiveEnemies().isEmpty()) {
                 loadNextMap();
             }
@@ -158,6 +158,7 @@ public class GameScene extends ScreenAdapter {
         gameMusic.dispose();
         bossMusic.dispose();
         box2dWorld.dispose();
+        leafFallingAnimation.dispose();
     }
 
     private void loadAssets() {
@@ -171,7 +172,7 @@ public class GameScene extends ScreenAdapter {
             imageActor = new Image(assets.getAssetManager().get(Assets.skullTexture));
             gameMusic = assets.getAssetManager().get(Assets.gameMusic);
             bossMusic = assets.getAssetManager().get(Assets.bossMusic);
-            healthBarTexture = assets.getAssetManager().get(Assets.BorderHealthTexture);
+            healthBarTexture = assets.getAssetManager().get(Assets.BossHealthBarTexture);
             healthFillTexture = assets.getAssetManager().get(Assets.HealthTexture);
         } catch (Exception e) {
             Gdx.app.error("Assets", "Failed to load assets", e);
@@ -364,7 +365,7 @@ public class GameScene extends ScreenAdapter {
         Vector2 bulletStartPosition = new Vector2(character.getPosition().x, character.getPosition().y);
         Vector2 directionToCursor = calculateDirectionToCursor(bulletStartPosition);
         directionToCursor.nor().scl(BULLET_SPEED);
-        characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, damage, assets, soundVolume);
+        characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, 100, assets, soundVolume);
     }
 
     private Vector2 calculateDirectionToCursor(Vector2 startingPoint) {

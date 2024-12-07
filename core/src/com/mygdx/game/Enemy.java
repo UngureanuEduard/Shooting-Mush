@@ -37,6 +37,8 @@ public class Enemy implements Pool.Poolable{
     protected float stateTime;
     protected boolean isFlipped = false;
     protected float health;
+    private boolean isDamaged = false;
+    protected float maxHealth;
     protected float sizeScale;
     protected Sound sound;
     protected float shootTimer = 0.0f;
@@ -63,6 +65,8 @@ public class Enemy implements Pool.Poolable{
 
     protected BehaviorStatus behaviorStatus;
 
+    private Texture healthBarBackgroundTexture;
+    private Texture healthBarForegroundTexture;
 
     private boolean alive;
 
@@ -88,6 +92,7 @@ public class Enemy implements Pool.Poolable{
     public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode){
         this.assets = assets;
         this.health = health;
+        this.maxHealth = health;
         this.position = position;
         this.spawnPosition = position.cpy();
         this.playerPosition = playerPosition;
@@ -116,6 +121,8 @@ public class Enemy implements Pool.Poolable{
     protected void loadEnemyTextures(){
         duckTexture = assets.getAssetManager().get(Assets.duckTexture);
         idleTexture = assets.getAssetManager().get(Assets.idleEnemyTexture);
+        healthBarBackgroundTexture = assets.getAssetManager().get(Assets.EnemyHealthBarTexture);
+        healthBarForegroundTexture = assets.getAssetManager().get(Assets.EnemyHealthTexture);
     }
 
     public void update(float deltaTime, EnemyBulletsManager enemyBulletsManager, Array<CharacterBullet> characterBullets, boolean isPaused, Array<Enemy> enemies ) {
@@ -190,6 +197,7 @@ public class Enemy implements Pool.Poolable{
         for (CharacterBullet bullet : bullets) {
             if (isCollidingWithBullet(bullet)) {
                 takeDamage(bullet.getDamage());
+                isDamaged = true;
                 isAttacked = true;
                 Vector2 bulletDirection = new Vector2(position).sub(bullet.getPosition()).nor();
                 pushBackDirection.set(bulletDirection);
@@ -231,7 +239,24 @@ public class Enemy implements Pool.Poolable{
 
         drawCurrentFrame(batch, currentFrame, scaledWidth, scaledHeight, isFlipped);
         renderDamageTexts(batch, Gdx.graphics.getDeltaTime());
+
+        if(isDamaged || isAttacked ){
+            renderHealthBar(batch);
+        }
     }
+
+    protected void renderHealthBar(SpriteBatch batch) {
+        float healthPercentage = Math.max(0, health) / maxHealth; // Assuming max health is 100
+        float barX = position.x;
+        float barY = position.y;
+        float barWidth = getWidth() * 0.8f;
+        float barHeight = getHeight() * 0.4f;
+
+        batch.draw(healthBarBackgroundTexture, barX, barY+getHeight()*0.8f, barWidth, barHeight*0.8f);
+
+        batch.draw(healthBarForegroundTexture, (float) (barX+1.8),barY+getHeight()*0.93f , barWidth * healthPercentage*0.83f, barHeight*0.25f);
+    }
+
 
     protected TextureRegion getCurrentFrame() {
         if(behaviorStatus == BehaviorStatus.IDLE)

@@ -40,13 +40,16 @@ public class Assets {
     public static final AssetDescriptor<Texture> bossTexture = new AssetDescriptor<>("Environment/boss.png", Texture.class);
     public static final AssetDescriptor<Texture> idleBossTexture = new AssetDescriptor<>("Environment/IdleDuckBoss.png", Texture.class);
     public static final AssetDescriptor<Texture> idleEnemyTexture = new AssetDescriptor<>("Environment/IdleEnemy.png", Texture.class);
-    public static final AssetDescriptor<Texture> idleShoomTexture = new AssetDescriptor<>("Environment/Shoom/Shoom_Idle.png", Texture.class);
-    public static final AssetDescriptor<Texture> BorderHealthTexture = new AssetDescriptor<>("Environment/BorderHealth.png", Texture.class);
+    public static final AssetDescriptor<Texture> idleShoomTexture = new AssetDescriptor<>("Environment/Shoom_Idle.png", Texture.class);
+    public static final AssetDescriptor<Texture> BossHealthBarTexture = new AssetDescriptor<>("Environment/BorderHealth.png", Texture.class);
     public static final AssetDescriptor<Texture> HealthTexture = new AssetDescriptor<>("Environment/Texture.png", Texture.class);
+    public static final AssetDescriptor<Texture> EnemyHealthTexture = new AssetDescriptor<>("Environment/EnemyHealthTexture.png", Texture.class);
+    public static final AssetDescriptor<Texture> EnemyHealthBarTexture = new AssetDescriptor<>("Environment/HealthBarEmpty.png", Texture.class);
     public static final AssetDescriptor<Music> bossMusic = new AssetDescriptor<>("mp3/BossSong.mp3", Music.class);
     public static final AssetDescriptor<Sound> DialogueNPC1Line1 = new AssetDescriptor<>("mp3/Mylo 1.wav",Sound.class);
     public static final AssetDescriptor<Sound> DialogueNPC1Line2 = new AssetDescriptor<>("mp3/The Ducks 1.wav",Sound.class);
     public static final AssetDescriptor<Sound> DialogueNPC1Line3 = new AssetDescriptor<>("mp3/You need to stop them 1.wav",Sound.class);
+    public static final AssetDescriptor<Texture> fallingLeafTexture = new AssetDescriptor<>("Environment/Leaf.png", Texture.class);
     public Assets() {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
     }
@@ -78,15 +81,18 @@ public class Assets {
         assetManager.load(duckSound);
         assetManager.load(gameMusic);
         assetManager.load(bossTexture);
+        assetManager.load(EnemyHealthTexture);
         assetManager.load(duckShootSound);
         assetManager.load(idleBossTexture);
         assetManager.load(idleEnemyTexture);
-        assetManager.load(BorderHealthTexture);
+        assetManager.load(BossHealthBarTexture);
+        assetManager.load(EnemyHealthBarTexture);
         assetManager.load(HealthTexture);
         assetManager.load(bossMusic);
         assetManager.load(DialogueNPC1Line1);
         assetManager.load(DialogueNPC1Line2);
         assetManager.load(DialogueNPC1Line3);
+        assetManager.load(fallingLeafTexture);
     }
 
     public AssetManager getAssetManager() {

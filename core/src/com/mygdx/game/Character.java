@@ -15,7 +15,6 @@ import com.badlogic.gdx.utils.Array;
 
 public class Character {
     private final float DASH_COOLDOWN_TIME = 10.0f;
-    private final float PUSH_BACK_FORCE = 50.0f;
     private boolean isDashing = false;
     private float dashDuration = 0.0f;
     private float dashCooldown = DASH_COOLDOWN_TIME;
@@ -137,7 +136,6 @@ public class Character {
                     headHitbox.set(potentialX + getWidth() / 2, (float) (potentialY + getHeight() / 1.7), (float) (getWidth() / 3.1)); // Head hitbox (circle)
                     body.setTransform(potentialX, potentialY, 0); // No rotation for this character
                 }
-                System.out.println(position.x +" "+ bodyHitbox.x +" "+ body.getPosition().x);
 
                 // Check for enemy collisions
                 for (Enemy enemy : enemies) {
@@ -163,6 +161,7 @@ public class Character {
 
                 if (pushBackTime < 0.5f) {
                     pushBackTime += deltaTime;
+                    float PUSH_BACK_FORCE = 50.0f;
                     position.add(pushBackDirection.scl(PUSH_BACK_FORCE * deltaTime));
                 }
             }
