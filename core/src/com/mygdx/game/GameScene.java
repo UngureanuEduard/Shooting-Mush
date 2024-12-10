@@ -128,7 +128,6 @@ public class GameScene extends ScreenAdapter {
             spawnStoryEnemy();
             npc.update(delta , isPaused , character.getPosition() , stage , skin);
             npc.render(batch);
-            leafFallingAnimation.updateAndRender(batch , camera);
             if (transitionArea.isWithinArea(character.getPosition().x, character.getPosition().y) && enemyManager.getActiveEnemies().isEmpty()) {
                 loadNextMap();
             }
@@ -303,6 +302,7 @@ public class GameScene extends ScreenAdapter {
         if (shouldDrawBossHealthBar()) {
             drawBossHealthBar(camera);
         }
+        leafFallingAnimation.updateAndRender(batch , camera);
     }
 
     private void drawWaveNumberAndScore() {

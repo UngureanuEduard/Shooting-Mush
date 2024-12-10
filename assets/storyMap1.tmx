@@ -92,7 +92,9 @@
    </animation>
   </tile>
  </tileset>
- <tileset firstgid="229" source="shrooms.tsx"/>
+ <tileset firstgid="229" name="shrooms" tilewidth="16" tileheight="16" tilecount="6" columns="3">
+  <image source="Tilesets/shrooms.png" width="48" height="32"/>
+ </tileset>
  <layer id="1" name="Block" width="90" height="90">
   <properties>
    <property name="blocked" type="bool" value="true"/>
