@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.ui_screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Screen;
@@ -9,6 +9,8 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
+import com.mygdx.game.GameScene;
+import com.mygdx.game.MyGdxGame;
 
 import java.io.FileNotFoundException;
 

@@ -1,15 +1,16 @@
-package com.mygdx.game;
+package com.mygdx.game.ui_screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.mygdx.game.utilities_resources.Assets;
 
 public class OptionsTable extends Table {
     private int musicVolume;
     private int soundVolume;
 
-    public OptionsTable(Assets assets, final MainMenuScreen.MainMenuCallback callback,int value1,int value2) {
+    public OptionsTable(Assets assets, final MainMenuScreen.MainMenuCallback callback, int value1, int value2) {
         Skin skin=assets.getAssetManager().get(Assets.skin);
         final Slider firstSlider = new Slider(0, 100, 10, false, skin, "default-horizontal");
         final Slider secondSlider = new Slider(0, 100, 10, false, skin, "default-horizontal");

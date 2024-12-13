@@ -1,6 +1,7 @@
 package com.mygdx.game;
 
 import com.badlogic.gdx.Game;
+import com.mygdx.game.ui_screens.MainMenuScreen;
 
 public class MyGdxGame extends Game {
 	@Override

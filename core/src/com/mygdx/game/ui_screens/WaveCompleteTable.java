@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.ui_screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
@@ -6,6 +6,9 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
+import com.mygdx.game.GameScene;
+import com.mygdx.game.combat_system.Wave;
+import com.mygdx.game.utilities_resources.Assets;
 
 import static com.badlogic.gdx.math.MathUtils.random;
 
@@ -24,9 +27,9 @@ public class WaveCompleteTable extends Table {
         button1.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gameScene.isPaused = false;
+                gameScene.setPaused(false);
                 gameScene.damage+=gameScene.damage*5/100;
-                for (Wave wave: gameScene.waves) {
+                for (Wave wave: gameScene.getWaves()) {
                     wave.setBulletDamage(gameScene.damage);
                 }
             }
@@ -44,8 +47,8 @@ public class WaveCompleteTable extends Table {
         button2.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gameScene.isPaused = false;
-                gameScene.character.GainLife();
+                gameScene.setPaused(false);
+                gameScene.getCharacter().GainLife();
 
             }
         });
@@ -59,8 +62,8 @@ public class WaveCompleteTable extends Table {
         button3.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gameScene.isPaused = false;
-                gameScene.character.GainSpeed();
+                gameScene.setPaused(false);
+                gameScene.getCharacter().GainSpeed();
             }
         });
 
@@ -76,7 +79,7 @@ public class WaveCompleteTable extends Table {
         button4.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gameScene.isPaused = false;
+                gameScene.setPaused(false);
                 gameScene.critRate+=5;
             }
         });

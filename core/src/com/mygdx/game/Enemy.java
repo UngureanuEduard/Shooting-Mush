@@ -15,8 +15,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.ai.ArenaEnemyBehaviorTree;
-import com.mygdx.game.poolmanagers.EnemyBulletsManager;
+import com.mygdx.game.animations_effects.DamageText;
+import com.mygdx.game.combat_system.CharacterBullet;
+import com.mygdx.game.pool_managers.EnemyBulletsManager;
 import com.mygdx.game.ai.StoryEnemyBehaviorTree;
+import com.mygdx.game.utilities_resources.Assets;
 
 import java.util.Random;
 

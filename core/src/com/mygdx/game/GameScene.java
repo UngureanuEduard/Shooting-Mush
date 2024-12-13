@@ -21,7 +21,14 @@ import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
-import com.mygdx.game.poolmanagers.*;
+import com.mygdx.game.animations_effects.LeafFallingAnimation;
+import com.mygdx.game.combat_system.Wave;
+import com.mygdx.game.pool_managers.*;
+import com.mygdx.game.ui_screens.MainMenuScreen;
+import com.mygdx.game.ui_screens.WaveCompleteTable;
+import com.mygdx.game.utilities_resources.Assets;
+import com.mygdx.game.utilities_resources.MapDetails;
+import com.mygdx.game.utilities_resources.TransitionArea;
 
 public class GameScene extends ScreenAdapter {
 
@@ -37,7 +44,7 @@ public class GameScene extends ScreenAdapter {
     TiledMap tiledMap;
     OrthogonalTiledMapRenderer tiledMapRenderer;
     OrthographicCamera camera;
-    Character character;
+    private Character character;
     Npc npc;
     private float minCameraX;
     private float minCameraY;
@@ -47,13 +54,13 @@ public class GameScene extends ScreenAdapter {
     private float timeSinceLastShot = 0.0f;
     private float bossHealthPercentage = 0.0f;
     public float damage = 5;
-    Array<Wave> waves;
+    private Array<Wave> waves;
     Assets assets;
     private int enemiesLeftToKill;
     Image imageActor;
     Music gameMusic;
     Music bossMusic;
-    boolean isPaused = false;
+    private boolean isPaused = false;
     private boolean inDialog = false;
     private WaveCompleteTable waveCompleteTable;
     private Texture healthBarTexture;
@@ -407,11 +414,11 @@ public class GameScene extends ScreenAdapter {
     private void loadMap(int index) {
         if (index < maps.size) {
             MapDetails mapDetails = maps.get(index);
-            tiledMap = assets.getAssetManager().get(mapDetails.mapAsset);
+            tiledMap = assets.getAssetManager().get(mapDetails.getMapAsset());
             tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
 
-            character.setPosition(mapDetails.spawnPoint);
-            transitionArea = mapDetails.transitionArea;
+            character.setPosition(mapDetails.getSpawnPoint());
+            transitionArea = mapDetails.getTransitionArea();
         }
         initCamera();
         initGameModeElements();
@@ -439,4 +446,17 @@ public class GameScene extends ScreenAdapter {
         waveCompleteTable.center();
         waveCompleteTable.setPosition(Gdx.graphics.getWidth() / 2f - waveCompleteTable.getWidth() / 2f, Gdx.graphics.getHeight() / 2f - waveCompleteTable.getHeight() / 2f);
     }
+
+    public Character getCharacter() {
+        return character;
+    }
+
+    public Array<Wave> getWaves() {
+        return waves;
+    }
+
+    public void setPaused(boolean isPaused) {
+        this.isPaused = isPaused;
+    }
+
 }

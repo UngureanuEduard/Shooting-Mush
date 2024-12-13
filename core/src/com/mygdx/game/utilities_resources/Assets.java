@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.utilities_resources;
 
 import com.badlogic.gdx.assets.AssetDescriptor;
 import com.badlogic.gdx.assets.AssetManager;

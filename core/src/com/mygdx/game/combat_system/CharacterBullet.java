@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.combat_system;
 
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
@@ -6,6 +6,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Circle;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.utilities_resources.Assets;
 
 public class CharacterBullet extends Bullet{
 

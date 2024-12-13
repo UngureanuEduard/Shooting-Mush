@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.ui_screens;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
@@ -15,6 +15,8 @@ import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.game.*;
+import com.mygdx.game.utilities_resources.Assets;
 
 public class MainMenuScreen extends ScreenAdapter {
 

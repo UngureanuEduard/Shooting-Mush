@@ -11,6 +11,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.mygdx.game.utilities_resources.Assets;
 import com.rafaskoberg.gdx.typinglabel.TypingLabel;
 
 import java.util.ArrayList;

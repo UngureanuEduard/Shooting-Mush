@@ -12,6 +12,8 @@ import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.combat_system.EnemyBullet;
+import com.mygdx.game.utilities_resources.Assets;
 
 public class Character {
     private final float DASH_COOLDOWN_TIME = 10.0f;
@@ -43,7 +45,7 @@ public class Character {
     private final Vector2 pushBackDirection = new Vector2(0, 0);
     private float pushBackTime = 0f;
 
-    public Character( Vector2 initialPosition,Assets assets , World world) {
+    public Character(Vector2 initialPosition, Assets assets , World world) {
         this.world = world;
         position = initialPosition;
         Texture walkTexture = assets.getAssetManager().get(Assets.walkTexture);
@@ -70,7 +72,7 @@ public class Character {
         createPhysicsBody();
     }
 
-    public void update( Array<Enemy> enemies,TiledMap tiledMap,Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog) {
+    public void update(Array<Enemy> enemies, TiledMap tiledMap, Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog) {
         if(!isPaused) {
             float deltaTime = Gdx.graphics.getDeltaTime();
             stateTime += deltaTime;

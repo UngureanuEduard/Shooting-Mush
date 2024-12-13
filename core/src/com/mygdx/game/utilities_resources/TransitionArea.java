@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.utilities_resources;
 
 public class TransitionArea {
     private float x;

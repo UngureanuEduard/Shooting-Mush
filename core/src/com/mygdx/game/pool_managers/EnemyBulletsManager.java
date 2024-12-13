@@ -1,12 +1,12 @@
-package com.mygdx.game.poolmanagers;
+package com.mygdx.game.pool_managers;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
-import com.mygdx.game.Assets;
-import com.mygdx.game.EnemyBullet;
+import com.mygdx.game.utilities_resources.Assets;
+import com.mygdx.game.combat_system.EnemyBullet;
 
 public class EnemyBulletsManager {
 

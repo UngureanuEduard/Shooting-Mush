@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.combat_system;
 
 public class Wave {
     private final int waveNumber;
