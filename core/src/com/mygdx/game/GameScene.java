@@ -27,6 +27,7 @@ import com.mygdx.game.pool_managers.*;
 import com.mygdx.game.ui_screens.MainMenuScreen;
 import com.mygdx.game.ui_screens.WaveCompleteTable;
 import com.mygdx.game.utilities_resources.Assets;
+import com.mygdx.game.utilities_resources.EnemyBasicInfo;
 import com.mygdx.game.utilities_resources.MapDetails;
 import com.mygdx.game.utilities_resources.TransitionArea;
 
@@ -91,17 +92,15 @@ public class GameScene extends ScreenAdapter {
 
     private final LeafFallingAnimation leafFallingAnimation;
 
-    public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume, GameMode gameMode) {
+    public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume, GameMode gameMode ,Assets assets) {
         this.game = game;
         this.soundVolume = soundVolume;
         this.musicVolume = musicVolume;
         this.gameMode = gameMode;
+        this.assets = assets;
         box2dWorld = new World(new Vector2(0, -10), true);
         enemyManager = new EnemyManager(gameMode);
         enemyManager.loadEnemiesFromJson("storyInfo.json");
-        assets = new Assets();
-        assets.loadGameAssets();
-        assets.getAssetManager().finishLoading();
         leafFallingAnimation = new LeafFallingAnimation(assets);
         particleEffectsManager = new ParticleEffectsManager(assets);
         loadAssets();
@@ -277,7 +276,7 @@ public class GameScene extends ScreenAdapter {
                 isPaused = true;
             }
         } else {
-            game.setScreen(new MainMenuScreen(game));
+            game.setScreen(new MainMenuScreen(game , assets));
         }
         drawWaveNumberAndScore();
     }
@@ -352,7 +351,7 @@ public class GameScene extends ScreenAdapter {
         Gdx.input.setInputProcessor(null);
         gameMusic.dispose();
         bossMusic.dispose();
-        game.setScreen(new MainMenuScreen(game));
+        game.setScreen(new MainMenuScreen(game ,assets));
     }
 
     private boolean shouldDrawBossHealthBar() {
@@ -416,7 +415,6 @@ public class GameScene extends ScreenAdapter {
             MapDetails mapDetails = maps.get(index);
             tiledMap = assets.getAssetManager().get(mapDetails.getMapAsset());
             tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
-
             character.setPosition(mapDetails.getSpawnPoint());
             transitionArea = mapDetails.getTransitionArea();
         }

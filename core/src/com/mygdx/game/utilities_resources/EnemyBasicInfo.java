@@ -1,4 +1,4 @@
-package com.mygdx.game.pool_managers;
+package com.mygdx.game.utilities_resources;
 
 import com.badlogic.gdx.math.Vector2;
 

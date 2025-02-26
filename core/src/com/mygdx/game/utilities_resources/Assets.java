@@ -54,47 +54,20 @@ public class Assets {
     public Assets() {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
     }
-    public void loadMenuAssets() {
-        assetManager.load(skin);
-        assetManager.load(menuBackgroundTexture);
-        assetManager.load(duckTexture);
-        assetManager.load(menuMusic);
-    }
 
     public void loadGameAssets() {
-        assetManager.load(skin);
-        assetManager.load(arenaTiledMap);
-        assetManager.load(storyTiledMap);
-        assetManager.load(walkTexture);
-        assetManager.load(idleTexture);
-        assetManager.load(walkFrontTexture);
-        assetManager.load(walkBackTexture);
-        assetManager.load(heartTexture);
-        assetManager.load(emptyHeartTexture);
-        assetManager.load(bulletTexture);
-        assetManager.load(throwSound);
-        assetManager.load(explosionParticleEffect);
-        assetManager.load(skullTexture);
-        assetManager.load(duckTexture);
-        assetManager.load(idleShoomTexture);
-        assetManager.load(lightningBoltTexture);
-        assetManager.load(candyCornTexture);
-        assetManager.load(duckSound);
-        assetManager.load(gameMusic);
-        assetManager.load(bossTexture);
-        assetManager.load(EnemyHealthTexture);
-        assetManager.load(duckShootSound);
-        assetManager.load(idleBossTexture);
-        assetManager.load(idleEnemyTexture);
-        assetManager.load(BossHealthBarTexture);
-        assetManager.load(EnemyHealthBarTexture);
-        assetManager.load(HealthTexture);
-        assetManager.load(bossMusic);
-        assetManager.load(DialogueNPC1Line1);
-        assetManager.load(DialogueNPC1Line2);
-        assetManager.load(DialogueNPC1Line3);
-        assetManager.load(fallingLeafTexture);
-        assetManager.load(dialogTexture);
+        AssetDescriptor<?>[] assetsToLoad = {
+                skin, menuBackgroundTexture, duckTexture, menuMusic, arenaTiledMap, storyTiledMap, walkTexture,
+                idleTexture, walkFrontTexture, walkBackTexture, heartTexture, emptyHeartTexture, bulletTexture,
+                throwSound, explosionParticleEffect, skullTexture, idleShoomTexture, lightningBoltTexture,
+                candyCornTexture, duckSound, gameMusic, bossTexture, EnemyHealthTexture, duckShootSound,
+                idleBossTexture, idleEnemyTexture, BossHealthBarTexture, EnemyHealthBarTexture, HealthTexture,
+                bossMusic, DialogueNPC1Line1, DialogueNPC1Line2, DialogueNPC1Line3, fallingLeafTexture, dialogTexture
+        };
+
+        for (AssetDescriptor<?> asset : assetsToLoad) {
+            assetManager.load(asset);
+        }
     }
 
     public AssetManager getAssetManager() {

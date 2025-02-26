@@ -11,6 +11,7 @@ import com.badlogic.gdx.video.VideoPlayer;
 import com.badlogic.gdx.video.VideoPlayerCreator;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.utilities_resources.Assets;
 
 import java.io.FileNotFoundException;
 
@@ -26,26 +27,28 @@ public class VideoScreen implements Screen {
     private final int soundVolume;
     private float spaceKeyHoldTime;
     private BitmapFont font;
-
-    public VideoScreen(MyGdxGame game , int musicVolume , int soundVolume) {
+    private final Assets assets;
+    public VideoScreen(MyGdxGame game , int musicVolume , int soundVolume , Assets assets) {
         this.game = game;
         this.batch = new SpriteBatch();
         this.musicVolume=musicVolume;
         this.soundVolume=soundVolume;
         this.spaceKeyHoldTime = 0;
+        this.assets = assets;
     }
 
     @Override
     public void show() {
         videoPlayer = VideoPlayerCreator.createVideoPlayer();
+        videoPlayer.setVolume(0);
         audio = Gdx.audio.newSound(Gdx.files.local("assets/intro.wav"));
         videoPlayer.setOnCompletionListener(file -> startGame());
-
         font = new BitmapFont();
 
 
         try {
-            videoPlayer.play(Gdx.files.local("assets/intro.webm"));
+            videoPlayer.load(Gdx.files.local("assets/intro.webm"));
+            videoPlayer.play();
             audio.play(musicVolume / 100f);
         } catch (FileNotFoundException e) {
             Gdx.app.error("gdx-video", "Video file not found!", e);
@@ -92,7 +95,7 @@ public class VideoScreen implements Screen {
     private void startGame() {
         audio.stop();
         videoPlayer.stop();
-        game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.STORY));
+        game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.STORY , assets));
     }
 
     @Override

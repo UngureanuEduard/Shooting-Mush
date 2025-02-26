@@ -39,16 +39,15 @@ public class MainMenuScreen extends ScreenAdapter {
     private Image backgroundImage;
     private int musicVolume=100;
     private int soundVolume=100;
-    public MainMenuScreen(MyGdxGame game) {
+    private final Assets assets;
+    public MainMenuScreen(MyGdxGame game , Assets assets) {
         this.game = game;
+        this.assets = assets;
         batch = new SpriteBatch();
     }
 
     @Override
     public void show() {
-        Assets assets = new Assets();
-        assets.loadMenuAssets();
-        assets.getAssetManager().finishLoading();
         Viewport viewport = new ExtendViewport(1920, 1080);
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
@@ -74,14 +73,14 @@ public class MainMenuScreen extends ScreenAdapter {
         addButton("Play").addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new VideoScreen(game , musicVolume , soundVolume));
+                game.setScreen(new VideoScreen(game , musicVolume , soundVolume , assets));
             }
 
         });
         addButton("Arena").addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScene(game,musicVolume,soundVolume,GameScene.GameMode.ARENA));
+                game.setScreen(new GameScene(game,musicVolume,soundVolume,GameScene.GameMode.ARENA , assets));
             }
 
         });

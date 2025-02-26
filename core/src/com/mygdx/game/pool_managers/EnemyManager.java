@@ -11,6 +11,7 @@ import com.mygdx.game.utilities_resources.Assets;
 import com.mygdx.game.Enemy;
 import com.mygdx.game.EnemyBoss;
 import com.mygdx.game.GameScene;
+import com.mygdx.game.utilities_resources.EnemyBasicInfo;
 
 public class EnemyManager {
 
@@ -79,12 +80,11 @@ public class EnemyManager {
         JsonValue base = json.parse(Gdx.files.internal(filePath));
 
         for (JsonValue map : base.get("maps")) {
-            String mapName = map.getString("mapName");
             JsonValue npcLocation = map.get("npcLocation");
             float frogX = npcLocation.getFloat("x");
             float frogY = npcLocation.getFloat("y");
             Vector2 npcPosition = new Vector2(frogX, frogY);
-            EnemyMapLocationsInfo mapInfo = new EnemyMapLocationsInfo(mapName , npcPosition);
+            EnemyMapLocationsInfo mapInfo = new EnemyMapLocationsInfo(npcPosition);
             for (JsonValue enemy : map.get("enemies")) {
                 float x = enemy.getFloat("x");
                 float y = enemy.getFloat("y");
