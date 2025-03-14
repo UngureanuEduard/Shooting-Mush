@@ -44,7 +44,7 @@ public class Character {
 
     private final Vector2 pushBackDirection = new Vector2(0, 0);
     private float pushBackTime = 0f;
-
+    private Boolean dialogOrGameOver = false;
     public Character(Vector2 initialPosition, Assets assets , World world) {
         this.world = world;
         position = initialPosition;
@@ -72,105 +72,6 @@ public class Character {
         createPhysicsBody();
     }
 
-    public void update(Array<Enemy> enemies, TiledMap tiledMap, Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog) {
-        if(!isPaused) {
-            float deltaTime = Gdx.graphics.getDeltaTime();
-            stateTime += deltaTime;
-            if(!inDialog){
-
-                boolean moveLeft = Gdx.input.isKeyPressed(Input.Keys.A);
-                boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
-                boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
-                boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
-
-                handleDash(deltaTime);
-
-                //The potential new position based on input
-                float potentialX = position.x;
-                float potentialY = position.y;
-
-                //The potential new position based on a buff distance (avoid overlaps of the character with the tile)
-                float buffedpotentialX = position.x;
-                float buffedpotentialY = position.y;
-
-                isWalking = "";
-
-                if (isDashing) {
-                    SPEED =dashSpeed;
-                }
-                else SPEED =movementSpeed;
-
-                if (moveUp) {
-                    potentialY += SPEED * deltaTime;
-                    buffedpotentialY = potentialY + 5;
-                    isWalking = "up";
-                }
-                if (moveDown) {
-                    potentialY -= SPEED * deltaTime;
-                    buffedpotentialY = potentialY;
-                    isWalking = "down";
-                }
-                if (moveLeft) {
-                    potentialX -= SPEED * deltaTime;
-                    if (!isFlipped) {
-                        flipAnimations();
-                        isFlipped = true;
-                    }
-                    buffedpotentialX = potentialX;
-                    isWalking = "left";
-                }
-                if (moveRight) {
-                    potentialX += SPEED * deltaTime;
-                    if (isFlipped) {
-                        flipAnimations();
-                        isFlipped = false;
-                    }
-                    buffedpotentialX = potentialX + 5;
-                    isWalking = "right";
-                }
-
-
-
-                // Check if the potential new position collides with blocked tiles
-                if (isTileBlocked(buffedpotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedpotentialY, tiledMap)) {
-                    position.set(potentialX, potentialY);
-                    bodyHitbox.set(potentialX + getWidth() * 29 / 100, potentialY + getHeight() * 10 / 100, (float) (getWidth() * 41.66 / 100), (float) (getHeight() * 31.25 / 100)); // Body hitbox (rectangle)
-                    headHitbox.set(potentialX + getWidth() / 2, (float) (potentialY + getHeight() / 1.7), (float) (getWidth() / 3.1)); // Head hitbox (circle)
-                    body.setTransform(potentialX, potentialY, 0); // No rotation for this character
-                }
-
-                // Check for enemy collisions
-                for (Enemy enemy : enemies) {
-                    if (isCollidingWithEnemy(enemy)) {
-                        if (timeSinceLastLifeLost >= 5.0f) {
-                            loseLife();
-                        }
-                    }
-                }
-
-                // Check for bullet collisions
-                for (EnemyBullet enemyBullet : enemyBullets) {
-                    if (isCollidingWithBullet(enemyBullet)&&timeSinceLastLifeLost>=5.0f) {
-                        loseLife();
-                        Vector2 bulletDirection = new Vector2(position).sub(enemyBullet.getPosition()).nor(); // Reverse the direction
-                        pushBackDirection.set(bulletDirection);
-                        pushBackTime = 0f;
-                        enemyBullet.setAlive(false);
-                    }
-                }
-
-                timeSinceLastLifeLost += deltaTime;
-
-                if (pushBackTime < 0.5f) {
-                    pushBackTime += deltaTime;
-                    float PUSH_BACK_FORCE = 50.0f;
-                    position.add(pushBackDirection.scl(PUSH_BACK_FORCE * deltaTime));
-                }
-            }
-        }
-
-    }
-
     public void render(SpriteBatch batch ) {
         TextureRegion currentFrame;
         if (!isInvincible()) {
@@ -185,17 +86,140 @@ public class Character {
         }
     }
 
+    public void update(Array<Enemy> enemies, TiledMap tiledMap, Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog) {
+        if (!isPaused) {
+            float deltaTime = Gdx.graphics.getDeltaTime();
+            stateTime += deltaTime;
+            dialogOrGameOver = false;
+
+            if (!inDialog) {
+
+                handleMovement(deltaTime);
+
+                handleDash(deltaTime);
+
+                checkTileCollisions(tiledMap);
+
+                checkEnemyCollisions(enemies);
+
+                checkBulletCollisions(enemyBullets);
+
+                timeSinceLastLifeLost += deltaTime;
+
+                handlePushBack(deltaTime);
+
+            }
+            else {
+                dialogOrGameOver = true;
+            }
+        }
+    }
+
+    private void handleMovement(float deltaTime) {
+        boolean moveLeft = Gdx.input.isKeyPressed(Input.Keys.A);
+        boolean moveRight = Gdx.input.isKeyPressed(Input.Keys.D);
+        boolean moveUp = Gdx.input.isKeyPressed(Input.Keys.W);
+        boolean moveDown = Gdx.input.isKeyPressed(Input.Keys.S);
+
+        float potentialX = position.x;
+        float potentialY = position.y;
+        String direction = "";
+
+        if (isDashing) {
+            SPEED = dashSpeed;
+        } else {
+            SPEED = movementSpeed;
+        }
+
+        if (moveUp) {
+            potentialY += SPEED * deltaTime;
+            direction = "up";
+        }
+        if (moveDown) {
+            potentialY -= SPEED * deltaTime;
+            direction = "down";
+        }
+        if (moveLeft) {
+            potentialX -= SPEED * deltaTime;
+            if (!isFlipped) {
+                flipAnimations();
+                isFlipped = true;
+            }
+            direction = "left";
+        }
+        if (moveRight) {
+            potentialX += SPEED * deltaTime;
+            if (isFlipped) {
+                flipAnimations();
+                isFlipped = false;
+            }
+            direction = "right";
+        }
+
+        isWalking = direction;
+        position.set(potentialX, potentialY);
+    }
+
+
+    private void checkTileCollisions(TiledMap tiledMap) {
+
+        float buffedPotentialX = position.x;
+        float buffedPotentialY = position.y;
+
+        if (isTileBlocked(buffedPotentialX, position.y, tiledMap) && isTileBlocked(position.x, buffedPotentialY, tiledMap)) {
+            bodyHitbox.set(buffedPotentialX + getWidth() * 29 / 100, buffedPotentialY + getHeight() * 10 / 100,
+                    (float) (getWidth() * 41.66 / 100), (float) (getHeight() * 31.25 / 100));
+            headHitbox.set(buffedPotentialX + getWidth() / 2, (float) (buffedPotentialY + getHeight() / 1.7),
+                    (float) (getWidth() / 3.1));
+            body.setTransform(buffedPotentialX, buffedPotentialY, 0);
+        }
+    }
+
+    private void checkEnemyCollisions(Array<Enemy> enemies) {
+        for (Enemy enemy : enemies) {
+            if (isCollidingWithEnemy(enemy)) {
+                if (timeSinceLastLifeLost >= 5.0f) {
+                    loseLife();
+                }
+            }
+        }
+    }
+
+    private void checkBulletCollisions(Array<EnemyBullet> enemyBullets) {
+        for (EnemyBullet enemyBullet : enemyBullets) {
+            if (isCollidingWithBullet(enemyBullet) && timeSinceLastLifeLost >= 5.0f) {
+                loseLife();
+                Vector2 bulletDirection = new Vector2(position).sub(enemyBullet.getPosition()).nor(); // Reverse the direction
+                pushBackDirection.set(bulletDirection);
+                pushBackTime = 0.5f;
+                enemyBullet.setAlive(false);
+            }
+        }
+    }
+
+    private void handlePushBack(float deltaTime) {
+        if (pushBackTime > 0f) {
+            pushBackTime -= deltaTime;
+            float PUSH_BACK_FORCE = 50.0f;
+            position.add(pushBackDirection.scl(PUSH_BACK_FORCE * deltaTime));
+        }
+    }
+
     private TextureRegion getCurrentFrame(){
-        switch (isWalking) {
-            case "right":
-            case "left":
-                return walkAnimationLeftAndRight.getKeyFrame(stateTime, true);
-            case "up":
-                return walkAnimationBack.getKeyFrame(stateTime, true);
-            case "down":
-                return walkAnimationFront.getKeyFrame(stateTime, true);
-            default:
-                return idleAnimationLeftAndRight.getKeyFrame(stateTime, true);
+        if(dialogOrGameOver)
+            return idleAnimationLeftAndRight.getKeyFrame(stateTime, true);
+        else{
+            switch (isWalking) {
+                case "right":
+                case "left":
+                    return walkAnimationLeftAndRight.getKeyFrame(stateTime, true);
+                case "up":
+                    return walkAnimationBack.getKeyFrame(stateTime, true);
+                case "down":
+                    return walkAnimationFront.getKeyFrame(stateTime, true);
+                default:
+                    return idleAnimationLeftAndRight.getKeyFrame(stateTime, true);
+            }
         }
     }
 
@@ -296,7 +320,6 @@ public class Character {
         }
     }
     private boolean isTileBlocked(float x, float y, TiledMap tiledMap) {
-        // Get the collision layer from the TiledMap
         TiledMapTileLayer collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Block");
 
         int tileX = (int) (x / 15.9);
@@ -374,39 +397,31 @@ public class Character {
     }
 
     private void createPhysicsBody() {
-        // Define the body
         BodyDef bodyDef = new BodyDef();
         bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(position); // Set initial position
+        bodyDef.position.set(position);
 
-        // Create the body in the world
         body = world.createBody(bodyDef);
 
-        // Create a rectangle shape for the body
         PolygonShape bodyShape = new PolygonShape();
         bodyShape.setAsBox(getWidth() / 2, getHeight() / 2);
 
-        // Create a fixture for the body
         FixtureDef bodyFixture = new FixtureDef();
         bodyFixture.shape = bodyShape;
         bodyFixture.density = 1.0f;
         bodyFixture.friction = 0.5f;
-        bodyFixture.restitution = 0.2f; // Bounciness
+        bodyFixture.restitution = 0.2f;
 
-        // Attach the fixture to the body
         body.createFixture(bodyFixture);
         bodyShape.dispose();
 
-        // Create the head as a circle shape
         CircleShape headShape = new CircleShape();
-        headShape.setRadius(getWidth() / 6); // Example radius for head
+        headShape.setRadius(getWidth() / 6);
 
-        // Create a fixture for the head
         FixtureDef headFixture = new FixtureDef();
         headFixture.shape = headShape;
         headFixture.density = 0.5f;
 
-        // Attach the fixture to the body
         body.createFixture(headFixture);
         headShape.dispose();
     }

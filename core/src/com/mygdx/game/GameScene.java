@@ -14,9 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.scenes.scene2d.ui.Image;
-import com.badlogic.gdx.scenes.scene2d.ui.Label;
-import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
@@ -24,12 +22,10 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.animations_effects.LeafFallingAnimation;
 import com.mygdx.game.combat_system.Wave;
 import com.mygdx.game.pool_managers.*;
+import com.mygdx.game.ui_screens.EndGameScreen;
 import com.mygdx.game.ui_screens.MainMenuScreen;
 import com.mygdx.game.ui_screens.WaveCompleteTable;
-import com.mygdx.game.utilities_resources.Assets;
-import com.mygdx.game.utilities_resources.EnemyBasicInfo;
-import com.mygdx.game.utilities_resources.MapDetails;
-import com.mygdx.game.utilities_resources.TransitionArea;
+import com.mygdx.game.utilities_resources.*;
 
 public class GameScene extends ScreenAdapter {
 
@@ -78,6 +74,7 @@ public class GameScene extends ScreenAdapter {
     Array<MapDetails> maps = new Array<>();
     private int currentMapIndex = 0;
 
+
     public enum GameMode {
         ARENA,
         STORY
@@ -91,6 +88,7 @@ public class GameScene extends ScreenAdapter {
     ParticleEffectsManager particleEffectsManager;
 
     private final LeafFallingAnimation leafFallingAnimation;
+    private Boolean isGameOver;
 
     public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume, GameMode gameMode ,Assets assets) {
         this.game = game;
@@ -103,6 +101,7 @@ public class GameScene extends ScreenAdapter {
         enemyManager.loadEnemiesFromJson("storyInfo.json");
         leafFallingAnimation = new LeafFallingAnimation(assets);
         particleEffectsManager = new ParticleEffectsManager(assets);
+        isGameOver = false;
         loadAssets();
     }
 
@@ -121,13 +120,12 @@ public class GameScene extends ScreenAdapter {
         ScreenUtils.clear(1, 0, 0, 1);
         batch.begin();
         updateCamera();
-        character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused, enemyBulletsManager.getActiveEnemyBullets(),inDialog);
+        character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused , enemyBulletsManager.getActiveEnemyBullets(),inDialog||isGameOver);
         handleShootLogic(delta);
         batch.setProjectionMatrix(camera.combined);
         particleEffectsManager.update();
         tiledMapRenderer.setView(camera);
         tiledMapRenderer.render();
-
         if (gameMode == GameMode.ARENA) {
             arenaWaveRender();
         } else {
@@ -347,14 +345,10 @@ public class GameScene extends ScreenAdapter {
         }
     }
 
-    private void handleGameOver() {
-        Gdx.input.setInputProcessor(null);
-        gameMusic.dispose();
-        bossMusic.dispose();
-        game.setScreen(new MainMenuScreen(game ,assets));
-    }
-
     private boolean shouldDrawBossHealthBar() {
+        if(isGameOver)
+            return false;
+
         if (!enemyManager.getActiveEnemies().isEmpty() && !isPaused) {
             for (Enemy enemy : enemyManager.getActiveEnemies()) {
                 if (enemy instanceof EnemyBoss) {
@@ -405,9 +399,6 @@ public class GameScene extends ScreenAdapter {
 
     private void initializeMaps() {
         maps.add(new MapDetails(Assets.storyTiledMap.fileName, new Vector2(120, 100), new TransitionArea(1380, 1290, 128, 192)));
-        maps.add(new MapDetails(Assets.arenaTiledMap.fileName, new Vector2(800, 800), new TransitionArea(900, 900, 128, 192)));
-        maps.add(new MapDetails(Assets.storyTiledMap.fileName, new Vector2(120, 100), new TransitionArea(1380, 1290, 128, 192)));
-        maps.add(new MapDetails(Assets.storyTiledMap.fileName, new Vector2(120, 100), new TransitionArea(1380, 1290, 128, 192)));
     }
 
     private void loadMap(int index) {
@@ -456,5 +447,23 @@ public class GameScene extends ScreenAdapter {
     public void setPaused(boolean isPaused) {
         this.isPaused = isPaused;
     }
+
+    private void handleGameOver() {
+        isGameOver = true;
+        int totalGameTime = 5 * 3600;
+        int timePlayed = (int) (Gdx.graphics.getDeltaTime() * 3600);
+        int finalScore = (totalGameTime - timePlayed) * 100;
+
+        EndGameScreen endGameScreen = new EndGameScreen(game , finalScore, assets) {
+            @Override
+            public void render(float delta) {
+                GameScene.this.render(delta);
+                super.render(delta);
+            }
+        };
+
+        game.setScreen(endGameScreen);
+    }
+
 
 }

@@ -6,8 +6,7 @@ import com.mygdx.game.ui_screens.LoadingScreen;
 public class MyGdxGame extends Game {
 	@Override
 	public void create() {
-		LoadingScreen loadingScreen = new LoadingScreen(this);
-		setScreen(loadingScreen);
+		setScreen(new LoadingScreen(this));
 	}
 
 	@Override

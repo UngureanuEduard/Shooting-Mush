@@ -54,7 +54,7 @@ project(":desktop") {
         api "com.badlogicgames.gdx-controllers:gdx-controllers-desktop:$gdxControllersVersion"
         api "com.badlogicgames.gdx:gdx-box2d-platform:$gdxVersion:natives-desktop"
         implementation "com.badlogicgames.gdx-video:gdx-video-lwjgl3:$gdxVideoVersion"
-        
+        implementation "mysql:mysql-connector-java:8.0.26"
     }
 }
 
@@ -73,6 +73,6 @@ project(":core") {
         api "com.badlogicgames.gdx:gdx-box2d:$gdxVersion"
         api "com.rafaskoberg.gdx:typing-label:$typingLabelVersion"
         implementation "com.badlogicgames.gdx-video:gdx-video:$gdxVideoVersion"
-        
+        implementation "org.xerial:sqlite-jdbc:3.34.0"
     }
 }

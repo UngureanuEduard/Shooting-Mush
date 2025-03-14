@@ -56,15 +56,16 @@ public class LeafFallingAnimation {
         Leaf leaf;
         if (leafPool.size > 0) {
             leaf = leafPool.pop();
-            leaf.reset(MathUtils.random(0, Gdx.graphics.getWidth()), Gdx.graphics.getHeight());
+            leaf.reset(MathUtils.random(0, Gdx.graphics.getWidth()), camera.position.y + camera.viewportHeight / 2);
         } else {
             float x = MathUtils.random(0, Gdx.graphics.getWidth());
-            float y = camera.position.y + camera.viewportHeight/8;
+            float y = camera.position.y + camera.viewportHeight / 2;
             float speed = MathUtils.random(50, 120);
             leaf = new Leaf(x, y, speed);
         }
         leaves.add(leaf);
     }
+
 
     public void dispose() {
         leafSheet.dispose();

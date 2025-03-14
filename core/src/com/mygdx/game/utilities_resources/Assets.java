@@ -51,6 +51,10 @@ public class Assets {
     public static final AssetDescriptor<Sound> DialogueNPC1Line3 = new AssetDescriptor<>("mp3/You need to stop them 1.wav",Sound.class);
     public static final AssetDescriptor<Texture> fallingLeafTexture = new AssetDescriptor<>("Environment/Leaf.png", Texture.class);
     public static final AssetDescriptor<Texture> dialogTexture = new AssetDescriptor<>("Environment/Dialog.png", Texture.class);
+    public static final AssetDescriptor<Texture> goldTrophyTexture = new AssetDescriptor<>("Environment/Golden Trophy Large.png", Texture.class);
+    public static final AssetDescriptor<Texture> silverTrophyTexture = new AssetDescriptor<>("Environment/Silver Trophy Large.png", Texture.class);
+    public static final AssetDescriptor<Texture> bronzeTrophyTexture = new AssetDescriptor<>("Environment/Bronze Trophy Large.png", Texture.class);
+
     public Assets() {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
     }
@@ -62,7 +66,8 @@ public class Assets {
                 throwSound, explosionParticleEffect, skullTexture, idleShoomTexture, lightningBoltTexture,
                 candyCornTexture, duckSound, gameMusic, bossTexture, EnemyHealthTexture, duckShootSound,
                 idleBossTexture, idleEnemyTexture, BossHealthBarTexture, EnemyHealthBarTexture, HealthTexture,
-                bossMusic, DialogueNPC1Line1, DialogueNPC1Line2, DialogueNPC1Line3, fallingLeafTexture, dialogTexture
+                bossMusic, DialogueNPC1Line1, DialogueNPC1Line2, DialogueNPC1Line3, fallingLeafTexture, dialogTexture ,
+                goldTrophyTexture , silverTrophyTexture , bronzeTrophyTexture
         };
 
         for (AssetDescriptor<?> asset : assetsToLoad) {
