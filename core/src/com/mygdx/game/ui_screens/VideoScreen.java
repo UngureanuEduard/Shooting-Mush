@@ -93,10 +93,15 @@ public class VideoScreen implements Screen {
     }
 
     private void startGame() {
-        audio.stop();
-        videoPlayer.stop();
-        game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.STORY , assets));
+        if (audio != null) {
+            audio.stop();
+        }
+        if (videoPlayer != null) {
+            videoPlayer.stop();
+        }
+        game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.STORY, assets));
     }
+
 
     @Override
     public void resize(int width, int height) {
@@ -116,15 +121,12 @@ public class VideoScreen implements Screen {
 
     @Override
     public void dispose() {
-        if (videoPlayer != null) {
-            if (videoPlayer.isPlaying()) {
-                videoPlayer.stop();
-            }
-            videoPlayer.dispose();
-        }
         if (audio != null) {
             audio.stop();
             audio.dispose();
+        }
+        if (videoPlayer != null) {
+            videoPlayer.dispose();
         }
         batch.dispose();
         if (font != null) {

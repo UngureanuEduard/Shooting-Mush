@@ -54,7 +54,8 @@ public class Assets {
     public static final AssetDescriptor<Texture> goldTrophyTexture = new AssetDescriptor<>("Environment/Golden Trophy Large.png", Texture.class);
     public static final AssetDescriptor<Texture> silverTrophyTexture = new AssetDescriptor<>("Environment/Silver Trophy Large.png", Texture.class);
     public static final AssetDescriptor<Texture> bronzeTrophyTexture = new AssetDescriptor<>("Environment/Bronze Trophy Large.png", Texture.class);
-
+    public static final AssetDescriptor<Texture> fireworkExplosionTexture = new AssetDescriptor<>("Environment/FireWorksExplosion.png", Texture.class);
+    public static final AssetDescriptor<Texture> fireworkRocketTexture = new AssetDescriptor<>("Environment/FireWorksRocket.png", Texture.class);
     public Assets() {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
     }
@@ -67,7 +68,7 @@ public class Assets {
                 candyCornTexture, duckSound, gameMusic, bossTexture, EnemyHealthTexture, duckShootSound,
                 idleBossTexture, idleEnemyTexture, BossHealthBarTexture, EnemyHealthBarTexture, HealthTexture,
                 bossMusic, DialogueNPC1Line1, DialogueNPC1Line2, DialogueNPC1Line3, fallingLeafTexture, dialogTexture ,
-                goldTrophyTexture , silverTrophyTexture , bronzeTrophyTexture
+                goldTrophyTexture , silverTrophyTexture , bronzeTrophyTexture , fireworkExplosionTexture , fireworkRocketTexture
         };
 
         for (AssetDescriptor<?> asset : assetsToLoad) {

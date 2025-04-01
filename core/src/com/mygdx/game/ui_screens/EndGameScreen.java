@@ -5,12 +5,16 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.utils.Align;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.animations_effects.firework.Firework;
 import com.mygdx.game.utilities_resources.Assets;
-import com.mygdx.game.utilities_resources.SQLiteHelper;
+import com.mygdx.game.utilities_resources.MySQLHelper;
 
 import java.util.List;
 
@@ -31,6 +35,11 @@ public class EndGameScreen extends ScreenAdapter {
     private float timeSinceSubmission = 0;
     private final Assets assets;
     private final StringBuilder playerName = new StringBuilder();
+    private final Texture fireworksExplosionTexture;
+    private final Texture fireworksRocketTexture;
+    private float fireworkTimer = 0;
+
+    private final Array<Firework> fireworks;
 
     public EndGameScreen(MyGdxGame game, int score, Assets assets) {
         this.game = game;
@@ -39,6 +48,11 @@ public class EndGameScreen extends ScreenAdapter {
         this.batch = new SpriteBatch();
         this.trophyTexture = assets.getAssetManager().get(Assets.goldTrophyTexture);
         this.assets = assets;
+        this.fireworksExplosionTexture = assets.getAssetManager().get(Assets.fireworkExplosionTexture);
+        this.fireworksRocketTexture = assets.getAssetManager().get(Assets.fireworkRocketTexture);
+        this.fireworks = new Array<>();
+
+
         Gdx.input.setInputProcessor(stage);
 
         this.skin = new Skin(Gdx.files.internal("Font/menu.json"));
@@ -49,7 +63,10 @@ public class EndGameScreen extends ScreenAdapter {
 
         scoreLabel = new Label("Score: " + finalScore, skin);
         scoreLabel.setFontScale(1.5f);
-        scoreLabel.setPosition(Gdx.graphics.getWidth() / 2f - scoreLabel.getWidth() / 3, Gdx.graphics.getHeight() / 2f);
+        scoreLabel.setPosition(
+                Gdx.graphics.getWidth() / 2f - scoreLabel.getPrefWidth() / 2,
+                Gdx.graphics.getHeight() / 2f
+        );
         stage.addActor(scoreLabel);
 
         nameLabel = new Label("Name:", skin);
@@ -61,18 +78,42 @@ public class EndGameScreen extends ScreenAdapter {
         inputLabel = new Label("_", skin);
         inputLabel.setFontScale(1.5f);
         inputLabel.setAlignment(Align.left);
-        inputLabel.setPosition(nameLabel.getX() + 250, nameLabel.getY());
+        inputLabel.setPosition(
+                Gdx.graphics.getWidth() / 2f - inputLabel.getPrefWidth() / 2 + 110,
+                nameLabel.getY()
+        );
         stage.addActor(inputLabel);
 
         topScoresLabel = new Label("", skin);
         topScoresLabel.setFontScale(1.2f);
         topScoresLabel.setAlignment(Align.center);
-        topScoresLabel.setPosition(Gdx.graphics.getWidth() / 2f , (float) Gdx.graphics.getHeight() / 3);
+        topScoresLabel.setPosition(
+                Gdx.graphics.getWidth() / 2f - topScoresLabel.getPrefWidth() / 2,
+                (float) ((float) Gdx.graphics.getHeight() / 2.5)
+        );
+
         stage.addActor(topScoresLabel);
     }
 
     @Override
     public void render(float delta) {
+        fireworkTimer += delta;
+        if (fireworkTimer >= 0.4f) {
+            fireworkTimer = 0;
+            float x = MathUtils.random(0, Gdx.graphics.getWidth() - 256);
+            fireworks.add(new Firework(fireworksRocketTexture, fireworksExplosionTexture, new Vector2(x, 0)));
+        }
+
+        for (int i = 0; i < fireworks.size; i++) {
+            Firework f = fireworks.get(i);
+            f.update(delta);
+            if (f.isFinished()) {
+                fireworks.removeIndex(i);
+                i--;
+            }
+        }
+
+
         if (!submitted) {
             handleInput();
             cursorTimer += delta;
@@ -83,6 +124,7 @@ public class EndGameScreen extends ScreenAdapter {
 
             String displayText = playerName + (cursorVisible ? "_" : " ");
             inputLabel.setText(displayText);
+
         } else {
             timeSinceSubmission += delta;
             if (timeSinceSubmission >= 5) {
@@ -91,6 +133,15 @@ public class EndGameScreen extends ScreenAdapter {
         }
 
         stage.act();
+
+        batch.begin();
+
+        for (Firework f : fireworks) {
+            f.render(batch);
+        }
+
+        batch.end();
+
         stage.draw();
     }
 
@@ -106,7 +157,7 @@ public class EndGameScreen extends ScreenAdapter {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ENTER) && playerName.length() > 0) {
-            SQLiteHelper.insertScore(playerName.toString(), finalScore);
+            MySQLHelper.insertScore(playerName.toString(), finalScore);
             updateTopScores();
             submitted = true;
 
@@ -118,7 +169,7 @@ public class EndGameScreen extends ScreenAdapter {
 
 
     private void updateTopScores() {
-        List<String[]> scores = SQLiteHelper.getScores();
+        List<String[]> scores = MySQLHelper.getScores();
         StringBuilder scoreText = new StringBuilder("Top 10 Scores:\n");
 
         int maxEntries = Math.min(scores.size(), 10);
@@ -133,6 +184,7 @@ public class EndGameScreen extends ScreenAdapter {
     public void dispose() {
         batch.dispose();
         trophyTexture.dispose();
+        fireworksExplosionTexture.dispose();
         stage.dispose();
         skin.dispose();
     }

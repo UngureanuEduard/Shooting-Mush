@@ -139,9 +139,15 @@ public class GameScene extends ScreenAdapter {
 
         }
 
-        if (character.getLives() <= 0 || Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+        if (character.getLives() <= 0) {
             handleGameOver();
         }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            handleGameOver();
+            //game.setScreen(new MainMenuScreen(game , assets));
+        }
+
         renderCommonElements(batch, camera);
         batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
@@ -450,10 +456,7 @@ public class GameScene extends ScreenAdapter {
 
     private void handleGameOver() {
         isGameOver = true;
-        int totalGameTime = 5 * 3600;
-        int timePlayed = (int) (Gdx.graphics.getDeltaTime() * 3600);
-        int finalScore = (totalGameTime - timePlayed) * 100;
-
+        int finalScore =   (int) (Gdx.graphics.getDeltaTime() * 3600);
         EndGameScreen endGameScreen = new EndGameScreen(game , finalScore, assets) {
             @Override
             public void render(float delta) {
