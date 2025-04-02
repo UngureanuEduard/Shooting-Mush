@@ -73,7 +73,7 @@ public class GameScene extends ScreenAdapter {
     TransitionArea transitionArea;
     Array<MapDetails> maps = new Array<>();
     private int currentMapIndex = 0;
-
+    private float timePlayed = 0f;
 
     public enum GameMode {
         ARENA,
@@ -144,11 +144,16 @@ public class GameScene extends ScreenAdapter {
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
-            handleGameOver();
             //game.setScreen(new MainMenuScreen(game , assets));
+            handleGameOver();
         }
 
         renderCommonElements(batch, camera);
+
+        if (!isPaused && !isGameOver) {
+            timePlayed += delta;
+        }
+
         batch.end();
         stage.act(Gdx.graphics.getDeltaTime());
         stage.draw();
@@ -279,10 +284,10 @@ public class GameScene extends ScreenAdapter {
                 }
                 isPaused = true;
             }
+            drawWaveNumberAndScore();
         } else {
             game.setScreen(new MainMenuScreen(game , assets));
         }
-        drawWaveNumberAndScore();
     }
 
     private void spawnStoryEnemy() {
@@ -312,7 +317,9 @@ public class GameScene extends ScreenAdapter {
         if (shouldDrawBossHealthBar()) {
             drawBossHealthBar(camera);
         }
-        leafFallingAnimation.updateAndRender(batch , camera);
+        if(!isGameOver){
+            leafFallingAnimation.updateAndRender(batch , camera);
+        }
     }
 
     private void drawWaveNumberAndScore() {
@@ -371,7 +378,7 @@ public class GameScene extends ScreenAdapter {
         Vector2 bulletStartPosition = new Vector2(character.getPosition().x, character.getPosition().y);
         Vector2 directionToCursor = calculateDirectionToCursor(bulletStartPosition);
         directionToCursor.nor().scl(BULLET_SPEED);
-        characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, 100, assets, soundVolume);
+        characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, 50, assets, soundVolume);
     }
 
     private Vector2 calculateDirectionToCursor(Vector2 startingPoint) {
@@ -456,8 +463,7 @@ public class GameScene extends ScreenAdapter {
 
     private void handleGameOver() {
         isGameOver = true;
-        int finalScore =   (int) (Gdx.graphics.getDeltaTime() * 3600);
-        EndGameScreen endGameScreen = new EndGameScreen(game , finalScore, assets) {
+        EndGameScreen endGameScreen = new EndGameScreen(game , (int)timePlayed, assets) {
             @Override
             public void render(float delta) {
                 GameScene.this.render(delta);
@@ -465,6 +471,7 @@ public class GameScene extends ScreenAdapter {
             }
         };
 
+        gameMusic.stop();
         game.setScreen(endGameScreen);
     }
 

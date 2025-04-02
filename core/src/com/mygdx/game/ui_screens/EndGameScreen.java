@@ -25,7 +25,6 @@ public class EndGameScreen extends ScreenAdapter {
     private final SpriteBatch batch;
     private final int finalScore;
     private final Skin skin;
-    private final Label topScoresLabel;
     private final Label inputLabel;
     private final Label scoreLabel;
     private final Label nameLabel;
@@ -84,12 +83,12 @@ public class EndGameScreen extends ScreenAdapter {
         );
         stage.addActor(inputLabel);
 
-        topScoresLabel = new Label("", skin);
+        Label topScoresLabel = new Label("", skin);
         topScoresLabel.setFontScale(1.2f);
         topScoresLabel.setAlignment(Align.center);
         topScoresLabel.setPosition(
                 Gdx.graphics.getWidth() / 2f - topScoresLabel.getPrefWidth() / 2,
-                (float) ((float) Gdx.graphics.getHeight() / 2.5)
+                (float) Gdx.graphics.getHeight() / 3
         );
 
         stage.addActor(topScoresLabel);
@@ -122,8 +121,12 @@ public class EndGameScreen extends ScreenAdapter {
                 cursorTimer = 0;
             }
 
-            String displayText = playerName + (cursorVisible ? "_" : " ");
+            String displayText = playerName.toString();
+            if (playerName.length() < 7 && cursorVisible) {
+                displayText += "_";
+            }
             inputLabel.setText(displayText);
+
 
         } else {
             timeSinceSubmission += delta;
@@ -151,7 +154,7 @@ public class EndGameScreen extends ScreenAdapter {
         }
 
         for (int i = Input.Keys.A; i <= Input.Keys.Z; i++) {
-            if (Gdx.input.isKeyJustPressed(i)) {
+            if (Gdx.input.isKeyJustPressed(i) && playerName.length() < 7 ) {
                 playerName.append((char) (i + 36));
             }
         }
@@ -170,14 +173,46 @@ public class EndGameScreen extends ScreenAdapter {
 
     private void updateTopScores() {
         List<String[]> scores = MySQLHelper.getScores();
-        StringBuilder scoreText = new StringBuilder("Top 10 Scores:\n");
-
         int maxEntries = Math.min(scores.size(), 10);
+        Table scoreTable = createScoreTable(scores, maxEntries);
+        stage.addActor(scoreTable);
+    }
+    private Table createScoreTable(List<String[]> scores, int maxEntries) {
+        Table scoreTable = new Table();
+        scoreTable.setPosition(Gdx.graphics.getWidth() / 2.7f, Gdx.graphics.getHeight() / 1.5f);
+        scoreTable.top().left();
+        scoreTable.padTop(50);
+        scoreTable.setSkin(skin);
+
+        Label nameTitle = new Label("Name", skin);
+        Label timeTitle = new Label("Time", skin);
+        scoreTable.add(nameTitle).left();
+        scoreTable.add().width(210);
+        scoreTable.add(timeTitle).left().row();
+
         for (int i = 0; i < maxEntries; i++) {
-            scoreText.append(i + 1).append(". ").append(scores.get(i)[0]).append(": ").append(scores.get(i)[1]).append("\n");
+            String name = scores.get(i)[0];
+            if (name.length() > 10) name = name.substring(0, 10);
+            int timeInSeconds = Integer.parseInt(scores.get(i)[1]);
+
+            String formattedTime = formatTime(timeInSeconds);
+
+            Label nameLabel = new Label(name, skin);
+            Label timeLabel = new Label(formattedTime, skin);
+
+            scoreTable.add(nameLabel).left();
+            scoreTable.add().width(200);
+            scoreTable.add(timeLabel).left().row();
         }
 
-        topScoresLabel.setText(scoreText.toString());
+        return scoreTable;
+    }
+
+    private String formatTime(int totalSeconds) {
+        int hours = totalSeconds / 3600;
+        int minutes = (totalSeconds % 3600) / 60;
+        int seconds = totalSeconds % 60;
+        return String.format("%02d:%02d:%02d", hours, minutes, seconds);
     }
 
     @Override
