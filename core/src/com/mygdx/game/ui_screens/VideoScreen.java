@@ -17,7 +17,20 @@ import java.io.FileNotFoundException;
 
 public class VideoScreen implements Screen {
 
-    private static final Integer SKIP_TIME = 2;
+    private static final int SKIP_TIME_SECONDS = 2;
+    private static final float AUDIO_VOLUME_DIVISOR = 100f;
+    private static final int SKIP_TEXT_OFFSET_X = 150;
+    private static final int SKIP_TEXT_OFFSET_Y = 30;
+    private static final float CLEAR_COLOR_R = 0f;
+    private static final float CLEAR_COLOR_G = 0f;
+    private static final float CLEAR_COLOR_B = 0f;
+    private static final float CLEAR_COLOR_A = 1f;
+    private static final String SKIP_MESSAGE = "Hold space to Skip";
+    private static final String VIDEO_PATH = "assets/intro.webm";
+    private static final String AUDIO_PATH = "assets/intro.wav";
+    private static final String LOG_TAG = "gdx-video";
+    private static final String VIDEO_NOT_FOUND_MSG = "Video file not found!";
+    private static final String VIDEO_PLAY_ERROR_MSG = "An error occurred while playing the video.";
 
     private final MyGdxGame game;
     private final SpriteBatch batch;
@@ -28,11 +41,12 @@ public class VideoScreen implements Screen {
     private float spaceKeyHoldTime;
     private BitmapFont font;
     private final Assets assets;
-    public VideoScreen(MyGdxGame game , int musicVolume , int soundVolume , Assets assets) {
+
+    public VideoScreen(MyGdxGame game, int musicVolume, int soundVolume, Assets assets) {
         this.game = game;
         this.batch = new SpriteBatch();
-        this.musicVolume=musicVolume;
-        this.soundVolume=soundVolume;
+        this.musicVolume = musicVolume;
+        this.soundVolume = soundVolume;
         this.spaceKeyHoldTime = 0;
         this.assets = assets;
     }
@@ -41,31 +55,29 @@ public class VideoScreen implements Screen {
     public void show() {
         videoPlayer = VideoPlayerCreator.createVideoPlayer();
         videoPlayer.setVolume(0);
-        audio = Gdx.audio.newSound(Gdx.files.local("assets/intro.wav"));
+        audio = Gdx.audio.newSound(Gdx.files.local(AUDIO_PATH));
         videoPlayer.setOnCompletionListener(file -> startGame());
         font = new BitmapFont();
 
-
         try {
-            videoPlayer.load(Gdx.files.local("assets/intro.webm"));
+            videoPlayer.load(Gdx.files.local(VIDEO_PATH));
             videoPlayer.play();
-            audio.play(musicVolume / 100f);
+            audio.play(musicVolume / AUDIO_VOLUME_DIVISOR);
         } catch (FileNotFoundException e) {
-            Gdx.app.error("gdx-video", "Video file not found!", e);
+            Gdx.app.error(LOG_TAG, VIDEO_NOT_FOUND_MSG, e);
         } catch (Exception e) {
-            Gdx.app.error("gdx-video", "An error occurred while playing the video.", e);
+            Gdx.app.error(LOG_TAG, VIDEO_PLAY_ERROR_MSG, e);
         }
     }
 
     @Override
     public void render(float delta) {
-        ScreenUtils.clear(0, 0, 0, 1);
-
+        ScreenUtils.clear(CLEAR_COLOR_R, CLEAR_COLOR_G, CLEAR_COLOR_B, CLEAR_COLOR_A);
         videoPlayer.update();
 
         if (Gdx.input.isKeyPressed(com.badlogic.gdx.Input.Keys.SPACE)) {
             spaceKeyHoldTime += delta;
-            if (spaceKeyHoldTime >= SKIP_TIME) {
+            if (spaceKeyHoldTime >= SKIP_TIME_SECONDS) {
                 startGame();
             }
         } else {
@@ -83,12 +95,7 @@ public class VideoScreen implements Screen {
             float y = (screenHeight - videoHeight) / 2f;
             batch.draw(frame, x, y, videoWidth, videoHeight);
         }
-
-        String message = "Hold space to Skip";
-        float messageX = Gdx.graphics.getWidth() - 150;
-        float messageY = 30;
-        font.draw(batch, message, messageX, messageY);
-
+        font.draw(batch, SKIP_MESSAGE, Gdx.graphics.getWidth() - SKIP_TEXT_OFFSET_X , (float) SKIP_TEXT_OFFSET_Y);
         batch.end();
     }
 
@@ -101,7 +108,6 @@ public class VideoScreen implements Screen {
         }
         game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.STORY, assets));
     }
-
 
     @Override
     public void resize(int width, int height) {

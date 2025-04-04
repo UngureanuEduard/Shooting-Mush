@@ -286,7 +286,7 @@ public class GameScene extends ScreenAdapter {
             }
             drawWaveNumberAndScore();
         } else {
-            game.setScreen(new MainMenuScreen(game , assets));
+            game.setScreen(new MainMenuScreen(game , assets , musicVolume,soundVolume));
         }
     }
 
@@ -463,7 +463,7 @@ public class GameScene extends ScreenAdapter {
 
     private void handleGameOver() {
         isGameOver = true;
-        EndGameScreen endGameScreen = new EndGameScreen(game , (int)timePlayed, assets) {
+        EndGameScreen endGameScreen = new EndGameScreen(game , (int)timePlayed, assets , musicVolume ,soundVolume) {
             @Override
             public void render(float delta) {
                 GameScene.this.render(delta);
