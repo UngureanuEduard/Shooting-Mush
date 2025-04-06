@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.game_modes;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -6,6 +6,10 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.entities.Character;
+import com.mygdx.game.GameScene;
+import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.entities.Npc;
 import com.mygdx.game.pool_managers.EnemyManager;
 import com.mygdx.game.pool_managers.EnemyMapLocationsInfo;
 import com.mygdx.game.ui_screens.EndGameScreenStory;

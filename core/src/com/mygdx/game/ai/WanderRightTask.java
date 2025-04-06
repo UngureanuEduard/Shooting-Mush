@@ -4,7 +4,7 @@ import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.math.Vector2;
-import com.mygdx.game.Enemy;
+import com.mygdx.game.entities.Enemy;
 
 public class WanderRightTask extends LeafTask<Enemy> {
     private static final float WANDER_DISTANCE = 5.0f;

@@ -8,8 +8,8 @@ import com.badlogic.gdx.utils.JsonReader;
 import com.badlogic.gdx.utils.JsonValue;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.utilities_resources.Assets;
-import com.mygdx.game.Enemy;
-import com.mygdx.game.EnemyBoss;
+import com.mygdx.game.entities.Enemy;
+import com.mygdx.game.entities.EnemyBoss;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.utilities_resources.EnemyBasicInfo;
 

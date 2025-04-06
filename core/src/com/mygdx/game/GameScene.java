@@ -7,6 +7,8 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.mygdx.game.game_modes.ArenaMode;
+import com.mygdx.game.game_modes.StoryMode;
 import com.mygdx.game.utilities_resources.*;
 
 public class GameScene extends ScreenAdapter {

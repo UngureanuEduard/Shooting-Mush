@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
+import com.mygdx.game.GameScene;
 import com.mygdx.game.ai.ArenaEnemyBehaviorTree;
 import com.mygdx.game.animations_effects.DamageText;
 import com.mygdx.game.combat_system.CharacterBullet;

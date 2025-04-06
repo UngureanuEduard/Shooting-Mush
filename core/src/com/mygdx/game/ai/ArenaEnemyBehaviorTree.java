@@ -4,7 +4,7 @@ import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.ai.btree.Task;
 import com.badlogic.gdx.ai.btree.branch.Selector;
 import com.badlogic.gdx.ai.btree.branch.Sequence;
-import com.mygdx.game.Enemy;
+import com.mygdx.game.entities.Enemy;
 
 public class ArenaEnemyBehaviorTree extends BehaviorTree<Enemy> {
 

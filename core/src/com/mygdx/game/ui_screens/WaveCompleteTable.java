@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.mygdx.game.ArenaMode;
+import com.mygdx.game.game_modes.ArenaMode;
 import com.mygdx.game.combat_system.Wave;
 import com.mygdx.game.utilities_resources.Assets;
 

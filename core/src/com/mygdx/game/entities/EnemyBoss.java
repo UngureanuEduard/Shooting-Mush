@@ -1,8 +1,9 @@
-package com.mygdx.game;
+package com.mygdx.game.entities;
 
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
+import com.mygdx.game.GameScene;
 import com.mygdx.game.utilities_resources.Assets;
 
 public class EnemyBoss extends Enemy {

@@ -1,4 +1,4 @@
-package com.mygdx.game;
+package com.mygdx.game.game_modes;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
@@ -12,6 +12,10 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.mygdx.game.entities.Character;
+import com.mygdx.game.entities.Enemy;
+import com.mygdx.game.entities.EnemyBoss;
+import com.mygdx.game.GameScene;
 import com.mygdx.game.animations_effects.LeafFallingAnimation;
 import com.mygdx.game.pool_managers.CharacterBulletsManager;
 import com.mygdx.game.pool_managers.EnemyBulletsManager;
