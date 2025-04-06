@@ -18,7 +18,7 @@ import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.*;
 import com.mygdx.game.utilities_resources.Assets;
 
-public class MainMenuScreen extends ScreenAdapter {
+public class    MainMenuScreen extends ScreenAdapter {
 
     private static final int VIEWPORT_WIDTH = 1920;
     private static final int VIEWPORT_HEIGHT = 1080;
@@ -38,7 +38,6 @@ public class MainMenuScreen extends ScreenAdapter {
     private static final float DUCK_IMAGE_Y_DIVISOR = 6f;
 
     private static final float MOVE_SPEED_DEFAULT = 50f;
-    private static final float MUSIC_VOLUME_DEFAULT = 0.5f;
 
     private static final float CLEAR_COLOR_R = 0.1f;
     private static final float CLEAR_COLOR_G = 0.1f;
@@ -92,21 +91,63 @@ public class MainMenuScreen extends ScreenAdapter {
         stage.addActor(mainTable);
 
         optionsTable = new OptionsTable(assets, () -> {
+            updateVolumes();
             stage.clear();
             stage.addActor(backgroundImage);
             stage.addActor(mainTable);
-            backgroundMusic.setVolume(musicVolume);
-            updateVolumes();
+            backgroundMusic.setVolume(musicVolume/100f);
         }, musicVolume, soundVolume);
         optionsTable.setFillParent(true);
         optionsTable.center();
 
-        addButton("Play").addListener(new ClickListener() {
+
+        Table playRow = new Table();
+
+        TextButton playButton = new TextButton("Play", skin);
+        playRow.add(playButton)
+                .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT/1.5))
+                .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT))
+                .padBottom(BUTTON_PADDING_BOTTOM)
+                .left();
+
+        playRow.add().width(20f);
+
+        Texture coopButtonTexture = assets.getAssetManager().get(Assets.co_opButtonTexture);
+        TextButton.TextButtonStyle baseStyle = skin.get(TextButton.TextButtonStyle.class);
+
+        Image coopImage = new Image(coopButtonTexture);
+        Table coopButtonContent = new Table();
+        coopButtonContent.add(coopImage).size(48);
+
+        TextButton coopButton = new TextButton("", baseStyle);
+        coopButton.clearChildren();
+        coopButtonContent.center();
+        coopButton.add(coopButtonContent).expand().center();
+
+        playRow.add(coopButton)
+                .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT * 0.25f))
+                .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT))
+                .padBottom(BUTTON_PADDING_BOTTOM)
+                .right();
+
+        mainTable.add(playRow);
+        mainTable.row();
+
+        playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
                 game.setScreen(new VideoScreen(game, musicVolume, soundVolume, assets));
             }
         });
+
+        coopButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.CO_OP, assets));
+            }
+        });
+
+
 
         addButton("Arena").addListener(new ClickListener() {
             @Override
@@ -147,7 +188,7 @@ public class MainMenuScreen extends ScreenAdapter {
 
         backgroundMusic = assets.getAssetManager().get(Assets.menuMusic);
         backgroundMusic.setLooping(true);
-        backgroundMusic.setVolume(MUSIC_VOLUME_DEFAULT);
+        backgroundMusic.setVolume(musicVolume);
         backgroundMusic.play();
     }
 

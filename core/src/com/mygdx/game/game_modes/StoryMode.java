@@ -57,7 +57,7 @@ public class StoryMode extends BasicGameMode {
     }
 
     public void Render(float delta , SpriteBatch batch , MyGdxGame game , Stage stage){
-        super.render(delta,batch);
+        super.render(delta , batch , game);
 
         spawnStoryEnemy();
 
@@ -76,6 +76,8 @@ public class StoryMode extends BasicGameMode {
         if( (getCharacter().getLives() == 0) ){
             handleGameOver(game);
         }
+
+        getCharacter().render(batch);
     }
 
     private void loadNextMap(MyGdxGame game) {

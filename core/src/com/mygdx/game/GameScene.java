@@ -21,11 +21,11 @@ public class GameScene extends ScreenAdapter {
 
     public enum GameMode {
         ARENA,
-        STORY
+        STORY,
+        CO_OP
     }
 
     private final GameMode gameMode;
-
     private final ArenaMode arenaMode;
     private final StoryMode storyMode;
 
@@ -43,7 +43,7 @@ public class GameScene extends ScreenAdapter {
         batch = new SpriteBatch();
         if (gameMode == GameMode.ARENA) {
             arenaMode.show();
-        } else {
+        } else if (gameMode == GameMode.STORY){
             storyMode.show();
         }
     }

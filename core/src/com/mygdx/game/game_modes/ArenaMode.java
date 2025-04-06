@@ -57,7 +57,7 @@ public class ArenaMode  extends BasicGameMode{
 
     public void render(float delta , SpriteBatch batch , MyGdxGame game, Stage stage){
 
-        super.render(delta,batch);
+        super.render(delta , batch , game);
 
         if (!waves.isEmpty()) {
             Wave currentWave = waves.first();
@@ -95,6 +95,8 @@ public class ArenaMode  extends BasicGameMode{
             Gdx.input.setInputProcessor(endGameScreenArena.getStage());
             endGameScreenArena.render(delta, batch);
         }
+
+        getCharacter().render(batch);
 
 
     }
@@ -136,7 +138,9 @@ public class ArenaMode  extends BasicGameMode{
         } else  if(super.getIsGameNotOver() && waves.size > 0){
             stage.addActor(waveCompleteTable);
         }
-        Gdx.input.setInputProcessor(stage);
+        if(getIsGameNotOver()){
+            Gdx.input.setInputProcessor(stage);
+        }
     }
 
     private void handleGameOver(MyGdxGame game) {

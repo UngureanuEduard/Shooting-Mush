@@ -34,7 +34,7 @@ public class EndGameScreenStory extends EndGameScreen {
 
         scoreTable.add(new Label("Name", skin)).left();
         scoreTable.add().width(210);
-        scoreTable.add(new Label("Score", skin)).left().row();
+        scoreTable.add(new Label("Time", skin)).left().row();
 
         for (int i = 0; i < maxEntries; i++) {
             String name = scores.get(i)[0];

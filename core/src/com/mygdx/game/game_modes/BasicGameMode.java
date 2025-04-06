@@ -12,6 +12,7 @@ import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.entities.Character;
 import com.mygdx.game.entities.Enemy;
 import com.mygdx.game.entities.EnemyBoss;
@@ -21,6 +22,7 @@ import com.mygdx.game.pool_managers.CharacterBulletsManager;
 import com.mygdx.game.pool_managers.EnemyBulletsManager;
 import com.mygdx.game.pool_managers.EnemyManager;
 import com.mygdx.game.pool_managers.ParticleEffectsManager;
+import com.mygdx.game.ui_screens.MainMenuScreen;
 import com.mygdx.game.utilities_resources.Assets;
 
 public class BasicGameMode {
@@ -109,7 +111,7 @@ public class BasicGameMode {
         maxCameraY = mapHeightInUnits - camera.viewportHeight * camera.zoom / 2;
     }
 
-    protected void render(float delta , SpriteBatch batch){
+    protected void render(float delta , SpriteBatch batch , MyGdxGame game){
         updateCamera();
         character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused , enemyBulletsManager.getActiveEnemyBullets(),inDialog||isGameOver);
         handleShootLogic(delta);
@@ -117,7 +119,6 @@ public class BasicGameMode {
         particleEffectsManager.update();
         tiledMapRenderer.setView(camera);
         tiledMapRenderer.render();
-        character.render(batch);
         enemyBulletsManager.updateAndRender(batch);
         characterBulletsManager.updateAndRender(batch);
         enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, characterBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager);
@@ -132,6 +133,12 @@ public class BasicGameMode {
 
         if (!getIsPaused() && getIsGameNotOver()) {
             timePlayed += delta;
+        }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.ESCAPE)) {
+            isGameOver = true;
+            gameMusic.stop();
+            game.setScreen(new MainMenuScreen(game, assets, musicVolume, soundVolume));
         }
     }
 
