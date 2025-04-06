@@ -14,7 +14,7 @@ public class FireworkRocket {
 
     private final TextureRegion[] frames;
     private float stateTime = 0f;
-    private boolean finished = false;
+    private boolean isFinished = false;
     private final Vector2 position;
     private final float targetY;
 
@@ -34,7 +34,7 @@ public class FireworkRocket {
         if (position.y < targetY) {
             position.y += SPEED * delta;
         } else {
-            finished = true;
+            isFinished = true;
         }
     }
 
@@ -51,8 +51,8 @@ public class FireworkRocket {
     }
 
 
-    public boolean isFinished() {
-        return !finished;
+    public boolean isNotFinished() {
+        return !isFinished;
     }
 
     public Vector2 getPosition() {

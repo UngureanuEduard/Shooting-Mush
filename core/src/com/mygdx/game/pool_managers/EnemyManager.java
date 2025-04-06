@@ -49,7 +49,7 @@ public class EnemyManager {
         enemiesPool.clear();
     }
 
-    public void updateAndRender(SpriteBatch batch , EnemyBulletsManager enemyBulletsManager , CharacterBulletsManager characterBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects){
+    public int updateAndRender(SpriteBatch batch , EnemyBulletsManager enemyBulletsManager , CharacterBulletsManager characterBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects){
         for (Enemy enemy : activeEnemies) {
             enemy.update(Gdx.graphics.getDeltaTime(), enemyBulletsManager, characterBulletsManager.getActiveCharacterBullets(), isPaused, activeEnemies );
             if (!enemy.isAlive()) {
@@ -65,6 +65,7 @@ public class EnemyManager {
                 enemy.render(batch);
             }
         }
+        return enemiesLeftToKill;
     }
 
     public void setScaled(Boolean scaled) {

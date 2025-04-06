@@ -26,7 +26,7 @@ public class Firework {
 
     public void update(float delta) {
 
-        if (rocket.isFinished()) {
+        if (rocket.isNotFinished()) {
             rocket.update(delta);
         } else {
             if (explosion == null) {
@@ -41,7 +41,7 @@ public class Firework {
 
     public void render(SpriteBatch batch) {
         batch.setColor(color);
-        if (rocket.isFinished()) {
+        if (rocket.isNotFinished()) {
             rocket.render(batch);
         } else if (explosion != null) {
             explosion.render(batch);

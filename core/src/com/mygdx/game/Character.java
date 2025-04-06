@@ -10,7 +10,6 @@ import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.math.*;
-import com.badlogic.gdx.physics.box2d.*;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.combat_system.EnemyBullet;
 import com.mygdx.game.utilities_resources.Assets;
@@ -39,14 +38,12 @@ public class Character {
     private float timeSinceLastLifeLost = 5.0f;
     private final Rectangle bodyHitbox;
     private final Circle headHitbox;
-    private Body body;
-    private final World world;
 
     private final Vector2 pushBackDirection = new Vector2(0, 0);
     private float pushBackTime = 0f;
     private Boolean dialogOrGameOver = false;
-    public Character(Vector2 initialPosition, Assets assets , World world) {
-        this.world = world;
+    public Character(Vector2 initialPosition, Assets assets) {
+
         position = initialPosition;
         Texture walkTexture = assets.getAssetManager().get(Assets.walkTexture);
         Texture idleTexture = assets.getAssetManager().get(Assets.idleTexture);
@@ -62,14 +59,13 @@ public class Character {
         walkAnimationFront = new Animation<>(0.1f, walkFrontFrames);
         walkAnimationBack = new Animation<>(0.1f, walkBackFrames);
         idleAnimationLeftAndRight = new Animation<>(0.1f, idleFrames);
-        isWalking = ""; // Initially, the character is not walking
-        isFlipped = false; // Initially, the character is not flipped
-        lives = 3; // Start with 3 lives
+        isWalking = "";
+        isFlipped = false;
+        lives = 3;
         bodyHitbox = new Rectangle();
         headHitbox = new Circle();
         dashSpeed=SPEED*2;
         movementSpeed=SPEED;
-        createPhysicsBody();
     }
 
     public void render(SpriteBatch batch ) {
@@ -171,7 +167,6 @@ public class Character {
                     (float) (getWidth() * 41.66 / 100), (float) (getHeight() * 31.25 / 100));
             headHitbox.set(buffedPotentialX + getWidth() / 2, (float) (buffedPotentialY + getHeight() / 1.7),
                     (float) (getWidth() / 3.1));
-            body.setTransform(buffedPotentialX, buffedPotentialY, 0);
         }
     }
 
@@ -396,33 +391,4 @@ public class Character {
         this.position.set(position);
     }
 
-    private void createPhysicsBody() {
-        BodyDef bodyDef = new BodyDef();
-        bodyDef.type = BodyDef.BodyType.DynamicBody;
-        bodyDef.position.set(position);
-
-        body = world.createBody(bodyDef);
-
-        PolygonShape bodyShape = new PolygonShape();
-        bodyShape.setAsBox(getWidth() / 2, getHeight() / 2);
-
-        FixtureDef bodyFixture = new FixtureDef();
-        bodyFixture.shape = bodyShape;
-        bodyFixture.density = 1.0f;
-        bodyFixture.friction = 0.5f;
-        bodyFixture.restitution = 0.2f;
-
-        body.createFixture(bodyFixture);
-        bodyShape.dispose();
-
-        CircleShape headShape = new CircleShape();
-        headShape.setRadius(getWidth() / 6);
-
-        FixtureDef headFixture = new FixtureDef();
-        headFixture.shape = headShape;
-        headFixture.density = 0.5f;
-
-        body.createFixture(headFixture);
-        headShape.dispose();
-    }
 }

@@ -134,4 +134,19 @@ public class Npc {
     public Boolean getInDialog(){
         return inDialog;
     }
+
+    public void dispose() {
+        if (label != null) {
+            label.remove();
+            label = null;
+        }
+        for (Sound sound : dialogueSounds) {
+            if (sound != null) {
+                sound.dispose();
+            }
+        }
+        dialogueSounds.clear();
+        dialogueLines.clear();
+    }
+
 }

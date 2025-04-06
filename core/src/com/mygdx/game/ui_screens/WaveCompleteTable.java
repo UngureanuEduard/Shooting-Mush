@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
-import com.mygdx.game.GameScene;
+import com.mygdx.game.ArenaMode;
 import com.mygdx.game.combat_system.Wave;
 import com.mygdx.game.utilities_resources.Assets;
 
@@ -14,10 +14,11 @@ import static com.badlogic.gdx.math.MathUtils.random;
 
 public class WaveCompleteTable extends Table {
 
-    GameScene gameScene;
+    ArenaMode arenaMode;
 
-    public WaveCompleteTable(Skin skin, Assets assets, final GameScene gameScene) {
-        this.gameScene = gameScene;
+    public WaveCompleteTable(Skin skin, Assets assets , ArenaMode arenaMode) {
+
+        this.arenaMode = arenaMode;
 
         Label label1 = new Label("Damage(+5%)", skin);
         TextureRegion myTextureRegion = new TextureRegion(assets.getAssetManager().get(Assets.bulletTexture));
@@ -27,10 +28,10 @@ public class WaveCompleteTable extends Table {
         button1.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gameScene.setPaused(false);
-                gameScene.damage+=gameScene.damage*5/100;
-                for (Wave wave: gameScene.getWaves()) {
-                    wave.setBulletDamage(gameScene.damage);
+                arenaMode.setIsPaused(false);
+                arenaMode.setDamage(arenaMode.getDamage()+ arenaMode.getDamage()*5/100);
+                for (Wave wave: arenaMode.getWaves()) {
+                    wave.setBulletDamage(arenaMode.getDamage());
                 }
             }
         });
@@ -47,8 +48,8 @@ public class WaveCompleteTable extends Table {
         button2.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gameScene.setPaused(false);
-                gameScene.getCharacter().GainLife();
+                arenaMode.setIsPaused(false);
+                arenaMode.getCharacter().GainLife();
 
             }
         });
@@ -62,8 +63,8 @@ public class WaveCompleteTable extends Table {
         button3.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gameScene.setPaused(false);
-                gameScene.getCharacter().GainSpeed();
+                arenaMode.setIsPaused(false);
+                arenaMode.getCharacter().GainSpeed();
             }
         });
 
@@ -79,14 +80,13 @@ public class WaveCompleteTable extends Table {
         button4.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                gameScene.setPaused(false);
-                gameScene.critRate+=5;
+                arenaMode.setIsPaused(false);
+                arenaMode.incrementCritRate();
             }
         });
 
         int randomNumber = random.nextInt(4) + 1;
 
-        // Add the elements to the table
         if (randomNumber != 1) {
             add(label1).pad(10, 0, 0, 50);
         }
@@ -112,5 +112,7 @@ public class WaveCompleteTable extends Table {
         if (randomNumber != 4) {
             add(button4).pad(10, 0, 0, 50);
         }
+
     }
+
 }
