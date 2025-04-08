@@ -95,10 +95,6 @@ public class ArenaMode  extends BasicGameMode{
             Gdx.input.setInputProcessor(endGameScreenArena.getStage());
             endGameScreenArena.render(delta, batch);
         }
-
-        getCharacter().render(batch);
-
-
     }
     private void spawnArenaEnemy(float health) {
         Vector2 enemyPosition = new Vector2(MathUtils.random(getMinCameraX(), getMaxCameraX()), MathUtils.random(getMinCameraY(), getMaxCameraY()));

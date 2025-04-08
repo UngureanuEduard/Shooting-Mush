@@ -8,6 +8,7 @@ import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
 import com.mygdx.game.game_modes.ArenaMode;
+import com.mygdx.game.game_modes.CoopMode;
 import com.mygdx.game.game_modes.StoryMode;
 import com.mygdx.game.utilities_resources.*;
 
@@ -26,25 +27,42 @@ public class GameScene extends ScreenAdapter {
     }
 
     private final GameMode gameMode;
-    private final ArenaMode arenaMode;
-    private final StoryMode storyMode;
+    private  ArenaMode arenaMode;
+    private  StoryMode storyMode;
+    private  CoopMode coopMode;
 
 
     public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume, GameMode gameMode ,Assets assets) {
         this.game = game;
         this.gameMode = gameMode;
         this.assets = assets;
-        arenaMode = new ArenaMode(assets,soundVolume,musicVolume);
-        storyMode = new StoryMode(assets ,soundVolume ,musicVolume);
+
+        switch (gameMode) {
+            case ARENA:
+                arenaMode = new ArenaMode(assets,soundVolume,musicVolume);
+                break;
+            case STORY:
+                storyMode = new StoryMode(assets ,soundVolume ,musicVolume);
+                break;
+            case CO_OP:
+                coopMode = new CoopMode(assets, soundVolume, musicVolume);
+                break;
+        }
     }
 
     @Override
     public void show() {
         batch = new SpriteBatch();
-        if (gameMode == GameMode.ARENA) {
-            arenaMode.show();
-        } else if (gameMode == GameMode.STORY){
-            storyMode.show();
+        switch (gameMode) {
+            case ARENA:
+                arenaMode.show();
+                break;
+            case STORY:
+                storyMode.show();
+                break;
+            case CO_OP:
+                coopMode.show();
+                break;
         }
     }
 
@@ -53,11 +71,16 @@ public class GameScene extends ScreenAdapter {
         ScreenUtils.clear(1, 0, 0, 1);
         batch.begin();
 
-        if (gameMode == GameMode.ARENA) {
-            arenaMode.render(delta,batch,game,stage);
-        }
-        else if (gameMode == GameMode.STORY) {
-            storyMode.Render(delta,batch,game,stage);
+        switch (gameMode) {
+            case ARENA:
+                arenaMode.render(delta, batch, game, stage);
+                break;
+            case STORY:
+                storyMode.Render(delta, batch, game, stage);
+                break;
+            case CO_OP:
+                coopMode.Render(delta, batch, game, stage);
+                break;
         }
 
         batch.end();
@@ -74,4 +97,7 @@ public class GameScene extends ScreenAdapter {
         storyMode.dispose();
     }
 
+    public CoopMode getCoopMode() {
+        return coopMode;
+    }
 }

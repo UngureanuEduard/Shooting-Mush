@@ -28,7 +28,7 @@ public class StoryMode extends BasicGameMode {
 
 
     public StoryMode(Assets assets, Integer soundVolume, Integer musicVolume) {
-        super(assets , soundVolume, musicVolume);
+        super(assets , soundVolume, musicVolume );
         setEnemyManager(new EnemyManager(GameScene.GameMode.STORY));
         getEnemyManager().loadEnemiesFromJson("storyInfo.json");
         initializeMaps();
@@ -76,8 +76,6 @@ public class StoryMode extends BasicGameMode {
         if( (getCharacter().getLives() == 0) ){
             handleGameOver(game);
         }
-
-        getCharacter().render(batch);
     }
 
     private void loadNextMap(MyGdxGame game) {
@@ -121,5 +119,7 @@ public class StoryMode extends BasicGameMode {
         if (endGameScreenStory != null) endGameScreenStory.dispose();
         if (maps != null) maps.clear();
     }
+
+
 
 }

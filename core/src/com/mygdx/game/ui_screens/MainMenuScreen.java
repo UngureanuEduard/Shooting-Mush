@@ -12,10 +12,16 @@ import com.badlogic.gdx.scenes.scene2d.InputEvent;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
+import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.badlogic.gdx.utils.viewport.Viewport;
+import com.esotericsoftware.kryonet.Client;
+import com.esotericsoftware.kryonet.Connection;
+import com.esotericsoftware.kryonet.Listener;
+import com.esotericsoftware.kryonet.Server;
 import com.mygdx.game.*;
+import com.mygdx.game.newtork.Network;
 import com.mygdx.game.utilities_resources.Assets;
 
 public class    MainMenuScreen extends ScreenAdapter {
@@ -143,11 +149,147 @@ public class    MainMenuScreen extends ScreenAdapter {
         coopButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.CO_OP, assets));
+                mainTable.clear();
+
+                Texture backTexture = assets.getAssetManager().get(Assets.backButtonTexture);
+                ImageButton backButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(backTexture)));
+
+                TextButton joinButton = new TextButton("Join", skin);
+                TextButton hostButton = new TextButton("Host", skin);
+
+                backButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        stage.clear();
+                        stage.addActor(backgroundImage);
+                        stage.addActor(mainTable);
+                        mainTable.clear();
+                        show();
+                    }
+                });
+
+                joinButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        mainTable.clear();
+
+                        Texture backTexture = assets.getAssetManager().get(Assets.backButtonTexture);
+                        ImageButton backButton = new ImageButton(new TextureRegionDrawable(new TextureRegion(backTexture)));
+                        backButton.addListener(new ClickListener() {
+                            @Override
+                            public void clicked(InputEvent event, float x, float y) {
+                                stage.clear();
+                                stage.addActor(backgroundImage);
+                                stage.addActor(mainTable);
+                                show();
+                            }
+                        });
+
+                        TextField ipInputField = new TextField("", skin);
+                        ipInputField.setMessageText("  Enter IP address");
+
+                        TextButton connectButton = new TextButton("Connect", skin);
+                        connectButton.addListener(new ClickListener() {
+                            @Override
+                            public void clicked(InputEvent event, float x, float y) {
+                                String ipAddress = ipInputField.getText();
+                                Client client = new Client();
+                                Network.register(client);
+
+                                client.addListener(new Listener() {
+                                    public void connected(Connection connection) {
+                                        System.out.println("Connected to server at IP: " + ipAddress);
+                                        Gdx.app.postRunnable(() -> {
+                                            GameScene gameScene = new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.CO_OP, assets);
+
+                                            gameScene.getCoopMode().setNetworkInfo(false, client, null);
+                                            gameScene.getCoopMode().setClientListener();
+                                            System.out.println("Client listener set!");
+                                            game.setScreen(gameScene);
+
+
+                                        });
+                                    }
+
+                                    public void disconnected(com.esotericsoftware.kryonet.Connection connection) {
+                                        System.out.println("Disconnected from server");
+                                    }
+                                });
+
+                                client.start();
+                                new Thread(() -> {
+                                    try {
+                                        client.connect(5000, ipAddress, Network.PORT);
+                                    } catch (Exception e) {
+                                        ipInputField.setText(" Connection failed");
+                                        System.err.println("Connection failed: " + e.getMessage());
+                                    }
+                                }).start();
+                            }
+                        });
+
+
+                        Table inputTable = new Table();
+                        inputTable.add(ipInputField)
+                                .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT))
+                                .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT / 1.5))
+                                .padBottom(20f);
+                        inputTable.row();
+                        inputTable.add(connectButton)
+                                .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT * 0.6f))
+                                .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT));
+
+                        Table coopRow = new Table();
+                        coopRow.add(backButton).width(100).height(100).padRight(50).left();
+                        coopRow.add(inputTable).center();
+
+                        mainTable.add(coopRow).padBottom(BUTTON_PADDING_BOTTOM);
+                        mainTable.row();
+                    }
+                });
+
+
+                hostButton.addListener(new ClickListener() {
+                    @Override
+                    public void clicked(InputEvent event, float x, float y) {
+                        Server server = new Server();
+                        Network.register(server);
+                        server.start();
+                        try {
+                            server.bind(Network.PORT);
+                            String ip = java.net.InetAddress.getLocalHost().getHostAddress();
+                            System.out.println("Hosting server on IP: " + ip);
+                        } catch (Exception e) {
+                            //noinspection CallToPrintStackTrace
+                            e.printStackTrace();
+                        }
+
+                        GameScene gameScene = new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.CO_OP, assets);
+                        gameScene.getCoopMode().setNetworkInfo(true, null, server); // isHost=true
+                        game.setScreen(gameScene);
+
+
+                    }
+                });
+
+                Table joinHostColumn = new Table();
+                joinHostColumn.add(joinButton)
+                        .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT))
+                        .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT))
+                        .padBottom(30f);
+                joinHostColumn.row();
+                joinHostColumn.add(hostButton)
+                        .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT))
+                        .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT));
+
+                Table coopRow = new Table();
+                coopRow.add(backButton).width(100).height(100).padRight(50).left();
+                coopRow.add(joinHostColumn);
+
+                mainTable.add(coopRow).padBottom(BUTTON_PADDING_BOTTOM);
+                mainTable.row();
             }
         });
-
-
 
         addButton("Arena").addListener(new ClickListener() {
             @Override
@@ -252,4 +394,6 @@ public class    MainMenuScreen extends ScreenAdapter {
         musicVolume = optionsTable.getMusicVolume();
         soundVolume = optionsTable.getSoundVolume();
     }
+
+
 }

@@ -123,6 +123,7 @@ public class BasicGameMode {
         characterBulletsManager.updateAndRender(batch);
         enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, characterBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager);
         character.drawHearts(batch, camera);
+        character.render(batch);
         particleEffectsManager.draw(batch);
         if (shouldDrawBossHealthBar()) {
             drawBossHealthBar(camera ,batch);
@@ -321,6 +322,7 @@ public class BasicGameMode {
     public void setInDialog(boolean inDialog) {
         this.inDialog = inDialog;
     }
+
 
     public Integer getCritRate() {
         return critRate;
