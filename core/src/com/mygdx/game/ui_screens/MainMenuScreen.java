@@ -23,11 +23,12 @@ import com.esotericsoftware.kryonet.Server;
 import com.mygdx.game.*;
 import com.mygdx.game.newtork.Network;
 import com.mygdx.game.utilities_resources.Assets;
+import com.mygdx.game.utilities_resources.Settings;
+
+import static com.mygdx.game.utilities_resources.Settings.*;
+
 
 public class    MainMenuScreen extends ScreenAdapter {
-
-    private static final int VIEWPORT_WIDTH = 1920;
-    private static final int VIEWPORT_HEIGHT = 1080;
 
     private static final float BACKGROUND_PADDING = 200f;
 
@@ -69,7 +70,10 @@ public class    MainMenuScreen extends ScreenAdapter {
     private int musicVolume;
     private int soundVolume;
     private final Assets assets;
-
+    float worldWidth;
+    float worldHeight;
+    private float duckScaleX;
+    private float duckScaleY;
 
     public MainMenuScreen(MyGdxGame game, Assets assets , int musicVolume, int soundVolume) {
         this.game = game;
@@ -81,9 +85,18 @@ public class    MainMenuScreen extends ScreenAdapter {
 
     @Override
     public void show() {
-        Viewport viewport = new ExtendViewport(VIEWPORT_WIDTH, VIEWPORT_HEIGHT);
+        Viewport viewport = new ExtendViewport(Settings.fullScreenWidth, Settings.fullScreenHeight);
         stage = new Stage(viewport);
         Gdx.input.setInputProcessor(stage);
+        worldWidth = stage.getViewport().getWorldWidth();
+        worldHeight = stage.getViewport().getWorldHeight();
+
+        if (windowed) {
+            Gdx.graphics.setWindowedMode(windowedScreenWidth, windowedScreenHeight);
+        } else {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        }
+
 
         skin = assets.getAssetManager().get(Assets.skin);
         mainTable = new Table();
@@ -91,7 +104,7 @@ public class    MainMenuScreen extends ScreenAdapter {
 
         Texture backgroundTexture = assets.getAssetManager().get(Assets.menuBackgroundTexture);
         backgroundImage = new Image(backgroundTexture);
-        backgroundImage.setSize(Gdx.graphics.getWidth() + BACKGROUND_PADDING, Gdx.graphics.getHeight() + BACKGROUND_PADDING);
+        backgroundImage.setSize(worldWidth + BACKGROUND_PADDING, worldHeight + BACKGROUND_PADDING);
 
         stage.addActor(backgroundImage);
         stage.addActor(mainTable);
@@ -111,8 +124,8 @@ public class    MainMenuScreen extends ScreenAdapter {
 
         TextButton playButton = new TextButton("Play", skin);
         playRow.add(playButton)
-                .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT/1.5))
-                .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT))
+                .width(Math.round(worldWidth * BUTTON_WIDTH_PERCENT/1.5))
+                .height(Math.round(worldHeight * BUTTON_HEIGHT_PERCENT))
                 .padBottom(BUTTON_PADDING_BOTTOM)
                 .left();
 
@@ -131,8 +144,8 @@ public class    MainMenuScreen extends ScreenAdapter {
         coopButton.add(coopButtonContent).expand().center();
 
         playRow.add(coopButton)
-                .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT * 0.25f))
-                .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT))
+                .width(Math.round(worldWidth * BUTTON_WIDTH_PERCENT * 0.25f))
+                .height(Math.round(worldHeight * BUTTON_HEIGHT_PERCENT))
                 .padBottom(BUTTON_PADDING_BOTTOM)
                 .right();
 
@@ -142,7 +155,7 @@ public class    MainMenuScreen extends ScreenAdapter {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new VideoScreen(game, musicVolume, soundVolume, assets));
+                game.setScreen(new VideoScreen(game, musicVolume, soundVolume, assets , worldWidth , worldHeight));
             }
         });
 
@@ -231,13 +244,13 @@ public class    MainMenuScreen extends ScreenAdapter {
 
                         Table inputTable = new Table();
                         inputTable.add(ipInputField)
-                                .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT))
-                                .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT / 1.5))
+                                .width(Math.round(worldWidth * BUTTON_WIDTH_PERCENT))
+                                .height(Math.round(worldHeight * BUTTON_HEIGHT_PERCENT / 1.5))
                                 .padBottom(20f);
                         inputTable.row();
                         inputTable.add(connectButton)
-                                .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT * 0.6f))
-                                .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT));
+                                .width(Math.round(worldWidth * BUTTON_WIDTH_PERCENT * 0.6f))
+                                .height(Math.round(worldHeight * BUTTON_HEIGHT_PERCENT));
 
                         Table coopRow = new Table();
                         coopRow.add(backButton).width(100).height(100).padRight(50).left();
@@ -274,13 +287,13 @@ public class    MainMenuScreen extends ScreenAdapter {
 
                 Table joinHostColumn = new Table();
                 joinHostColumn.add(joinButton)
-                        .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT))
-                        .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT))
+                        .width(Math.round(worldWidth * BUTTON_WIDTH_PERCENT))
+                        .height(Math.round(worldHeight * BUTTON_HEIGHT_PERCENT))
                         .padBottom(30f);
                 joinHostColumn.row();
                 joinHostColumn.add(hostButton)
-                        .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT))
-                        .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT));
+                        .width(Math.round(worldWidth * BUTTON_WIDTH_PERCENT))
+                        .height(Math.round(worldHeight * BUTTON_HEIGHT_PERCENT));
 
                 Table coopRow = new Table();
                 coopRow.add(backButton).width(100).height(100).padRight(50).left();
@@ -325,8 +338,18 @@ public class    MainMenuScreen extends ScreenAdapter {
 
         movingAnimation = new Animation<>(DUCK_ANIMATION_FRAME_DURATION, frames, Animation.PlayMode.LOOP);
         movingImage = new Image(movingAnimation.getKeyFrame(0));
-        movingImage.setPosition(0, Gdx.graphics.getHeight() / DUCK_IMAGE_Y_DIVISOR);
-        movingImage.setSize(DUCK_IMAGE_WIDTH, DUCK_IMAGE_HEIGHT);
+
+        if(windowed){
+            duckScaleX = windowedScreenWidth / 1920f;
+            duckScaleY = windowedScreenHeight / 1080f;
+        }
+        else {
+            duckScaleX = fullScreenWidth / 1920f;
+            duckScaleY = fullScreenHeight / 1080f;
+        }
+
+        movingImage.setPosition(0, (Gdx.graphics.getHeight() / DUCK_IMAGE_Y_DIVISOR)*duckScaleY);
+        movingImage.setSize(DUCK_IMAGE_WIDTH *duckScaleX , DUCK_IMAGE_HEIGHT * duckScaleY);
 
         backgroundMusic = assets.getAssetManager().get(Assets.menuMusic);
         backgroundMusic.setLooping(true);
@@ -337,8 +360,8 @@ public class    MainMenuScreen extends ScreenAdapter {
     private Button addButton(String name) {
         TextButton button = new TextButton(name, skin);
         mainTable.add(button)
-                .width(Math.round(Gdx.graphics.getWidth() * BUTTON_WIDTH_PERCENT))
-                .height(Math.round(Gdx.graphics.getHeight() * BUTTON_HEIGHT_PERCENT))
+                .width(Math.round(worldWidth * BUTTON_WIDTH_PERCENT))
+                .height(Math.round(worldHeight * BUTTON_HEIGHT_PERCENT))
                 .padBottom(BUTTON_PADDING_BOTTOM);
         mainTable.row();
         return button;
@@ -371,7 +394,7 @@ public class    MainMenuScreen extends ScreenAdapter {
 
         batch.begin();
         batch.draw(currentFrame, movingImage.getX(), movingImage.getY(), DUCK_IMAGE_WIDTH, DUCK_IMAGE_HEIGHT,
-                isFlipped ? -DUCK_IMAGE_WIDTH : DUCK_IMAGE_WIDTH, DUCK_IMAGE_HEIGHT, 1, 1, 0);
+                isFlipped ? -DUCK_IMAGE_WIDTH : DUCK_IMAGE_WIDTH, DUCK_IMAGE_HEIGHT, duckScaleX, duckScaleY, 0);
         batch.end();
     }
 

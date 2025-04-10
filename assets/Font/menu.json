@@ -229,6 +229,14 @@
 		"vScrollKnob": "vertical-scroll-knob"
 	}
 },
+"com.badlogic.gdx.scenes.scene2d.ui.SelectBox$SelectBoxStyle": {
+	"default": {
+		"font": "Kaph-Big",
+		"fontColor": "green",
+		"scrollStyle": "scroll",
+		"listStyle": "default"
+	}
+},
 "com.badlogic.gdx.scenes.scene2d.ui.Slider$SliderStyle": {
 	"default-horizontal": {
 		"background": "round-button-green",

@@ -1,7 +1,6 @@
 package com.mygdx.game.ui_screens;
 
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.scenes.scene2d.ui.Table;
 import com.mygdx.game.MyGdxGame;
@@ -12,8 +11,9 @@ public class EndGameScreenArena extends EndGameScreen {
 
     private final int wavesCompleted;
 
-    public EndGameScreenArena(MyGdxGame game, int score, Assets assets, int musicVolume, int soundVolume, int wavesCompleted ) {
-        super(game, score, assets, musicVolume, soundVolume);
+    public EndGameScreenArena(MyGdxGame game, int score, Assets assets, int musicVolume,
+                              int soundVolume, int wavesCompleted ) {
+        super(game, score, assets, musicVolume, soundVolume );
         this.wavesCompleted = wavesCompleted;
     }
 
@@ -33,7 +33,7 @@ public class EndGameScreenArena extends EndGameScreen {
     @Override
     protected Table createScoreTable(java.util.List<String[]> scores, int maxEntries) {
         Table scoreTable = new Table();
-        scoreTable.setPosition(Gdx.graphics.getWidth() / 2.7f, Gdx.graphics.getHeight() / 1.5f);
+        scoreTable.setPosition(worldWidth / 2f - scoreTable.getWidth()/2f, worldHeight / 1.5f);
         scoreTable.top().left().padTop(50).setSkin(skin);
 
         scoreTable.add(new Label("Name", skin)).left();

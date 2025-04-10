@@ -11,6 +11,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.entities.Character;
@@ -65,6 +66,8 @@ public class BasicGameMode {
     private float damage = 5;
     private Integer critRate = 15;
     private float timePlayed = 0f;
+    private float worldWidth ;
+    private float worldHeight ;
 
 
     public BasicGameMode(Assets assets , Integer soundVolume, Integer musicVolume) {
@@ -83,18 +86,18 @@ public class BasicGameMode {
         healthFillTexture = assets.getAssetManager().get(Assets.HealthTexture);
     }
 
-    protected void show(){
+    protected void show(int cameraWidth, int cameraHeight){
         healthBarWidth = (float) Gdx.graphics.getWidth() / 5;
         healthBarHeight = (float) Gdx.graphics.getHeight() / 36;
         maxBossHealth = 500;
-        initCamera();
+        initCamera(cameraWidth,cameraHeight);
         setupMusic();
         fillManagers();
     }
 
-    protected void initCamera() {
+    protected void initCamera(int width, int height) {
         camera = new OrthographicCamera();
-        camera.setToOrtho(false, 1920, 1080);
+        camera.setToOrtho(false, width, height);
         camera.zoom = CAMERA_ZOOM;
 
         int mapWidthInTiles = tiledMap.getProperties().get("width", Integer.class);
@@ -111,8 +114,10 @@ public class BasicGameMode {
         maxCameraY = mapHeightInUnits - camera.viewportHeight * camera.zoom / 2;
     }
 
-    protected void render(float delta , SpriteBatch batch , MyGdxGame game){
+    protected void render(float delta , SpriteBatch batch , MyGdxGame game , Stage stage){
         updateCamera();
+        worldWidth = stage.getViewport().getWorldWidth();
+        worldHeight = stage.getViewport().getWorldHeight();
         character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused , enemyBulletsManager.getActiveEnemyBullets(),inDialog||isGameOver);
         handleShootLogic(delta);
         batch.setProjectionMatrix(camera.combined);
@@ -205,7 +210,7 @@ public class BasicGameMode {
     private void drawBossHealthBar(OrthographicCamera camera , SpriteBatch batch) {
         Vector2 healthBarPosition = new Vector2(
                 camera.position.x - (healthBarWidth * camera.zoom),
-                camera.position.y + (Gdx.graphics.getHeight() * camera.zoom) / 3
+                camera.position.y + (worldHeight * camera.zoom) / 3
         );
         float healthBarFillWidth = healthBarWidth * bossHealthPercentage;
         batch.draw(healthBarTexture, healthBarPosition.x, healthBarPosition.y, healthBarWidth / 2, healthBarHeight / 2);
@@ -336,6 +341,14 @@ public class BasicGameMode {
         return timePlayed;
     }
 
+    public float getWorldWidth() {
+        return worldWidth;
+    }
+
+    public float getWorldHeight() {
+        return worldHeight;
+    }
+
     protected void disposeBasicGameMode() {
         if (tiledMapRenderer != null) tiledMapRenderer.dispose();
         if (tiledMap != null) tiledMap.dispose();
@@ -346,5 +359,4 @@ public class BasicGameMode {
         if (bossMusic != null) bossMusic.dispose();
         leafFallingAnimation.dispose();
     }
-
 }

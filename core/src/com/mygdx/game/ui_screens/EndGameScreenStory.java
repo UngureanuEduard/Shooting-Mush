@@ -1,6 +1,5 @@
 package com.mygdx.game.ui_screens;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.utilities_resources.Assets;
@@ -29,7 +28,7 @@ public class EndGameScreenStory extends EndGameScreen {
     @Override
     protected Table createScoreTable(java.util.List<String[]> scores, int maxEntries) {
         Table scoreTable = new Table();
-        scoreTable.setPosition(Gdx.graphics.getWidth() / 2.7f, Gdx.graphics.getHeight() / 1.5f);
+        scoreTable.setPosition(worldWidth / 2.7f, worldHeight / 1.5f);
         scoreTable.top().left().padTop(50).setSkin(skin);
 
         scoreTable.add(new Label("Name", skin)).left();

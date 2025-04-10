@@ -16,7 +16,7 @@ public class CoopMode extends StoryMode {
 
     private final static float SEND_INTERVAL = 0.01f;
 
-    private Character guestCharacter;
+    private final Character guestCharacter;
     private boolean isHost;
     private Client client;
     private Server server;
@@ -26,6 +26,7 @@ public class CoopMode extends StoryMode {
 
     public CoopMode(Assets assets, Integer soundVolume, Integer musicVolume) {
         super(assets, soundVolume, musicVolume);
+        guestCharacter = new Character(new Vector2(200, 100), getAssets());
     }
 
     public void setNetworkInfo(boolean isHost, Client client, Server server) {
@@ -48,9 +49,8 @@ public class CoopMode extends StoryMode {
     }
 
     @Override
-    public void show() {
-        super.show();
-        guestCharacter = new Character(new Vector2(200, 100), getAssets());
+    public void show(int cameraWidth , int cameraHeight) {
+        super.show(cameraWidth,cameraHeight);
     }
 
     @Override

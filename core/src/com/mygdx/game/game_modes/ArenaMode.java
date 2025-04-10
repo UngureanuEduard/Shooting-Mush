@@ -28,7 +28,10 @@ public class ArenaMode  extends BasicGameMode{
     private Integer completedWaves=0;
     private EndGameScreenArena endGameScreenArena;
 
+
+
     public ArenaMode(Assets assets, Integer soundVolume, Integer musicVolume) {
+
         super(assets, soundVolume, musicVolume);
         setEnemyManager(new EnemyManager(GameScene.GameMode.ARENA));
         getEnemyManager().loadEnemiesFromJson("storyInfo.json");
@@ -37,8 +40,8 @@ public class ArenaMode  extends BasicGameMode{
         setTiledMapRenderer(new OrthogonalTiledMapRenderer(getTiledMap()));
     }
 
-    public void show( ){
-        super.show();
+    public void show(int cameraWidth , int cameraHeight){
+        super.show(cameraWidth,cameraHeight);
         setCharacter(new Character(new Vector2(800, 800), getAssets()));
         initArenaWaves();
     }
@@ -47,17 +50,15 @@ public class ArenaMode  extends BasicGameMode{
         waves = new Array<>();
         waves.add(new Wave(1, 0, 1, 0.5f, 90, super.getDamage()));
         waves.add(new Wave(2, 1, 0, 0.4f, 500, super.getDamage()));
-        imageActor.setPosition((float) Gdx.graphics.getWidth() / 2 - imageActor.getWidth(), (float) (Gdx.graphics.getHeight() - Gdx.graphics.getHeight() / 10) + imageActor.getHeight() / 3);
         imageActor.setSize(imageActor.getWidth() / 1.5f, imageActor.getHeight() / 1.5f);
         setEnemiesLeftToKill(waves.first().getNumEnemies());
         waveCompleteTable = new WaveCompleteTable(getSkin(), getAssets() , this);
         waveCompleteTable.center();
-        waveCompleteTable.setPosition(Gdx.graphics.getWidth() / 2f - waveCompleteTable.getWidth() / 2f, Gdx.graphics.getHeight() / 2f - waveCompleteTable.getHeight() / 2f);
     }
 
     public void render(float delta , SpriteBatch batch , MyGdxGame game, Stage stage){
 
-        super.render(delta , batch , game);
+        super.render(delta , batch , game , stage);
 
         if (!waves.isEmpty()) {
             Wave currentWave = waves.first();
@@ -103,17 +104,18 @@ public class ArenaMode  extends BasicGameMode{
 
     private void drawWaveNumberAndScore( Stage stage) {
         if (!getIsPaused()) {
+
             stage.clear();
             String text = "Wave: " + waves.first().getWaveNumber();
             Label label = new Label(text, getSkin());
-            float textX = (float) Gdx.graphics.getWidth() / 2 - label.getWidth() / 2;
-            float textY = Gdx.graphics.getHeight() - label.getHeight();
+            float textX = getWorldWidth() / 2 - label.getWidth() / 2;
+            float textY = getWorldHeight() - label.getHeight();
             label.setPosition(textX, textY);
             stage.addActor(label);
             text = "Score: " + getEnemyManager().getScore();
             label = new Label(text, getSkin());
-            textX = Gdx.graphics.getWidth() - (float) Gdx.graphics.getWidth() / 6;
-            textY = Gdx.graphics.getHeight() - label.getHeight();
+            textX = getWorldWidth() - getWorldWidth() / 6;
+            textY = getWorldHeight() - label.getHeight();
             label.setPosition(textX, textY);
             stage.addActor(label);
             text = ": " + getEnemiesLeftToKill();
@@ -129,9 +131,11 @@ public class ArenaMode  extends BasicGameMode{
             } else {
                 imageActor.setColor(1, 1, 1, 1);
             }
-
+            imageActor.setPosition(getWorldWidth() / 2 - imageActor.getWidth(),
+                    getWorldHeight() - getWorldHeight() / 10 + imageActor.getHeight() / 3);
             stage.addActor(imageActor);
         } else  if(super.getIsGameNotOver() && waves.size > 0){
+            waveCompleteTable.setPosition( getWorldWidth() / 2f - waveCompleteTable.getWidth() / 2f, getWorldHeight() / 2f - waveCompleteTable.getHeight() / 2f);
             stage.addActor(waveCompleteTable);
         }
         if(getIsGameNotOver()){
@@ -156,7 +160,7 @@ public class ArenaMode  extends BasicGameMode{
 
     public void dispose() {
         disposeBasicGameMode();
-        if (waveCompleteTable != null) waveCompleteTable.remove(); // remove from stage
+        if (waveCompleteTable != null) waveCompleteTable.remove();
         if (endGameScreenArena != null) endGameScreenArena.dispose();
         if (imageActor != null) imageActor.clear();
         if (waves != null) waves.clear();

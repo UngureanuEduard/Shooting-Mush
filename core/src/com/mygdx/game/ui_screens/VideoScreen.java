@@ -15,6 +15,8 @@ import com.mygdx.game.utilities_resources.Assets;
 
 import java.io.FileNotFoundException;
 
+import static com.mygdx.game.utilities_resources.Settings.*;
+
 public class VideoScreen implements Screen {
 
     private static final int SKIP_TIME_SECONDS = 2;
@@ -27,7 +29,6 @@ public class VideoScreen implements Screen {
     private static final float CLEAR_COLOR_A = 1f;
     private static final String SKIP_MESSAGE = "Hold space to Skip";
     private static final String VIDEO_PATH = "assets/intro.webm";
-    private static final String AUDIO_PATH = "assets/intro.wav";
     private static final String LOG_TAG = "gdx-video";
     private static final String VIDEO_NOT_FOUND_MSG = "Video file not found!";
     private static final String VIDEO_PLAY_ERROR_MSG = "An error occurred while playing the video.";
@@ -41,21 +42,25 @@ public class VideoScreen implements Screen {
     private float spaceKeyHoldTime;
     private BitmapFont font;
     private final Assets assets;
+    private final float screenWidth ;
+    private final float screenHeight ;
 
-    public VideoScreen(MyGdxGame game, int musicVolume, int soundVolume, Assets assets) {
+    public VideoScreen(MyGdxGame game, int musicVolume, int soundVolume, Assets assets ,float screenWidth ,float screenHeight ) {
         this.game = game;
         this.batch = new SpriteBatch();
         this.musicVolume = musicVolume;
         this.soundVolume = soundVolume;
         this.spaceKeyHoldTime = 0;
         this.assets = assets;
+        this.screenWidth = screenWidth;
+        this.screenHeight = screenHeight;
     }
 
     @Override
     public void show() {
         videoPlayer = VideoPlayerCreator.createVideoPlayer();
         videoPlayer.setVolume(0);
-        audio = Gdx.audio.newSound(Gdx.files.local(AUDIO_PATH));
+        audio = assets.getAssetManager().get(Assets.introSound);
         videoPlayer.setOnCompletionListener(file -> startGame());
         font = new BitmapFont();
 
@@ -87,14 +92,20 @@ public class VideoScreen implements Screen {
         batch.begin();
         Texture frame = videoPlayer.getTexture();
         if (frame != null) {
-            int screenWidth = Gdx.graphics.getWidth();
-            int screenHeight = Gdx.graphics.getHeight();
+
             int videoWidth = videoPlayer.getVideoWidth();
             int videoHeight = videoPlayer.getVideoHeight();
+
             float x = (screenWidth - videoWidth) / 2f;
             float y = (screenHeight - videoHeight) / 2f;
-            batch.draw(frame, x, y, videoWidth, videoHeight);
+
+            if(windowed){
+                batch.draw(frame, x, y, windowedScreenWidth, windowedScreenHeight);
+            } else {
+                batch.draw(frame, x, y, fullScreenWidth, fullScreenHeight);
+            }
         }
+
         font.draw(batch, SKIP_MESSAGE, Gdx.graphics.getWidth() - SKIP_TEXT_OFFSET_X , (float) SKIP_TEXT_OFFSET_Y);
         batch.end();
     }

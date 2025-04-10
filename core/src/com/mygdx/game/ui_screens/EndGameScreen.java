@@ -13,6 +13,7 @@ import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.animations_effects.firework.Firework;
 import com.mygdx.game.utilities_resources.Assets;
+import com.mygdx.game.utilities_resources.Settings;
 
 public abstract class EndGameScreen extends ScreenAdapter {
 
@@ -44,13 +45,18 @@ public abstract class EndGameScreen extends ScreenAdapter {
     protected Table inputTable;
     protected Label inputLabel;
 
-    public EndGameScreen(MyGdxGame game, int score, Assets assets, int musicVolume, int soundVolume) {
+    protected float worldWidth ;
+    protected float worldHeight ;
+
+    public EndGameScreen(MyGdxGame game, int score, Assets assets, int musicVolume, int soundVolume ) {
         this.game = game;
         this.finalScore = score;
         this.assets = assets;
         this.musicVolume = musicVolume;
         this.soundVolume = soundVolume;
         this.stage = new Stage();
+        worldWidth = stage.getViewport().getWorldWidth();
+        worldHeight = stage.getViewport().getWorldHeight();
 
         this.trophyTexture = assets.getAssetManager().get(Assets.goldTrophyTexture);
         this.fireworksExplosionTexture = assets.getAssetManager().get(Assets.fireworkExplosionTexture);
@@ -64,12 +70,15 @@ public abstract class EndGameScreen extends ScreenAdapter {
 
     private void setupUI() {
         Image trophyImage = new Image(trophyTexture);
-        trophyImage.setPosition(Gdx.graphics.getWidth() / 2f - trophyImage.getWidth() / 2, Gdx.graphics.getHeight() / 1.5f);
+        if(Settings.windowed){
+            trophyImage.setScale((float) Settings.windowedScreenWidth /Settings.fullScreenWidth , (float) Settings.windowedScreenHeight /Settings.fullScreenHeight);
+        }
+        trophyImage.setPosition(worldWidth / 2f - trophyImage.getWidth()*(float) Settings.windowedScreenWidth /Settings.fullScreenWidth / 2, worldHeight / 1.7f);
         stage.addActor(trophyImage);
 
         inputTable = new Table();
         inputTable.setSkin(skin);
-        inputTable.setPosition(Gdx.graphics.getWidth() / 2f, Gdx.graphics.getHeight() / 2.2f);
+        inputTable.setPosition(worldWidth / 2f, worldHeight / 2.2f);
         inputTable.center();
 
         Label scoreLabel = new Label("Score: " + finalScore, skin);

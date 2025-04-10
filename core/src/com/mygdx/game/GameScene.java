@@ -12,9 +12,11 @@ import com.mygdx.game.game_modes.CoopMode;
 import com.mygdx.game.game_modes.StoryMode;
 import com.mygdx.game.utilities_resources.*;
 
+import static com.mygdx.game.utilities_resources.Settings.*;
+
 public class GameScene extends ScreenAdapter {
 
-    Viewport viewport = new ExtendViewport(1920, 1080);
+    Viewport viewport = new ExtendViewport(fullScreenWidth, fullScreenHeight);
     private final Stage stage = new Stage(viewport);
     SpriteBatch batch;
     Assets assets;
@@ -37,6 +39,11 @@ public class GameScene extends ScreenAdapter {
         this.gameMode = gameMode;
         this.assets = assets;
 
+        if(windowed){
+            Gdx.graphics.setWindowedMode(windowedScreenWidth, windowedScreenHeight);
+        }
+        else Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+
         switch (gameMode) {
             case ARENA:
                 arenaMode = new ArenaMode(assets,soundVolume,musicVolume);
@@ -55,13 +62,13 @@ public class GameScene extends ScreenAdapter {
         batch = new SpriteBatch();
         switch (gameMode) {
             case ARENA:
-                arenaMode.show();
+                arenaMode.show(fullScreenWidth, fullScreenHeight);
                 break;
             case STORY:
-                storyMode.show();
+                storyMode.show(fullScreenWidth, fullScreenHeight);
                 break;
             case CO_OP:
-                coopMode.show();
+                coopMode.show(fullScreenWidth, fullScreenHeight);
                 break;
         }
     }
@@ -100,4 +107,5 @@ public class GameScene extends ScreenAdapter {
     public CoopMode getCoopMode() {
         return coopMode;
     }
+
 }

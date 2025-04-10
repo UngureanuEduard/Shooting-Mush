@@ -38,10 +38,10 @@ public class StoryMode extends BasicGameMode {
         maps.add(new MapDetails(Assets.storyTiledMap.fileName, new Vector2(120, 100), new TransitionArea(1380, 1290, 128, 192)));
     }
 
-    public void show(){
+    public void show(int cameraWidth , int cameraHeight){
         setCharacter(new Character(new Vector2(120, 100) , getAssets()));
         loadMap(currentMapIndex);
-        super.show();
+        super.show(cameraWidth ,cameraHeight);
         currentMapIndex = 0;
         npc = new Npc(getEnemyManager().getEnemyMapLocationsInfos().get(0).getNpcPosition(), getAssets() , getSoundVolume());
     }
@@ -57,7 +57,7 @@ public class StoryMode extends BasicGameMode {
     }
 
     public void Render(float delta , SpriteBatch batch , MyGdxGame game , Stage stage){
-        super.render(delta , batch , game);
+        super.render(delta , batch , game , stage);
 
         spawnStoryEnemy();
 
