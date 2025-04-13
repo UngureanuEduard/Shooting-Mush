@@ -29,7 +29,7 @@ import com.mygdx.game.utilities_resources.Assets;
 public class BasicGameMode {
 
     private static final float CAMERA_ZOOM = 0.25f;
-    private static final float BULLET_SPEED = 300f;
+    protected static final float BULLET_SPEED = 300f;
     private static final float SHOOT_COOLDOWN = 0.2f;
 
 
@@ -68,7 +68,6 @@ public class BasicGameMode {
     private float timePlayed = 0f;
     private float worldWidth ;
     private float worldHeight ;
-
 
     public BasicGameMode(Assets assets , Integer soundVolume, Integer musicVolume) {
         this.assets = assets;
@@ -176,14 +175,14 @@ public class BasicGameMode {
         }
     }
 
-    private void shootBullet() {
+    protected void shootBullet() {
         Vector2 bulletStartPosition = new Vector2(character.getPosition().x, character.getPosition().y);
         Vector2 directionToCursor = calculateDirectionToCursor(bulletStartPosition);
         directionToCursor.nor().scl(BULLET_SPEED);
         characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, 50, assets, soundVolume);
     }
 
-    private Vector2 calculateDirectionToCursor(Vector2 startingPoint) {
+    protected Vector2 calculateDirectionToCursor(Vector2 startingPoint) {
         Vector3 cursorPositionScreen = new Vector3(Gdx.input.getX(), Gdx.input.getY(), 0);
         Vector3 cursorPositionWorld = camera.unproject(cursorPositionScreen);
         Vector2 cursorPositionWorld2D = new Vector2(cursorPositionWorld.x, cursorPositionWorld.y);
@@ -328,7 +327,6 @@ public class BasicGameMode {
         this.inDialog = inDialog;
     }
 
-
     public Integer getCritRate() {
         return critRate;
     }
@@ -359,4 +357,9 @@ public class BasicGameMode {
         if (bossMusic != null) bossMusic.dispose();
         leafFallingAnimation.dispose();
     }
+
+    public CharacterBulletsManager getCharacterBulletsManager() {
+        return characterBulletsManager;
+    }
+
 }
