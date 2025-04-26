@@ -1,11 +1,13 @@
-package com.mygdx.game.entities;
+package com.mygdx.game.entities.character;
 
 
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
-import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.combat_system.EnemyBullet;
 import com.mygdx.game.utilities_resources.Assets;
 
 public class BasicCharacter {
@@ -18,9 +20,13 @@ public class BasicCharacter {
     private String isWalking;
     private boolean isFlipped;
     private float timeSinceLastLifeLost = 5.0f;
+    private final Rectangle bodyHitbox;
+    private final Circle headHitbox;
 
     public BasicCharacter(Vector2 position , Assets assets) {
         this.position = position;
+        bodyHitbox = new Rectangle();
+        headHitbox = new Circle();
         Texture walkTexture = assets.getAssetManager().get(Assets.walkTexture);
         Texture idleTexture = assets.getAssetManager().get(Assets.idleTexture);
         Texture walkFrontTexture = assets.getAssetManager().get(Assets.walkFrontTexture);
@@ -35,6 +41,7 @@ public class BasicCharacter {
         idleAnimationLeftAndRight = new Animation<>(0.1f, idleFrames);
         isWalking = "";
         isFlipped = false;
+
     }
 
     public void render(SpriteBatch batch ) {
@@ -104,6 +111,44 @@ public class BasicCharacter {
         idleAnimationLeftAndRight.getKeyFrames()[6].flip(true, false);
         idleAnimationLeftAndRight.getKeyFrames()[7].flip(true, false);
         idleAnimationLeftAndRight.getKeyFrames()[8].flip(true, false);
+
+
+    }
+
+    protected void checkBulletCollisions(Array<EnemyBullet> enemyBullets) {
+        for (EnemyBullet enemyBullet : enemyBullets) {
+            if (isCollidingWithBullet(enemyBullet) && getTimeSinceLastLifeLost() >= 5.0f) {
+                colidedWithBullet(enemyBullet);
+            }
+        }
+    }
+
+    protected void colidedWithBullet(EnemyBullet enemyBullet){
+    }
+
+
+
+    private boolean isCollidingWithBullet(EnemyBullet bullet) {
+        Polygon bulletPolygon = bullet.getHitBox();
+
+        Polygon bodyPolygon = new Polygon(new float[]{
+                bodyHitbox.x, bodyHitbox.y,
+                bodyHitbox.x + bodyHitbox.width, bodyHitbox.y,
+                bodyHitbox.x + bodyHitbox.width, bodyHitbox.y + bodyHitbox.height,
+                bodyHitbox.x, bodyHitbox.y + bodyHitbox.height
+        });
+
+        int numVertices = 8;
+        float[] circleVertices = new float[2 * numVertices];
+        for (int i = 0; i < numVertices; i++) {
+            double angle = 2 * Math.PI * i / numVertices;
+            circleVertices[2 * i] = (float) (headHitbox.x + headHitbox.radius * Math.cos(angle));
+            circleVertices[2 * i + 1] = (float) (headHitbox.y + headHitbox.radius * Math.sin(angle));
+        }
+        Polygon headPolygon = new Polygon(circleVertices);
+
+        return Intersector.overlapConvexPolygons(bulletPolygon, bodyPolygon) ||
+                Intersector.overlapConvexPolygons(bulletPolygon, headPolygon);
     }
 
     public float getWidth() {
@@ -156,5 +201,13 @@ public class BasicCharacter {
 
     public Animation<TextureRegion> getIdleAnimationLeftAndRight() {
         return idleAnimationLeftAndRight;
+    }
+
+    public Rectangle getBodyHitbox() {
+        return bodyHitbox;
+    }
+
+    public Circle getHeadHitbox() {
+        return headHitbox;
     }
 }

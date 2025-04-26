@@ -9,7 +9,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.ui.Label;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.entities.Character;
+import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.combat_system.Wave;
@@ -48,7 +48,7 @@ public class ArenaMode  extends BasicGameMode{
 
     private void initArenaWaves() {
         waves = new Array<>();
-        waves.add(new Wave(1, 0, 1, 0.5f, 90, super.getDamage()));
+        waves.add(new Wave(1, 0, 5, 0.5f, 90, super.getDamage()));
         waves.add(new Wave(2, 1, 0, 0.4f, 500, super.getDamage()));
         imageActor.setSize(imageActor.getWidth() / 1.5f, imageActor.getHeight() / 1.5f);
         setEnemiesLeftToKill(waves.first().getNumEnemies());

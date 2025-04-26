@@ -1,7 +1,9 @@
-package com.mygdx.game.entities;
+package com.mygdx.game.entities.character;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.math.Vector2;
+import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.combat_system.EnemyBullet;
 import com.mygdx.game.utilities_resources.Assets;
 
 public class GuestCharacter extends BasicCharacter {
@@ -10,7 +12,7 @@ public class GuestCharacter extends BasicCharacter {
         super(initialPosition, assets);
     }
 
-    public void update(  Boolean isPaused) {
+    public void update(  Boolean isPaused , Array<EnemyBullet> enemyBullets) {
         if (!isPaused) {
             float deltaTime = Gdx.graphics.getDeltaTime();
             setStateTime(getStateTime() + deltaTime);
@@ -24,7 +26,16 @@ public class GuestCharacter extends BasicCharacter {
                 setIsFlipped(false);
             }
 
+            checkBulletCollisions(enemyBullets);
         }
+
     }
+
+    @Override
+    protected void colidedWithBullet(EnemyBullet enemyBullet){
+        enemyBullet.setAlive(false);
+    }
+
+
 
 }

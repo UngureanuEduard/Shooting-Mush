@@ -2,7 +2,7 @@ package com.mygdx.game.ai;
 
 import com.badlogic.gdx.ai.btree.LeafTask;
 import com.badlogic.gdx.ai.btree.Task;
-import com.mygdx.game.entities.Enemy;
+import com.mygdx.game.entities.enemy.Enemy;
 
 public class IsAttackedCondition extends LeafTask<Enemy> {
     @Override

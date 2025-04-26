@@ -6,7 +6,7 @@ import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
-import com.mygdx.game.entities.Character;
+import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.entities.Npc;
@@ -88,7 +88,7 @@ public class StoryMode extends BasicGameMode {
         }
     }
 
-    private void spawnStoryEnemy() {
+    public void spawnStoryEnemy() {
         if (getEnemyManager().getActiveEnemies().size < 9) {
             EnemyMapLocationsInfo enemyMapLocationsInfo = getEnemyManager().getEnemyMapLocationsInfos().get(currentMapIndex);
             for (EnemyBasicInfo enemyInfo : enemyMapLocationsInfo.getEnemies()) {
@@ -119,7 +119,5 @@ public class StoryMode extends BasicGameMode {
         if (endGameScreenStory != null) endGameScreenStory.dispose();
         if (maps != null) maps.clear();
     }
-
-
 
 }

@@ -26,9 +26,9 @@ public class CharacterBulletsManager {
         characterBulletPool.clear();
         activeCharacterBullets.clear();
     }
-    public void generateBullet(Vector2 bulletStartPosition, Vector2 directionToCursor, float damage, Assets assets, Integer soundVolume){
+    public void generateBullet(Vector2 bulletStartPosition, Vector2 directionToCursor, float damage, Assets assets, Integer soundVolume , boolean isFromHost){
         CharacterBullet item = characterBulletPool.obtain();
-        item.init(bulletStartPosition, directionToCursor, damage, assets, soundVolume);
+        item.init(bulletStartPosition, directionToCursor, damage, assets, soundVolume , isFromHost);
         activeCharacterBullets.add(item);
     }
 
@@ -52,5 +52,15 @@ public class CharacterBulletsManager {
     public Array<CharacterBullet> getActiveCharacterBullets() {
         return activeCharacterBullets;
     }
+
+    public void printActiveBullets() {
+        System.out.println("---- Active Bullets ----");
+        for (CharacterBullet bullet : activeCharacterBullets) {
+                System.out.println("Position: " + bullet.getPosition() +
+                        ", isFromHost: " + bullet.isFromHost());
+        }
+        System.out.println("------------------------");
+    }
+
 
 }

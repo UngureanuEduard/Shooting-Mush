@@ -1,4 +1,4 @@
-package com.mygdx.game.entities;
+package com.mygdx.game.entities.enemy;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ai.btree.BehaviorTree;
@@ -28,18 +28,18 @@ public class Enemy implements Pool.Poolable{
 
     public static final float MOVEMENT_SPEED = 10.0f;
     private static final float BULLET_COOLDOWN = 5.0f;
-    private static final float SCALE = 0.8f;
+    protected static final float SCALE = 0.8f;
     private static final Random RANDOM = new Random();
     private BehaviorTree<Enemy> behaviorTree;
+
     protected Vector2 position;
     protected Vector2 playerPosition;
     protected Texture duckTexture;
     protected Texture idleTexture;
     protected Animation<TextureRegion> walkAnimation;
     protected Animation<TextureRegion> idleAnimation;
-
     protected float stateTime;
-    protected boolean isFlipped = false;
+    private boolean isFlipped = false;
     protected float health;
     private boolean isDamaged = false;
     protected float maxHealth;
@@ -71,7 +71,6 @@ public class Enemy implements Pool.Poolable{
 
     private Texture healthBarBackgroundTexture;
     private Texture healthBarForegroundTexture;
-
     private boolean alive;
 
     private boolean isAttacked;
@@ -79,6 +78,12 @@ public class Enemy implements Pool.Poolable{
     protected final Vector2 pushBackDirection = new Vector2(0, 0);
     protected float pushBackTime = 0f;
     protected float PUSH_BACK_FORCE;
+
+    private static int nextId = 0;
+    private int id;
+    private boolean markedForRemoval = false;
+    private boolean lastHitByHost;
+
 
     public Enemy(){
         this.alive=false;
@@ -91,6 +96,7 @@ public class Enemy implements Pool.Poolable{
         position.set(-1,-1);
         this.alive = false;
         this.isAttacked = false;
+
     }
 
     public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode){
@@ -120,6 +126,7 @@ public class Enemy implements Pool.Poolable{
         behaviorTree = new StoryEnemyBehaviorTree(this);
         else behaviorTree = new ArenaEnemyBehaviorTree(this);
         PUSH_BACK_FORCE = 50.0f;
+        this.id = nextId++;
     }
 
     protected void loadEnemyTextures(){
@@ -203,6 +210,7 @@ public class Enemy implements Pool.Poolable{
                 takeDamage(bullet.getDamage());
                 isDamaged = true;
                 isAttacked = true;
+                lastHitByHost = bullet.isFromHost();
                 Vector2 bulletDirection = new Vector2(position).sub(bullet.getPosition()).nor();
                 pushBackDirection.set(bulletDirection);
                 pushBackTime = 0f;
@@ -262,7 +270,7 @@ public class Enemy implements Pool.Poolable{
     }
 
 
-    protected TextureRegion getCurrentFrame() {
+    public TextureRegion getCurrentFrame() {
         if(behaviorStatus == BehaviorStatus.IDLE)
         return idleAnimation.getKeyFrame(stateTime, true);
             else return walkAnimation.getKeyFrame(stateTime, true);
@@ -289,6 +297,7 @@ public class Enemy implements Pool.Poolable{
             Vector2 direction = playerPosition.cpy().sub(position).nor();
             enemyBulletsManager.generateBullet(position.cpy(),direction.cpy().scl(200), 1, assets, soundVolume);
         }
+
     }
 
     public float getWidth() {
@@ -369,4 +378,53 @@ public class Enemy implements Pool.Poolable{
     public void setIsFlipped(boolean setFlipped) {
         isFlipped = setFlipped;
     }
+
+    public int getId() {
+        return id;
+    }
+
+    public void setId(int id) {
+        this.id = id;
+    }
+
+    public boolean isFlipped() {
+        return isFlipped;
+    }
+
+    public void setFlipped(boolean flipped) {
+        isFlipped = flipped;
+    }
+
+    public boolean isDamaged() {
+        return isDamaged;
+    }
+
+    public void setIsDamaged(boolean damaged) {
+        isDamaged = damaged;
+    }
+    public void setAlive(boolean alive) {
+        this.alive = alive;
+    }
+
+    public boolean isMarkedForRemoval() {
+        return markedForRemoval;
+    }
+
+    public void setMarkedForRemoval(boolean value) {
+        this.markedForRemoval = value;
+    }
+
+    public BehaviorStatus getBehaviorStatus() {
+        return behaviorStatus;
+    }
+
+    public float getStateTime() {
+        return stateTime;
+    }
+
+    public void updatePlayerPosition(Vector2 hostPos, Vector2 guestPos) {
+        this.playerPosition = lastHitByHost ? hostPos : guestPos;
+    }
+
+
 }

@@ -13,21 +13,20 @@ public class CharacterBullet extends Bullet{
     private static final float BULLET_SIZE = 35f;
     private static final float HITBOX_RADIUS_SCALE = 0.25f;
     private  Circle hitBox;
+    private boolean isFromHost;
 
     public CharacterBullet(){
         super();
     }
 
-    public void init(Vector2 position , Vector2 velocity, float damage, Assets assets , Integer soundVolume) {
-        this.position.set(position);
-        this.alive = true;
-        this.velocity = velocity;
-        this.damage = damage;
-        this.damageScale = DAMAGE_SCALE_BASE + damage / DAMAGE_SCALE_FACTOR;
-        this.assets=assets;
-        Texture bulletAppleTexture = this.assets.getAssetManager().get(Assets.bulletTexture);
+
+    public void init(Vector2 position , Vector2 velocity, float damage, Assets assets , Integer soundVolume , boolean fromHost) {
+        super.init(position,velocity,damage);
+        setDamageScale(DAMAGE_SCALE_BASE + damage / DAMAGE_SCALE_FACTOR);
+        this.isFromHost = fromHost;
+        Texture bulletAppleTexture = assets.getAssetManager().get(Assets.bulletTexture);
         Sound soundCharacter = assets.getAssetManager().get(Assets.throwSound);
-        texture = new TextureRegion(bulletAppleTexture);
+        setTexture(new TextureRegion(bulletAppleTexture));
         soundCharacter.play(soundVolume/100f);
         hitBox=new Circle();
     }
@@ -36,27 +35,33 @@ public class CharacterBullet extends Bullet{
         updatePosition(deltaTime);
         updateAngle();
 
-        // Set hitbox center to be in the middle of the texture
-        hitBox.set(position.x + getWidth() / 2, position.y + getHeight() / 2, getWidth() *HITBOX_RADIUS_SCALE); // Adjust radius as needed
+        hitBox.set(getPosition().x + getWidth() / 2, getPosition().y + getHeight() / 2, getWidth() *HITBOX_RADIUS_SCALE);
     }
 
     public void render(SpriteBatch batch){
-        batch.draw(texture,
-                position.x, position.y,        // x, y position of the bottom-left corner
-                getWidth() / 2, getHeight() / 2, // originX, originY (center for rotation)
-                getWidth(), getHeight(),        // width and height of the drawn region
-                (float) (damageScale-0.3), (float) (damageScale-0.3),       // scaleX and scaleY
-                angle);                         // rotation angle
+        batch.draw(getTexture(), getPosition().x, getPosition().y, getWidth() / 2,
+                getHeight() / 2, getWidth(), getHeight(), (float) (getDamageScale()-0.3),
+                (float) (getDamageScale()-0.3), getAngle());
     }
 
     private float getWidth() {
-        return BULLET_SIZE * damageScale * 0.8f;
+        return BULLET_SIZE * getDamageScale() * 0.8f;
     }
 
     private float getHeight() {
-        return BULLET_SIZE * damageScale * 0.8f;
+        return BULLET_SIZE * getDamageScale() * 0.8f;
     }
 
     public Circle getHitBox(){return hitBox;}
+
+    public boolean isFromHost() {
+        return isFromHost;
+    }
+
+    @Override
+    public void reset() {
+        super.reset();
+        isFromHost = false;
+    }
 
 }

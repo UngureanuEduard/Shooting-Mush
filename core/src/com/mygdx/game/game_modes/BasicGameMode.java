@@ -14,9 +14,9 @@ import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.mygdx.game.MyGdxGame;
-import com.mygdx.game.entities.Character;
-import com.mygdx.game.entities.Enemy;
-import com.mygdx.game.entities.EnemyBoss;
+import com.mygdx.game.entities.character.Character;
+import com.mygdx.game.entities.enemy.Enemy;
+import com.mygdx.game.entities.enemy.EnemyBoss;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.animations_effects.LeafFallingAnimation;
 import com.mygdx.game.pool_managers.CharacterBulletsManager;
@@ -179,7 +179,7 @@ public class BasicGameMode {
         Vector2 bulletStartPosition = new Vector2(character.getPosition().x, character.getPosition().y);
         Vector2 directionToCursor = calculateDirectionToCursor(bulletStartPosition);
         directionToCursor.nor().scl(BULLET_SPEED);
-        characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, 50, assets, soundVolume);
+        characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, 25, assets, soundVolume ,true);
     }
 
     protected Vector2 calculateDirectionToCursor(Vector2 startingPoint) {
@@ -361,5 +361,11 @@ public class BasicGameMode {
     public CharacterBulletsManager getCharacterBulletsManager() {
         return characterBulletsManager;
     }
+
+    public EnemyBulletsManager getEnemyBulletsManager() {
+        return enemyBulletsManager;
+    }
+
+
 
 }

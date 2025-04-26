@@ -4,49 +4,49 @@ package com.mygdx.game.combat_system;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
-import com.mygdx.game.utilities_resources.Assets;
 
 public class Bullet implements Pool.Poolable {
-    protected static final float MAX_LIFETIME = 3.5f;
+    protected static final float MAX_LIFETIME = 4.5f;
     protected static final float DAMAGE_SCALE_BASE = 0.8f;
     protected static final float DAMAGE_SCALE_FACTOR = 200.0f;
 
-    protected Vector2 position;
-    protected Vector2 velocity;
-    protected TextureRegion texture;
-    protected float damage;
-    protected float damageScale;
-    protected float lifeTimer; // Tracks the lifetime of a bullet
-    protected float angle;
-    Assets assets;
-
-    protected boolean alive;
+    private final Vector2 position;
+    private Vector2 velocity;
+    private TextureRegion texture;
+    private float damage;
+    private float damageScale;
+    private float lifeTimer;
+    private float angle;
+    private boolean alive;
 
     public Bullet(){
-        this.alive=false;
-        this.position=new Vector2();
-        this.lifeTimer= 0.0f;
+        alive = false;
+        position = new Vector2();
+        lifeTimer = 0.0f;
+    }
+
+    public void init(Vector2 position , Vector2 velocity, float damage  ) {
+        this.position.set(position);
+        alive = true;
+        this.velocity = velocity;
+        this.damage = damage;
     }
 
     @Override
     public void reset() {
         position.set(-1,-1);
-        this.alive = false;
-        this.lifeTimer=0.0f;
+        alive = false;
+        lifeTimer=0.0f;
     }
 
     protected void updatePosition(float deltaTime) {
 
-        // Update position
         position.add(velocity.x * deltaTime, velocity.y * deltaTime);
 
-
-        //Update LifeTimer
         lifeTimer += deltaTime;
 
-        // Check if lifeTimer exceeds 3.5 seconds
         if (lifeTimer >= MAX_LIFETIME) {
-            this.alive = false;
+            alive = false;
         }
     }
 
@@ -67,17 +67,40 @@ public class Bullet implements Pool.Poolable {
         return damage;
     }
 
-    public boolean getAlive_n(){return !this.alive;}
+    public boolean getAlive_n(){return !alive;}
 
     public void setAlive(boolean setAlive) {
-        this.alive = setAlive;
+        alive = setAlive;
     }
 
     public Vector2 getPosition() {
         return position;
     }
 
-    public void setDamage(float setDmg){damage=setDmg;}
+    public void setDamage(float setDmg){damage = setDmg;}
 
+    public void setTexture(TextureRegion texture) {
+        this.texture = texture;
+    }
+
+    public float getAngle() {
+        return angle;
+    }
+
+    public TextureRegion getTexture() {
+        return texture;
+    }
+
+    public float getDamageScale() {
+        return damageScale;
+    }
+
+    public void setDamageScale(float damageScale) {
+        this.damageScale = damageScale;
+    }
+
+    public Vector2 getVelocity() {
+        return velocity;
+    }
 
 }
