@@ -19,6 +19,7 @@ public class Assets {
     public static final AssetDescriptor<Skin> skin = new AssetDescriptor<>("Font/menu.json", Skin.class);
     public static final AssetDescriptor<TiledMap> arenaTiledMap = new AssetDescriptor<>("arenaMap.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> storyTiledMap = new AssetDescriptor<>("storyMap1.tmx", TiledMap.class);
+    public static final AssetDescriptor<TiledMap> storyTiledMap_2 = new AssetDescriptor<>("Tiled_files/Dungeon1.tmx", TiledMap.class);
     public static final AssetDescriptor<Texture> walkTexture = new AssetDescriptor<>("Character/Character Walking Side.png", Texture.class);
     public static final AssetDescriptor<Texture> idleTexture = new AssetDescriptor<>("Character/Character Idle Side.png", Texture.class);
     public static final AssetDescriptor<Texture> walkFrontTexture = new AssetDescriptor<>("Character/Character Walking Front.png", Texture.class);
@@ -65,7 +66,7 @@ public class Assets {
 
     public void loadGameAssets() {
         AssetDescriptor<?>[] assetsToLoad = {
-                skin, menuBackgroundTexture, duckTexture, menuMusic, arenaTiledMap, storyTiledMap, walkTexture,
+                skin, menuBackgroundTexture, duckTexture, menuMusic, arenaTiledMap, storyTiledMap , storyTiledMap_2, walkTexture,
                 idleTexture, walkFrontTexture, walkBackTexture, heartTexture, emptyHeartTexture, bulletTexture,
                 throwSound, explosionParticleEffect, skullTexture, idleShoomTexture, lightningBoltTexture,
                 candyCornTexture, duckSound, gameMusic, bossTexture, EnemyHealthTexture, duckShootSound,

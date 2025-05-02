@@ -1,6 +1,7 @@
 package com.mygdx.game.game_modes;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
@@ -36,6 +37,7 @@ public class StoryMode extends BasicGameMode {
 
     private void initializeMaps() {
         maps.add(new MapDetails(Assets.storyTiledMap.fileName, new Vector2(120, 100), new TransitionArea(1380, 1290, 128, 192)));
+        maps.add(new MapDetails(Assets.storyTiledMap_2.fileName , new Vector2(243 ,450), new TransitionArea(274,649,100,100)));
     }
 
     public void show(int cameraWidth , int cameraHeight){
@@ -53,6 +55,9 @@ public class StoryMode extends BasicGameMode {
             setTiledMapRenderer(new OrthogonalTiledMapRenderer(getTiledMap()));
             getCharacter().setPosition(mapDetails.getSpawnPoint());
             transitionArea = mapDetails.getTransitionArea();
+            initCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            loadCollisionObjects();
+            getCharacter().setCollisionRectangles(getCollisionRectangles());
         }
     }
 
@@ -66,7 +71,14 @@ public class StoryMode extends BasicGameMode {
         if (transitionArea.isWithinArea(getCharacter().getPosition().x, getCharacter().getPosition().y) && getEnemyManager().getActiveEnemies().isEmpty()) {
             loadNextMap(game);
         }
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
+            loadNextMap(game);
+        }
+
         setInDialog(npc.getInDialog());
+
+
 
         if (endGameScreenStory != null) {
             Gdx.input.setInputProcessor(endGameScreenStory.getStage());

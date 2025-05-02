@@ -34,15 +34,16 @@ public class ArenaMode  extends BasicGameMode{
 
         super(assets, soundVolume, musicVolume);
         setEnemyManager(new EnemyManager(GameScene.GameMode.ARENA));
-        getEnemyManager().loadEnemiesFromJson("storyInfo.json");
         setTiledMap(assets.getAssetManager().get(Assets.arenaTiledMap));
         imageActor = new Image(assets.getAssetManager().get(Assets.skullTexture));
         setTiledMapRenderer(new OrthogonalTiledMapRenderer(getTiledMap()));
+        loadCollisionObjects();
     }
 
     public void show(int cameraWidth , int cameraHeight){
         super.show(cameraWidth,cameraHeight);
         setCharacter(new Character(new Vector2(800, 800), getAssets()));
+        getCharacter().setCollisionRectangles(getCollisionRectangles());
         initArenaWaves();
     }
 

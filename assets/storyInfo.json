@@ -1,81 +1,16 @@
 {
   "maps": [
     {
-      "mapName": "storyMap1",
+      "mapName": "Dungeon1",
       "npcLocation": {
         "x" : 145,
         "y" : 115
       },
       "enemies": [
-        {
-          "x": 690,
-          "y": 350,
-          "type": "normal"
-        },
-        {
-          "x": 719,
-          "y": 399,
-          "type": "normal"
-        },
-        {
-          "x": 943,
-          "y": 280,
-          "type": "normal"
-        },
-        {
-          "x": 1163,
-          "y": 453,
-          "type": "normal"
-        },
-        {
-          "x": 1066,
-          "y": 503,
-          "type": "normal"
-        },
-        {
-          "x": 839,
-          "y": 680,
-          "type": "normal"
-        },
-        {
-          "x": 619,
-          "y": 816,
-          "type": "normal"
-        },
-        {
-          "x": 439,
-          "y": 760,
-          "type": "normal"
-        },
-        {
-          "x": 286,
-          "y": 870,
-          "type": "normal"
-        },
-        {
-          "x": 136,
-          "y": 1006,
-          "type": "normal"
-        },
-        {
-          "x": 269,
-          "y": 1236,
-          "type": "normal"
-        },
-        {
-          "x": 756,
-          "y": 1333,
-          "type": "normal"
-        },
-        {
-          "x": 1280,
-          "y": 1290,
-          "type": "boss"
-        }
       ]
     },
     {
-      "mapName": "secondMap",
+      "mapName": "storyMap1",
       "npcLocation": {
         "x" : 600,
         "y" : 200

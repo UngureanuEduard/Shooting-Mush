@@ -6,13 +6,17 @@ import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.maps.MapObject;
+import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.MathUtils;
+import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.math.Vector3;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
+import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.entities.enemy.Enemy;
@@ -68,6 +72,7 @@ public class BasicGameMode {
     private float timePlayed = 0f;
     private float worldWidth ;
     private float worldHeight ;
+    private final Array<Rectangle> collisionRectangles = new Array<>();
 
     public BasicGameMode(Assets assets , Integer soundVolume, Integer musicVolume) {
         this.assets = assets;
@@ -117,7 +122,7 @@ public class BasicGameMode {
         updateCamera();
         worldWidth = stage.getViewport().getWorldWidth();
         worldHeight = stage.getViewport().getWorldHeight();
-        character.update(enemyManager.getActiveEnemies(), tiledMap, isPaused , enemyBulletsManager.getActiveEnemyBullets(),inDialog||isGameOver);
+        character.update(enemyManager.getActiveEnemies(), isPaused , enemyBulletsManager.getActiveEnemyBullets(),inDialog||isGameOver);
         handleShootLogic(delta);
         batch.setProjectionMatrix(camera.combined);
         particleEffectsManager.update();
@@ -221,6 +226,16 @@ public class BasicGameMode {
         getEnemyManager().getActiveEnemies().add(enemy);
         getGameMusic().stop();
         getBossMusic().play();
+    }
+
+    protected void loadCollisionObjects() {
+        getCollisionRectangles().clear();
+        for (MapObject object : getTiledMap().getLayers().get("Collisions").getObjects()) {
+            if (object instanceof RectangleMapObject) {
+                RectangleMapObject rectObject = (RectangleMapObject) object;
+                getCollisionRectangles().add(rectObject.getRectangle());
+            }
+        }
     }
 
     public void setTiledMap(TiledMap tiledMap){
@@ -366,6 +381,8 @@ public class BasicGameMode {
         return enemyBulletsManager;
     }
 
-
+    public Array<Rectangle> getCollisionRectangles() {
+        return collisionRectangles;
+    }
 
 }

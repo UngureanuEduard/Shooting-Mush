@@ -6,8 +6,6 @@
     import com.badlogic.gdx.graphics.Texture;
     import com.badlogic.gdx.graphics.g2d.SpriteBatch;
     import com.badlogic.gdx.graphics.g2d.TextureRegion;
-    import com.badlogic.gdx.maps.tiled.TiledMap;
-    import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
     import com.badlogic.gdx.math.*;
     import com.badlogic.gdx.utils.Array;
     import com.mygdx.game.combat_system.EnemyBullet;
@@ -30,6 +28,7 @@
         private final Vector2 pushBackDirection = new Vector2(0, 0);
         private float pushBackTime = 0f;
         private Boolean dialogOrGameOver = false;
+        private Array<Rectangle> collisionRectangles;
 
         public Character(Vector2 initialPosition, Assets assets) {
             super(initialPosition, assets);
@@ -41,7 +40,7 @@
 
         }
 
-        public void update(Array<Enemy> enemies, TiledMap tiledMap, Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog) {
+        public void update(Array<Enemy> enemies , Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog) {
             if (!isPaused) {
                 float deltaTime = Gdx.graphics.getDeltaTime();
                 setStateTime(getStateTime()+deltaTime);
@@ -53,7 +52,6 @@
 
                     handleDash(deltaTime);
 
-                    checkTileCollisions(tiledMap);
 
                     checkEnemyCollisions(enemies);
 
@@ -113,20 +111,22 @@
             }
 
             setIsWalking(direction);
-            setPosition(new Vector2(potentialX,potentialY));
-        }
 
+            // Create a hitbox for the potential new position
+            Rectangle futureHitbox = new Rectangle(potentialX, potentialY, getWidth(), getHeight());
 
-        private void checkTileCollisions(TiledMap tiledMap) {
+            boolean collides = false;
+            if (collisionRectangles != null) {
+                for (Rectangle rect : collisionRectangles) {
+                    if (rect.overlaps(futureHitbox)) {
+                        collides = true;
+                        break;
+                    }
+                }
+            }
 
-            float buffedPotentialX = getPosition().x;
-            float buffedPotentialY = getPosition().y;
-
-            if (isTileBlocked(buffedPotentialX, getPosition().y, tiledMap) && isTileBlocked(getPosition().x, buffedPotentialY, tiledMap)) {
-                getBodyHitbox().set(buffedPotentialX + getWidth() * 29 / 100, buffedPotentialY + getHeight() * 10 / 100,
-                        (float) (getWidth() * 41.66 / 100), (float) (getHeight() * 31.25 / 100));
-                getHeadHitbox().set(buffedPotentialX + getWidth() / 2, (float) (buffedPotentialY + getHeight() / 1.7),
-                        (float) (getWidth() / 3.1));
+            if (!collides) {
+                setPosition(new Vector2(potentialX, potentialY));
             }
         }
 
@@ -188,16 +188,6 @@
                 }
             }
         }
-        private boolean isTileBlocked(float x, float y, TiledMap tiledMap) {
-            TiledMapTileLayer collisionLayer = (TiledMapTileLayer) tiledMap.getLayers().get("Block");
-
-            int tileX = (int) (x / 15.9);
-            int tileY = (int) (y / 15.9);
-
-            TiledMapTileLayer.Cell cell = collisionLayer.getCell(tileX, tileY);
-
-            return !(cell != null && cell.getTile().getProperties().containsKey("blocked"));
-        }
 
         private void handleDash(float deltaTime) {
             boolean dashPressed = Gdx.input.isKeyPressed(Input.Keys.SPACE);
@@ -254,6 +244,10 @@
             pushBackDirection.set(bulletDirection);
             pushBackTime = 0.5f;
             enemyBullet.setAlive(false);
+        }
+
+        public void setCollisionRectangles(Array<Rectangle> rectangles) {
+            this.collisionRectangles = rectangles;
         }
 
     }
