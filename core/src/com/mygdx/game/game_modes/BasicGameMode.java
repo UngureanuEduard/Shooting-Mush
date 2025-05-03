@@ -54,7 +54,7 @@ public class BasicGameMode {
     private float healthBarWidth;
     private float healthBarHeight;
     private float maxBossHealth;
-    private final Music gameMusic;
+    private Music gameMusic;
     private final Music bossMusic;
     private OrthographicCamera camera;
     private float minCameraX;
@@ -73,6 +73,7 @@ public class BasicGameMode {
     private float worldWidth ;
     private float worldHeight ;
     private final Array<Rectangle> collisionRectangles = new Array<>();
+    private boolean enableLeafs = true;
 
     public BasicGameMode(Assets assets , Integer soundVolume, Integer musicVolume) {
         this.assets = assets;
@@ -126,18 +127,18 @@ public class BasicGameMode {
         handleShootLogic(delta);
         batch.setProjectionMatrix(camera.combined);
         particleEffectsManager.update();
+        particleEffectsManager.draw(batch);
         tiledMapRenderer.setView(camera);
         tiledMapRenderer.render();
         enemyBulletsManager.updateAndRender(batch);
         characterBulletsManager.updateAndRender(batch);
         enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, characterBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager);
-        character.drawHearts(batch, camera);
         character.render(batch);
-        particleEffectsManager.draw(batch);
+        character.drawHearts(batch,camera);
         if (shouldDrawBossHealthBar()) {
             drawBossHealthBar(camera ,batch);
         }
-        if(!isGameOver){
+        if(!isGameOver && enableLeafs){
             leafFallingAnimation.updateAndRender(batch , camera);
         }
 
@@ -310,6 +311,10 @@ public class BasicGameMode {
         return gameMusic;
     }
 
+    public void setGameMusic(Music gameMusic) {
+        this.gameMusic = gameMusic;
+    }
+
     public Music getBossMusic() {
         return bossMusic;
     }
@@ -385,4 +390,11 @@ public class BasicGameMode {
         return collisionRectangles;
     }
 
+    public OrthographicCamera getCamera() {
+        return camera;
+    }
+
+    public void setEnableLeafs(boolean enableLeafs) {
+        this.enableLeafs = enableLeafs;
+    }
 }

@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="16" tileheight="16" infinite="0" nextlayerid="44" nextobjectid="161">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="64" height="48" tilewidth="16" tileheight="16" infinite="0" nextlayerid="45" nextobjectid="187">
  <tileset firstgid="1" name="cracked_tiles" tilewidth="16" tileheight="16" tilecount="256" columns="8">
   <image source="decorative_cracks_walls.png" width="128" height="512"/>
  </tileset>
@@ -5063,6 +5063,34 @@
 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 </data>
  </layer>
+ <objectgroup id="44" name="Light">
+  <object id="161" x="238.75" y="248.625" width="2.75" height="2.875"/>
+  <object id="162" x="271.25" y="248" width="2.375" height="2.5"/>
+  <object id="163" x="205.625" y="282.875"/>
+  <object id="164" x="341" y="297.5" width="2.25" height="1.75"/>
+  <object id="165" x="319" y="440" width="2" height="5.5"/>
+  <object id="166" x="445.5" y="439" width="4" height="2.5"/>
+  <object id="167" x="514.5" y="423" width="3.5"/>
+  <object id="168" x="590.5" y="200.5" width="2.5" height="4"/>
+  <object id="169" x="637.25" y="202.5" width="2.5" height="2.25"/>
+  <object id="170" x="717.75" y="60.5" width="2.25" height="2.75"/>
+  <object id="171" x="983.25" y="153.75" width="2.5" height="2"/>
+  <object id="172" x="943.5" y="57.5" width="1.25" height="2.25"/>
+  <object id="173" x="980.667" y="615.333" width="4.33333" height="4.66667"/>
+  <object id="174" x="831" y="600.333" width="1" height="1.33333"/>
+  <object id="175" x="751.333" y="584" width="1.33333" height="2.66667"/>
+  <object id="176" x="542.333" y="665.667" width="2" height="2"/>
+  <object id="177" x="446.667" y="665" width="1.66667" height="2"/>
+  <object id="178" x="352" y="666.333" width="0.666667" height="1.33333"/>
+  <object id="179" x="270" y="663.333" width="3" height="5"/>
+  <object id="180" x="68.3333" y="692.333" width="2.33333" height="6"/>
+  <object id="181" x="175" y="488.333" width="3" height="2"/>
+  <object id="182" x="35.3333" y="452.667" width="5.33333" height="6.33333"/>
+  <object id="183" x="117" y="182.667" width="4.33333" height="2.33333"/>
+  <object id="184" x="143" y="24" width="2.66667" height="2.66667"/>
+  <object id="185" x="287" y="22.6667" width="2" height="2.33333"/>
+  <object id="186" x="340.333" y="117.667" width="2.33333" height="2.66667"/>
+ </objectgroup>
  <objectgroup id="43" name="Collisions">
   <object id="3" x="196.5" y="123.5" width="7.75" height="20"/>
   <object id="4" x="147.25" y="144.75" width="118.5" height="5.75"/>

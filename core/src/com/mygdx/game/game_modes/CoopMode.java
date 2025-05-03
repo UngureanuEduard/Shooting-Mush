@@ -92,6 +92,9 @@
                 }
 
                 for (EnemyBullet bullet : getEnemyBulletsManager().getActiveEnemyBullets()) {
+
+                    if (bullet.isSent()) continue;
+
                     Vector2 bulletPos = bullet.getPosition();
                     Vector2 bulletVel = bullet.getVelocity();
                     float bulletDmg = bullet.getDamage();
@@ -104,6 +107,8 @@
                     data.damage = bulletDmg;
 
                     server.sendToAllTCP(data);
+
+                    bullet.setSent(true);
                 }
 
             }
@@ -126,7 +131,7 @@
                 sendTimer = 0f;
                 client.sendTCP(pos);
             }
-            guestCharacter.update(getIsPaused() ,getEnemyBulletsManager().getActiveEnemyBullets());
+            guestCharacter.update(getIsPaused() ,getEnemyBulletsManager().getActiveEnemyBullets() , client);
             guestCharacter.render(batch);
 
             Vector2 hostPos = getCharacter().getPosition();
@@ -224,6 +229,16 @@
                                 getSoundVolume()
                         );
                     }
+                    else if (object instanceof Network.BulletDeactivation) {
+                        Network.BulletDeactivation data = (Network.BulletDeactivation) object;
+                        for (EnemyBullet bullet : getEnemyBulletsManager().getActiveEnemyBullets()) {
+                            if (Math.abs(bullet.getPosition().x - data.x) < 2f &&
+                                    Math.abs(bullet.getPosition().y - data.y) < 2f) {
+                                bullet.setAlive(false);
+                                break;
+                            }
+                        }
+                    }
 
                 }
             };
@@ -240,6 +255,8 @@
             super.dispose();
             if (guestCharacter != null) guestCharacter.dispose();
         }
+
+
 
 
 

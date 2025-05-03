@@ -6,7 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
 
 public class Bullet implements Pool.Poolable {
-    protected static final float MAX_LIFETIME = 4.5f;
+    protected static final float MAX_LIFETIME = 10f;
     protected static final float DAMAGE_SCALE_BASE = 0.8f;
     protected static final float DAMAGE_SCALE_FACTOR = 200.0f;
 
@@ -28,7 +28,7 @@ public class Bullet implements Pool.Poolable {
     public void init(Vector2 position , Vector2 velocity, float damage  ) {
         this.position.set(position);
         alive = true;
-        this.velocity = velocity;
+        this.velocity = velocity.cpy();
         this.damage = damage;
     }
 
@@ -48,6 +48,7 @@ public class Bullet implements Pool.Poolable {
         if (lifeTimer >= MAX_LIFETIME) {
             alive = false;
         }
+
     }
 
     protected void updateAngle() {
@@ -67,7 +68,9 @@ public class Bullet implements Pool.Poolable {
         return damage;
     }
 
-    public boolean getAlive_n(){return !alive;}
+    public boolean isAlive() {
+        return alive;
+    }
 
     public void setAlive(boolean setAlive) {
         alive = setAlive;
@@ -102,5 +105,4 @@ public class Bullet implements Pool.Poolable {
     public Vector2 getVelocity() {
         return velocity;
     }
-
 }

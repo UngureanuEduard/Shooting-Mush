@@ -52,11 +52,11 @@
 
                     handleDash(deltaTime);
 
+                    updateHitboxes();
 
                     checkEnemyCollisions(enemies);
 
                     checkBulletCollisions(enemyBullets);
-
 
                     setTimeSinceLastLifeLost(getTimeSinceLastLifeLost()+deltaTime);
 
@@ -188,6 +188,8 @@
                 }
             }
         }
+
+
 
         private void handleDash(float deltaTime) {
             boolean dashPressed = Gdx.input.isKeyPressed(Input.Keys.SPACE);

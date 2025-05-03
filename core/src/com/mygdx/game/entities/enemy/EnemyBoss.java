@@ -4,6 +4,7 @@ import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.GameScene;
+import com.mygdx.game.pool_managers.EnemyBulletsManager;
 import com.mygdx.game.utilities_resources.Assets;
 
 public class EnemyBoss extends Enemy {
@@ -28,7 +29,7 @@ public class EnemyBoss extends Enemy {
 
 
     @Override
-    public void shootBullet() {
+    public void shootBullet(EnemyBulletsManager enemyBulletsManager) {
         if (shootTimer >= BULLET_COOLDOWN && behaviorStatus == BehaviorStatus.IDLE) {
             shootTimer = 0;
 

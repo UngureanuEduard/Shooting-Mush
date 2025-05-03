@@ -126,8 +126,6 @@ public class BasicCharacter {
     protected void colidedWithBullet(EnemyBullet enemyBullet){
     }
 
-
-
     private boolean isCollidingWithBullet(EnemyBullet bullet) {
         Polygon bulletPolygon = bullet.getHitBox();
 
@@ -203,11 +201,19 @@ public class BasicCharacter {
         return idleAnimationLeftAndRight;
     }
 
-    public Rectangle getBodyHitbox() {
-        return bodyHitbox;
+    public void updateHitboxes() {
+        bodyHitbox.set(
+                position.x + getWidth() * 0.25f,
+                position.y+getHeight()*0.1f,
+                getWidth() * 0.5f,
+                getHeight() * 0.5f
+        );
+
+        headHitbox.set(
+                position.x + getWidth() * 0.5f,
+                position.y + getHeight() * 0.55f,
+                getHeight() * 0.38f
+        );
     }
 
-    public Circle getHeadHitbox() {
-        return headHitbox;
-    }
 }

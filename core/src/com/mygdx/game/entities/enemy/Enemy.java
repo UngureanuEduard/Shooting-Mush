@@ -1,7 +1,6 @@
 package com.mygdx.game.entities.enemy;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.ai.btree.BehaviorTree;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -15,22 +14,19 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.GameScene;
-import com.mygdx.game.ai.ArenaEnemyBehaviorTree;
 import com.mygdx.game.animations_effects.DamageText;
 import com.mygdx.game.combat_system.CharacterBullet;
 import com.mygdx.game.pool_managers.EnemyBulletsManager;
-import com.mygdx.game.ai.StoryEnemyBehaviorTree;
 import com.mygdx.game.utilities_resources.Assets;
 
 import java.util.Random;
 
 public class Enemy implements Pool.Poolable{
 
-    public static final float MOVEMENT_SPEED = 10.0f;
+    public static final float MOVEMENT_SPEED = 15.0f;
     private static final float BULLET_COOLDOWN = 5.0f;
     protected static final float SCALE = 0.8f;
     private static final Random RANDOM = new Random();
-    private BehaviorTree<Enemy> behaviorTree;
 
     protected Vector2 position;
     protected Vector2 playerPosition;
@@ -45,7 +41,7 @@ public class Enemy implements Pool.Poolable{
     protected float maxHealth;
     protected float sizeScale;
     protected Sound sound;
-    protected float shootTimer = 0.0f;
+    protected float shootTimer = 5.0f;
 
     protected Integer soundVolume;
     Array<DamageText> damageTexts = new Array<>();
@@ -57,9 +53,6 @@ public class Enemy implements Pool.Poolable{
     protected Rectangle bodyHitbox;
     protected Circle headHitbox;
     protected Vector2 direction;
-
-    protected EnemyBulletsManager enemyBulletsManager;
-
     private Vector2 spawnPosition;
 
     public enum BehaviorStatus {
@@ -84,18 +77,27 @@ public class Enemy implements Pool.Poolable{
     private boolean markedForRemoval = false;
     private boolean lastHitByHost;
 
+    public enum EnemyState {
+        IDLE, WANDERING, MOVING_TO_PLAYER, SHOOTING
+    }
+
+    private GameScene.GameMode gameMode;
+    private EnemyState currentState;
+
+
+
 
     public Enemy(){
-        this.alive=false;
-        this.isAttacked=false;
-        this.position=new Vector2();
+        alive=false;
+        isAttacked=false;
+        position=new Vector2();
     }
 
     @Override
     public void reset() {
         position.set(-1,-1);
-        this.alive = false;
-        this.isAttacked = false;
+        alive = false;
+        isAttacked = false;
 
     }
 
@@ -108,25 +110,24 @@ public class Enemy implements Pool.Poolable{
         this.playerPosition = playerPosition;
         this.soundVolume = soundVolume;
         this.critRate = critRate;
-        this.alive = true;
-        this.isAttacked = false;
-        this.sizeScale = SCALE;
-        this.bodyHitbox = new Rectangle();
-        this.headHitbox = new Circle();
-        this.defaultFont = new BitmapFont();
+        this.gameMode = gameMode;
+        this.currentState = (gameMode == GameScene.GameMode.STORY) ? EnemyState.WANDERING : EnemyState.MOVING_TO_PLAYER;
+        alive = true;
+        isAttacked = false;
+        sizeScale = SCALE;
+        bodyHitbox = new Rectangle();
+        headHitbox = new Circle();
+        defaultFont = new BitmapFont();
         loadEnemyTextures();
         TextureRegion[] duckFrames = splitEnemyTexture(duckTexture, 6);
         TextureRegion[] duckIdleFrames = splitEnemyTexture(idleTexture, 4);
         walkAnimation = new Animation<>(0.1f, duckFrames);
         idleAnimation = new Animation<>(0.1f, duckIdleFrames);
-        this.sound = assets.getAssetManager().get(Assets.duckSound);
-        stateTime = 0.0f; // Initialize the animation time
+        sound = assets.getAssetManager().get(Assets.duckSound);
+        stateTime = 0.0f;
         damagedDelay = 0.0f;
-        if(gameMode == GameScene.GameMode.STORY)
-        behaviorTree = new StoryEnemyBehaviorTree(this);
-        else behaviorTree = new ArenaEnemyBehaviorTree(this);
         PUSH_BACK_FORCE = 50.0f;
-        this.id = nextId++;
+        id = nextId++;
     }
 
     protected void loadEnemyTextures(){
@@ -138,22 +139,18 @@ public class Enemy implements Pool.Poolable{
 
     public void update(float deltaTime, EnemyBulletsManager enemyBulletsManager, Array<CharacterBullet> characterBullets, boolean isPaused, Array<Enemy> enemies ) {
         if (!isPaused) {
-            this.enemyBulletsManager=enemyBulletsManager;
-            // Calculate the direction from the enemy to the player
             direction = playerPosition.cpy().sub(position).nor();
             boolean isColliding = isCollidingWithEnemy(enemies);
 
             if (!isColliding) {
-                behaviorTree.step();
+                simpleAI(deltaTime , enemyBulletsManager);
             }
 
             updateHitboxes();
 
-            // Update animation stateTime
             stateTime += deltaTime;
 
-            // Check for bullet collisions
-            CheckBulletCollisions(characterBullets);
+            checkBulletCollisions(characterBullets);
 
             shootTimer += deltaTime;
 
@@ -166,6 +163,69 @@ public class Enemy implements Pool.Poolable{
         }
     }
 
+    private void simpleAI(float deltaTime , EnemyBulletsManager enemyBulletsManager) {
+        float distanceToPlayer = playerPosition.dst(position);
+
+        switch (gameMode) {
+            case ARENA:
+                if (distanceToPlayer < 200f) {
+                    currentState = EnemyState.SHOOTING;
+                } else {
+                    currentState = EnemyState.MOVING_TO_PLAYER;
+                }
+                break;
+
+            case STORY:
+                if (distanceToPlayer < 150f || isAttacked) {
+                    isAttacked = true ;
+                    currentState = (distanceToPlayer < 100f) ? EnemyState.SHOOTING : EnemyState.MOVING_TO_PLAYER;
+                } else {
+                    currentState = EnemyState.WANDERING;
+                }
+                break;
+        }
+
+        switch (currentState) {
+            case SHOOTING:
+                if (shootTimer >= BULLET_COOLDOWN) {
+                    shootTimer = 0;
+                    shootBullet(enemyBulletsManager);
+                }
+                setBehaviorStatus(BehaviorStatus.IDLE);
+                break;
+            case MOVING_TO_PLAYER:
+                moveTowards(playerPosition, deltaTime);
+                setBehaviorStatus(BehaviorStatus.MOVING);
+                break;
+            case WANDERING:
+                wander();
+                setBehaviorStatus(BehaviorStatus.MOVING);
+                break;
+            default:
+                setBehaviorStatus(BehaviorStatus.IDLE);
+        }
+    }
+
+    private void moveTowards(Vector2 target, float deltaTime) {
+        Vector2 direction = target.cpy().sub(position).nor();
+        position.add(direction.scl(MOVEMENT_SPEED * deltaTime));
+        setIsFlipped(target.x < position.x);
+    }
+
+    private void wander() {
+        float wanderAmplitude = 10f;
+        float wanderSpeed = 1.5f;
+        float offsetX = (float) Math.sin(stateTime * wanderSpeed) * wanderAmplitude;
+        float previousX = position.x;
+        position.x = spawnPosition.x + offsetX;
+
+        if (position.x < previousX) {
+            setIsFlipped(true);
+        } else if (position.x > previousX) {
+            setIsFlipped(false);
+        }
+    }
+
     private void updateHitboxes() {
         bodyHitbox.set(position.x + getWidth() / 3.8f * sizeScale, position.y + getHeight() / 10.0f * sizeScale, getWidth() / 2.3f * sizeScale, getHeight() / 2.7f * sizeScale);
         headHitbox.set(position.x + getWidth() / 2.0f * sizeScale, position.y + getHeight() / 1.5f * sizeScale, getHeight() / 5.0f * sizeScale);
@@ -175,10 +235,9 @@ public class Enemy implements Pool.Poolable{
         Array<Enemy> enemiesCopy = new Array<>(enemies);
         for (Enemy otherEnemy : enemiesCopy) {
             if (otherEnemy != this) {
-                // Check for collision with body hitbox
-                if (Intersector.overlaps(this.bodyHitbox, otherEnemy.bodyHitbox) ||
-                        Intersector.overlaps(this.headHitbox, otherEnemy.headHitbox)) {
-                    resolveCollisionWithEnemy(otherEnemy); // Resolve the collision
+                if (Intersector.overlaps(bodyHitbox, otherEnemy.bodyHitbox) ||
+                        Intersector.overlaps(headHitbox, otherEnemy.headHitbox)) {
+                    resolveCollisionWithEnemy(otherEnemy);
                     return true;
                 }
             }
@@ -189,47 +248,32 @@ public class Enemy implements Pool.Poolable{
     private void resolveCollisionWithEnemy(Enemy otherEnemy) {
         Vector2 collisionVector = new Vector2();
 
-        // Determine the direction to resolve the collision
-        if (Intersector.overlaps(this.bodyHitbox, otherEnemy.bodyHitbox)) {
-            collisionVector.set(otherEnemy.bodyHitbox.x - this.bodyHitbox.x, otherEnemy.bodyHitbox.y - this.bodyHitbox.y);
+        if (Intersector.overlaps(bodyHitbox, otherEnemy.bodyHitbox)) {
+            collisionVector.set(otherEnemy.bodyHitbox.x - bodyHitbox.x, otherEnemy.bodyHitbox.y - bodyHitbox.y);
         } else {
-            collisionVector.set(otherEnemy.headHitbox.x - this.headHitbox.x, otherEnemy.headHitbox.y - this.headHitbox.y);
+            collisionVector.set(otherEnemy.headHitbox.x - headHitbox.x, otherEnemy.headHitbox.y - headHitbox.y);
         }
 
-        // Normalize and scale the collision vector
         collisionVector.nor().scl(0.5f);
 
-        // Adjust positions to prevent overlapping
         this.position.sub(collisionVector);
         otherEnemy.position.add(collisionVector);
     }
 
-    public void CheckBulletCollisions(Array<CharacterBullet> bullets) {
+    public void checkBulletCollisions(Array<CharacterBullet> bullets) {
         for (CharacterBullet bullet : bullets) {
-            if (isCollidingWithBullet(bullet)) {
-                takeDamage(bullet.getDamage());
+            if (Intersector.overlaps(bullet.getHitBox(), headHitbox) || Intersector.overlaps(bullet.getHitBox(), bodyHitbox)) {
+                boolean isCrit = isCrit();
+                takeDamage(isCrit ? bullet.getDamage() * 4 : bullet.getDamage());
+                damageTexts.add(new DamageText(bullet.getDamage(), bullet.getPosition().cpy(), 1f, isCrit));
                 isDamaged = true;
                 isAttacked = true;
                 lastHitByHost = bullet.isFromHost();
-                Vector2 bulletDirection = new Vector2(position).sub(bullet.getPosition()).nor();
-                pushBackDirection.set(bulletDirection);
+                pushBackDirection.set(position).sub(bullet.getPosition()).nor();
                 pushBackTime = 0f;
                 bullet.setAlive(false);
             }
         }
-    }
-
-    public boolean isCollidingWithBullet(CharacterBullet bullet) {
-        if (Intersector.overlaps(bullet.getHitBox(), headHitbox) || Intersector.overlaps(bullet.getHitBox(), bodyHitbox)) {
-            Boolean isCrit = isCrit();
-            if (isCrit) {
-                bullet.setDamage(bullet.getDamage() * 4);
-                PUSH_BACK_FORCE = PUSH_BACK_FORCE +10;
-            }
-            else PUSH_BACK_FORCE = 50.0f;
-            damageTexts.add(new DamageText(bullet.getDamage(), new Vector2(bullet.getPosition()), 1f, isCrit));
-            return true;
-        } else return false;
     }
 
     public void takeDamage(float damage) {
@@ -240,7 +284,7 @@ public class Enemy implements Pool.Poolable{
             damagedDelay = 0;
         }
         if (health <= 0) {
-            this.alive = false;
+            alive = false;
         }
     }
 
@@ -291,13 +335,9 @@ public class Enemy implements Pool.Poolable{
         return characterFrames;
     }
 
-    public void shootBullet() {
-        if (shootTimer >= BULLET_COOLDOWN) {
-            shootTimer = 0;
-            Vector2 direction = playerPosition.cpy().sub(position).nor();
-            enemyBulletsManager.generateBullet(position.cpy(),direction.cpy().scl(200), 1, assets, soundVolume);
-        }
-
+    public void shootBullet( EnemyBulletsManager enemyBulletsManager ) {
+        Vector2 direction = playerPosition.cpy().sub(position).nor().scl(110f);
+        enemyBulletsManager.generateBullet(position.cpy(), direction, 1, assets, soundVolume);
     }
 
     public float getWidth() {
@@ -320,9 +360,6 @@ public class Enemy implements Pool.Poolable{
         return health;
     }
 
-    public Vector2 getPlayerPosition() {
-        return playerPosition;
-    }
 
     public void renderDamageTexts(SpriteBatch batch, float deltaTime) {
         Array<DamageText> textsToRemove = new Array<>();
@@ -342,6 +379,7 @@ public class Enemy implements Pool.Poolable{
                 defaultFont.setColor(1, 1, 1, 1);
             }
 
+
             if (damageText.isFinished()) {
                 textsToRemove.add(damageText);
             }
@@ -360,11 +398,7 @@ public class Enemy implements Pool.Poolable{
     }
 
     public boolean isAlive(){
-        return this.alive;
-    }
-
-    public Vector2 getSpawnPosition() {
-        return spawnPosition;
+        return alive;
     }
 
     public boolean getIsAttacked() {
@@ -423,7 +457,7 @@ public class Enemy implements Pool.Poolable{
     }
 
     public void updatePlayerPosition(Vector2 hostPos, Vector2 guestPos) {
-        this.playerPosition = lastHitByHost ? hostPos : guestPos;
+        playerPosition = lastHitByHost ? hostPos : guestPos;
     }
 
 

@@ -15,6 +15,7 @@ public class EnemyBullet extends Bullet{
     private  float width;
     private  float height;
     private  Polygon hitBox;
+    private boolean sent = false;
 
     public EnemyBullet(){
         super();
@@ -28,7 +29,7 @@ public class EnemyBullet extends Bullet{
         Sound soundEnemy = assets.getAssetManager().get(Assets.duckShootSound);
         setTexture(new TextureRegion(bulletCornTexture));
         soundEnemy.play(soundVolume / 100f);
-
+        sent = false;
         float[] vertices = {
                 width / 2, height,
                 0, 0,
@@ -65,5 +66,13 @@ public class EnemyBullet extends Bullet{
     }
 
     public Polygon getHitBox(){return hitBox;}
+
+    public boolean isSent() {
+        return sent;
+    }
+
+    public void setSent(boolean sent) {
+        this.sent = sent;
+    }
 
 }

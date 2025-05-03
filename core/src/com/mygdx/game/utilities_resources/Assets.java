@@ -47,6 +47,7 @@ public class Assets {
     public static final AssetDescriptor<Texture> EnemyHealthTexture = new AssetDescriptor<>("Environment/EnemyHealthTexture.png", Texture.class);
     public static final AssetDescriptor<Texture> EnemyHealthBarTexture = new AssetDescriptor<>("Environment/HealthBarEmpty.png", Texture.class);
     public static final AssetDescriptor<Music> bossMusic = new AssetDescriptor<>("mp3/BossSong.mp3", Music.class);
+    public static final AssetDescriptor<Music> dungeonMusic = new AssetDescriptor<>("mp3/dungeonSong.wav", Music.class);
     public static final AssetDescriptor<Sound> DialogueNPC1Line1 = new AssetDescriptor<>("mp3/Mylo 1.wav",Sound.class);
     public static final AssetDescriptor<Sound> DialogueNPC1Line2 = new AssetDescriptor<>("mp3/The Ducks 1.wav",Sound.class);
     public static final AssetDescriptor<Sound> DialogueNPC1Line3 = new AssetDescriptor<>("mp3/You need to stop them 1.wav",Sound.class);
@@ -73,7 +74,7 @@ public class Assets {
                 idleBossTexture, idleEnemyTexture, BossHealthBarTexture, EnemyHealthBarTexture, HealthTexture,
                 bossMusic, DialogueNPC1Line1, DialogueNPC1Line2, DialogueNPC1Line3, fallingLeafTexture, dialogTexture ,
                 goldTrophyTexture , silverTrophyTexture , bronzeTrophyTexture , fireworkExplosionTexture , fireworkRocketTexture
-                , co_opButtonTexture , backButtonTexture , introSound
+                , co_opButtonTexture , backButtonTexture , introSound , dungeonMusic
         };
 
         for (AssetDescriptor<?> asset : assetsToLoad) {

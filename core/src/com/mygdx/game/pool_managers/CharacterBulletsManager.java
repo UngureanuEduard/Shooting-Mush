@@ -39,12 +39,12 @@ public class CharacterBulletsManager {
     public void updateAndRender(SpriteBatch batch  ){
         for (CharacterBullet characterBullet : activeCharacterBullets) {
             characterBullet.update(Gdx.graphics.getDeltaTime());
-            if (characterBullet.getAlive_n()) {
+
+            if(characterBullet.isAlive()){
+                characterBullet.render(batch);
+            } else {
                 activeCharacterBullets.removeValue(characterBullet, true);
                 characterBulletPool.free(characterBullet);
-
-            } else {
-                characterBullet.render(batch);
             }
         }
     }

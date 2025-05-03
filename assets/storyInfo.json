@@ -1,19 +1,10 @@
 {
   "maps": [
     {
-      "mapName": "Dungeon1",
+      "mapName": "storyMap1",
       "npcLocation": {
         "x" : 145,
         "y" : 115
-      },
-      "enemies": [
-      ]
-    },
-    {
-      "mapName": "storyMap1",
-      "npcLocation": {
-        "x" : 600,
-        "y" : 200
       },
       "enemies": [
         {
@@ -24,8 +15,17 @@
         {
           "x": 900,
           "y": 400,
-          "type": "normal"
+          "type": "boss"
         }
+      ]
+    },
+    {
+      "mapName": "storyMap2",
+      "npcLocation": {
+        "x" : 600,
+        "y" : 200
+      },
+      "enemies": [
       ]
     }
   ]

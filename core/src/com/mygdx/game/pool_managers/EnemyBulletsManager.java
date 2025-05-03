@@ -35,20 +35,21 @@ public class EnemyBulletsManager {
     }
 
     public void updateAndRender(SpriteBatch batch){
-        for (EnemyBullet enemyBullet : activeEnemyBullets) {
+        for (int i = activeEnemyBullets.size - 1; i >= 0; i--) {
+            EnemyBullet enemyBullet = activeEnemyBullets.get(i);
             enemyBullet.update(Gdx.graphics.getDeltaTime());
-            if (enemyBullet.getAlive_n()) {
-                activeEnemyBullets.removeValue(enemyBullet, true);
-                enemyBulletPool.free(enemyBullet);
-            } else {
+            if (enemyBullet.isAlive()) {
                 enemyBullet.render(batch);
+            } else {
+                activeEnemyBullets.removeIndex(i);
+                enemyBulletPool.free(enemyBullet);
             }
         }
     }
 
-    public void generateBullet(Vector2 bulletStartPosition, Vector2 directionToCursor, float damage, Assets assets, Integer soundVolume){
+    public void generateBullet(Vector2 bulletStartPosition, Vector2 playerPosition, float damage, Assets assets, Integer soundVolume){
         EnemyBullet item = enemyBulletPool.obtain();
-        item.init(bulletStartPosition, directionToCursor, damage, assets, soundVolume);
+        item.init(bulletStartPosition, playerPosition, damage, assets, soundVolume);
         activeEnemyBullets.add(item);
     }
 }
