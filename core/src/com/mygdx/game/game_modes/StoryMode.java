@@ -29,13 +29,14 @@ import com.mygdx.game.utilities_resources.TransitionArea;
 public class StoryMode extends BasicGameMode {
 
     private final Array<MapDetails> maps = new Array<>();
-    private int currentMapIndex = 0;
     private Npc npc;
     private TransitionArea transitionArea;
     private EndGameScreenStory endGameScreenStory;
     private RayHandler rayHandler;
     private PointLight playerLight;
     private World world;
+    private int cameraWidth;
+    private int cameraHeight;
 
     public StoryMode(Assets assets, Integer soundVolume, Integer musicVolume) {
         super(assets, soundVolume, musicVolume);
@@ -50,10 +51,12 @@ public class StoryMode extends BasicGameMode {
     }
 
     public void show(int cameraWidth, int cameraHeight) {
+        this.cameraWidth = cameraWidth;
+        this.cameraHeight = cameraHeight;
         setCharacter(new Character(new Vector2(120, 100), getAssets()));
-        loadMap(currentMapIndex);
+        loadMap(getCurrentMapIndex());
         super.show(cameraWidth, cameraHeight);
-        currentMapIndex = 0;
+        setCurrentMapIndex(0);
         npc = new Npc(getEnemyManager().getEnemyMapLocationsInfos().get(0).getNpcPosition(), getAssets(), getSoundVolume());
     }
 
@@ -64,7 +67,7 @@ public class StoryMode extends BasicGameMode {
             setTiledMapRenderer(new OrthogonalTiledMapRenderer(getTiledMap()));
             getCharacter().setPosition(mapDetails.getSpawnPoint());
             transitionArea = mapDetails.getTransitionArea();
-            initCamera(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
+            initCamera(cameraWidth, cameraHeight);
             loadCollisionObjects();
             getCharacter().setCollisionRectangles(getCollisionRectangles());
 
@@ -99,7 +102,6 @@ public class StoryMode extends BasicGameMode {
                 setGameMusic(getAssets().getAssetManager().get(Assets.dungeonMusic));
                 getGameMusic().setLooping(true);
                 getGameMusic().play();
-
                 setEnableLeafs(false);
 
             } else {
@@ -118,7 +120,7 @@ public class StoryMode extends BasicGameMode {
         npc.update(delta, getIsPaused(), getCharacter().getPosition(), stage, getSkin());
         npc.render(batch);
 
-        if (currentMapIndex == 1 && rayHandler != null && playerLight != null) {
+        if (getCurrentMapIndex() == 1 && rayHandler != null && playerLight != null) {
             playerLight.setPosition(
                     getCharacter().getPosition().x + getCharacter().getWidth() / 2,
                     getCharacter().getPosition().y + getCharacter().getHeight() / 2
@@ -149,32 +151,38 @@ public class StoryMode extends BasicGameMode {
     }
 
     private void loadNextMap(MyGdxGame game) {
-        currentMapIndex++;
+        setCurrentMapIndex( getCurrentMapIndex() + 1);
         getBossMusic().stop();
-        if (currentMapIndex < maps.size) {
-            loadMap(currentMapIndex);
+        if (getCurrentMapIndex() < maps.size) {
+            loadMap(getCurrentMapIndex());
         } else {
             handleGameOver(game);
         }
     }
 
     public void spawnStoryEnemy() {
-        if (getEnemyManager().getActiveEnemies().size < 9) {
-            EnemyMapLocationsInfo enemyMapLocationsInfo = getEnemyManager().getEnemyMapLocationsInfos().get(currentMapIndex);
+        int activeCount = getEnemyManager().getActiveEnemies().size;
+        int mapIndex = getCurrentMapIndex();
+        if (activeCount < 9) {
+            EnemyMapLocationsInfo enemyMapLocationsInfo = getEnemyManager().getEnemyMapLocationsInfos().get(mapIndex);
+            Array<EnemyBasicInfo> toRemove = new Array<>();
             for (EnemyBasicInfo enemyInfo : enemyMapLocationsInfo.getEnemies()) {
                 Vector2 enemyPosition = enemyInfo.getPosition();
                 String type = enemyInfo.getType();
                 if (type.equals("normal")) {
-                    getEnemyManager().spawnEnemy(enemyPosition, getCharacter().getPosition(), 100, getAssets(), getSoundVolume(), getCritRate());
-                    enemyMapLocationsInfo.removeEnemy(enemyInfo);
-                } else if (getCharacter().getPosition().x > transitionArea.getX() - 480
-                        && getCharacter().getPosition().y > transitionArea.getY() - 90) {
+                    getEnemyManager().spawnEnemy(enemyPosition, getCharacter().getPosition(), 100, getAssets(), getSoundVolume(), getCritRate(), mapIndex);
+                    toRemove.add(enemyInfo);
+                } else if (type.equals("boss") && (getCharacter().getPosition().x > transitionArea.getX() - 480
+                        && getCharacter().getPosition().y > transitionArea.getY() - 90) ) {
                     spawnBoss(500, enemyPosition, GameScene.GameMode.STORY);
-                    enemyMapLocationsInfo.removeEnemy(enemyInfo);
+                    toRemove.add(enemyInfo);
                 }
             }
+            enemyMapLocationsInfo.getEnemies().removeAll(toRemove, true);
         }
     }
+
+
 
     private void handleGameOver(MyGdxGame game) {
         setIsGameOver(true);

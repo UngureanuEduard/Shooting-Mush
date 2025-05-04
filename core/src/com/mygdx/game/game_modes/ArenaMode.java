@@ -100,7 +100,7 @@ public class ArenaMode  extends BasicGameMode{
     }
     private void spawnArenaEnemy(float health) {
         Vector2 enemyPosition = new Vector2(MathUtils.random(getMinCameraX(), getMaxCameraX()), MathUtils.random(getMinCameraY(), getMaxCameraY()));
-        getEnemyManager().spawnEnemy(enemyPosition, getCharacter().getPosition(), health, getAssets(), getSoundVolume(), getCritRate());
+        getEnemyManager().spawnEnemy(enemyPosition, getCharacter().getPosition(), health, getAssets(), getSoundVolume(), getCritRate() , 0);
     }
 
     private void drawWaveNumberAndScore( Stage stage) {

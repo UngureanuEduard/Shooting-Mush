@@ -47,9 +47,9 @@ public class EnemyBulletsManager {
         }
     }
 
-    public void generateBullet(Vector2 bulletStartPosition, Vector2 playerPosition, float damage, Assets assets, Integer soundVolume){
+    public void generateBullet(Vector2 bulletStartPosition, Vector2 playerPosition, float damage, Assets assets, Integer soundVolume , int mapIndex){
         EnemyBullet item = enemyBulletPool.obtain();
-        item.init(bulletStartPosition, playerPosition, damage, assets, soundVolume);
+        item.init(bulletStartPosition, playerPosition, damage, assets, soundVolume , mapIndex);
         activeEnemyBullets.add(item);
     }
 }

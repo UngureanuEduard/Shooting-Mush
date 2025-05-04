@@ -226,7 +226,7 @@
                                 new Vector2(data.vx, data.vy),
                                 data.damage,
                                 getAssets(),
-                                getSoundVolume()
+                                getSoundVolume(), getCurrentMapIndex()
                         );
                     }
                     else if (object instanceof Network.BulletDeactivation) {

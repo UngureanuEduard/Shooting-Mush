@@ -1,6 +1,8 @@
 package com.mygdx.game.entities.enemy;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.MathUtils;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.GameScene;
@@ -15,21 +17,25 @@ public class EnemyBoss extends Enemy {
     private static final float SCALE = 1.7f;
     private static final float FIRE_ANGLE_STEP = 15.0f;
 
-    public EnemyBoss(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode) {
-        init(position, playerPosition, health, assets, soundVolume, critRate , gameMode);
+    public EnemyBoss(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode , int mapIndex) {
+        init(position, playerPosition, health, assets, soundVolume, critRate , gameMode , mapIndex);
         sizeScale = SCALE;
         PUSH_BACK_FORCE = 0f;
     }
 
     @Override
-    protected void loadEnemyTextures() {
-        duckTexture = assets.getAssetManager().get(Assets.bossTexture);
+    protected void loadEnemyTextures(int mapIndex) {
+        walkTexture = assets.getAssetManager().get(Assets.bossTexture);
         idleTexture = assets.getAssetManager().get(Assets.idleBossTexture);
+        TextureRegion[] walkingFrames = splitEnemyTexture(walkTexture, 6 ,32 ,32);
+        TextureRegion[] idleFrames = splitEnemyTexture(idleTexture, 4,32,32);
+        walkAnimation = new Animation<>(0.1f, walkingFrames);
+        idleAnimation = new Animation<>(0.1f, idleFrames);
     }
 
 
     @Override
-    public void shootBullet(EnemyBulletsManager enemyBulletsManager) {
+    public void shootBullet(EnemyBulletsManager enemyBulletsManager ,int mapIndex) {
         if (shootTimer >= BULLET_COOLDOWN && behaviorStatus == BehaviorStatus.IDLE) {
             shootTimer = 0;
 
@@ -37,7 +43,7 @@ public class EnemyBoss extends Enemy {
 
             for (float angle = 0; angle < 360; angle += FIRE_ANGLE_STEP) {
                 Vector2 direction = new Vector2(MathUtils.cosDeg(angle), MathUtils.sinDeg(angle)).scl(BULLET_SPEED);
-                enemyBulletsManager.generateBullet(bulletPosition.cpy(), direction, 1, assets, soundVolume);
+                enemyBulletsManager.generateBullet(bulletPosition.cpy(), direction, 1, assets, soundVolume , 0);
             }
         }
     }

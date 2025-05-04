@@ -22,12 +22,12 @@ public class DummyEnemy extends Enemy {
         setFlipped(isFlipped);
         this.assets = assets;
         this.sizeScale = SCALE;
-        loadEnemyTextures();
+        loadEnemyTextures(1);
 
         walkAnimation = new com.badlogic.gdx.graphics.g2d.Animation<>(0.1f,
-                splitEnemyTexture(duckTexture, 6));
+                splitEnemyTexture(walkTexture, 6 ,32 ,32));
         idleAnimation = new com.badlogic.gdx.graphics.g2d.Animation<>(0.1f,
-                splitEnemyTexture(idleTexture, 4));
+                splitEnemyTexture(idleTexture, 4 , 32, 32));
     }
 
     public void updateFromNetwork(Vector2 position, float health, boolean isFlipped) {

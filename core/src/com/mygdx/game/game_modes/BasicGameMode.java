@@ -74,6 +74,7 @@ public class BasicGameMode {
     private float worldHeight ;
     private final Array<Rectangle> collisionRectangles = new Array<>();
     private boolean enableLeafs = true;
+    private int currentMapIndex = 0;
 
     public BasicGameMode(Assets assets , Integer soundVolume, Integer musicVolume) {
         this.assets = assets;
@@ -132,7 +133,7 @@ public class BasicGameMode {
         tiledMapRenderer.render();
         enemyBulletsManager.updateAndRender(batch);
         characterBulletsManager.updateAndRender(batch);
-        enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, characterBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager);
+        enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, characterBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager ,currentMapIndex );
         character.render(batch);
         character.drawHearts(batch,camera);
         if (shouldDrawBossHealthBar()) {
@@ -223,7 +224,7 @@ public class BasicGameMode {
     }
 
     protected void spawnBoss(float health, Vector2 bossPosition , GameScene.GameMode gameMode) {
-        EnemyBoss enemy = new EnemyBoss(bossPosition, character.getPosition(), health, assets, soundVolume, critRate, gameMode);
+        EnemyBoss enemy = new EnemyBoss(bossPosition, character.getPosition(), health, assets, soundVolume, critRate, gameMode , 0);
         getEnemyManager().getActiveEnemies().add(enemy);
         getGameMusic().stop();
         getBossMusic().play();
@@ -396,5 +397,13 @@ public class BasicGameMode {
 
     public void setEnableLeafs(boolean enableLeafs) {
         this.enableLeafs = enableLeafs;
+    }
+
+    public int getCurrentMapIndex() {
+        return currentMapIndex;
+    }
+
+    public void setCurrentMapIndex(int currentMapIndex) {
+        this.currentMapIndex = currentMapIndex;
     }
 }

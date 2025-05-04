@@ -35,9 +35,15 @@
         public void fillPool(int amount){
             enemiesPool.fill(amount);
         }
-        public void spawnEnemy(Vector2 enemyPosition , Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate){
+        public void spawnEnemy(Vector2 enemyPosition, Vector2 playerPosition, float health, Assets assets,
+                               Integer soundVolume, Integer critRate, int mapIndex) {
             Enemy item = enemiesPool.obtain();
-            item.init(enemyPosition, playerPosition, health, assets, soundVolume,critRate ,gameMode);
+
+            if (item instanceof EnemyBoss) {
+               item = new Enemy();
+            }
+
+            item.init(enemyPosition, playerPosition, health, assets, soundVolume, critRate, gameMode, mapIndex);
             activeEnemies.add(item);
         }
 
@@ -49,10 +55,10 @@
             enemiesPool.clear();
         }
 
-        public int updateAndRender(SpriteBatch batch , EnemyBulletsManager enemyBulletsManager , CharacterBulletsManager characterBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects){
-            for (Enemy enemy : activeEnemies) {
-                enemy.update(Gdx.graphics.getDeltaTime(), enemyBulletsManager, characterBulletsManager.getActiveCharacterBullets(), isPaused, activeEnemies );
-
+        public int updateAndRender(SpriteBatch batch , EnemyBulletsManager enemyBulletsManager , CharacterBulletsManager characterBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects , int mapIndex){
+            for (int i = activeEnemies.size - 1; i >= 0; i--) {
+                Enemy enemy = activeEnemies.get(i);
+                enemy.update(Gdx.graphics.getDeltaTime(), enemyBulletsManager, characterBulletsManager.getActiveCharacterBullets(), isPaused, activeEnemies ,  mapIndex);
                 if (!enemy.isAlive() && !enemy.isMarkedForRemoval()) {
                     Vector2 poz = new Vector2(enemy.getPosition());
                     particleEffects.DeathParticles(poz, enemy.getSizeScale(), scaled);
@@ -62,7 +68,10 @@
                     enemy.setMarkedForRemoval(true);
                 }
 
-                if (!enemy.isMarkedForRemoval()) {
+                if (enemy.isMarkedForRemoval()) {
+                    activeEnemies.removeIndex(i);
+                    enemiesPool.free(enemy);
+                } else {
                     enemy.render(batch);
                 }
             }

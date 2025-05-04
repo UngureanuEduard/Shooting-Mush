@@ -30,7 +30,7 @@ public class Enemy implements Pool.Poolable{
 
     protected Vector2 position;
     protected Vector2 playerPosition;
-    protected Texture duckTexture;
+    protected Texture walkTexture;
     protected Texture idleTexture;
     protected Animation<TextureRegion> walkAnimation;
     protected Animation<TextureRegion> idleAnimation;
@@ -101,7 +101,7 @@ public class Enemy implements Pool.Poolable{
 
     }
 
-    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode){
+    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode , int mapIndex){
         this.assets = assets;
         this.health = health;
         this.maxHealth = health;
@@ -118,32 +118,46 @@ public class Enemy implements Pool.Poolable{
         bodyHitbox = new Rectangle();
         headHitbox = new Circle();
         defaultFont = new BitmapFont();
-        loadEnemyTextures();
-        TextureRegion[] duckFrames = splitEnemyTexture(duckTexture, 6);
-        TextureRegion[] duckIdleFrames = splitEnemyTexture(idleTexture, 4);
-        walkAnimation = new Animation<>(0.1f, duckFrames);
-        idleAnimation = new Animation<>(0.1f, duckIdleFrames);
+        loadEnemyTextures(mapIndex);
         sound = assets.getAssetManager().get(Assets.duckSound);
         stateTime = 0.0f;
         damagedDelay = 0.0f;
         PUSH_BACK_FORCE = 50.0f;
         id = nextId++;
+        markedForRemoval = false;
     }
 
-    protected void loadEnemyTextures(){
-        duckTexture = assets.getAssetManager().get(Assets.duckTexture);
-        idleTexture = assets.getAssetManager().get(Assets.idleEnemyTexture);
+    protected void loadEnemyTextures(int mapIndex){
+        if(mapIndex == 1){
+            walkTexture = assets.getAssetManager().get(Assets.skeletonWalkTexture);
+            idleTexture = assets.getAssetManager().get(Assets.skeletonIdleTexture);
+            TextureRegion[] walkingFrames = splitEnemyTexture(walkTexture, 4 ,48 ,48);
+            TextureRegion[] idleFrames = splitEnemyTexture(idleTexture, 6,48,48);
+            walkAnimation = new Animation<>(0.1f, walkingFrames);
+            idleAnimation = new Animation<>(0.1f, idleFrames);
+            sizeScale += 0.2f;
+        } else {
+            walkTexture = assets.getAssetManager().get(Assets.duckTexture);
+            idleTexture = assets.getAssetManager().get(Assets.idleEnemyTexture);
+            TextureRegion[] walkingFrames = splitEnemyTexture(walkTexture, 6 ,32 ,32);
+            TextureRegion[] idleFrames = splitEnemyTexture(idleTexture, 4,32,32);
+            walkAnimation = new Animation<>(0.1f, walkingFrames);
+            idleAnimation = new Animation<>(0.1f, idleFrames);
+        }
+
+
         healthBarBackgroundTexture = assets.getAssetManager().get(Assets.EnemyHealthBarTexture);
         healthBarForegroundTexture = assets.getAssetManager().get(Assets.EnemyHealthTexture);
     }
 
-    public void update(float deltaTime, EnemyBulletsManager enemyBulletsManager, Array<CharacterBullet> characterBullets, boolean isPaused, Array<Enemy> enemies ) {
+    public void update(float deltaTime, EnemyBulletsManager enemyBulletsManager, Array<CharacterBullet> characterBullets, boolean isPaused, Array<Enemy> enemies
+    , int mapIndex ) {
         if (!isPaused) {
             direction = playerPosition.cpy().sub(position).nor();
             boolean isColliding = isCollidingWithEnemy(enemies);
 
             if (!isColliding) {
-                simpleAI(deltaTime , enemyBulletsManager);
+                simpleAI(deltaTime , enemyBulletsManager , mapIndex);
             }
 
             updateHitboxes();
@@ -163,7 +177,7 @@ public class Enemy implements Pool.Poolable{
         }
     }
 
-    private void simpleAI(float deltaTime , EnemyBulletsManager enemyBulletsManager) {
+    private void simpleAI(float deltaTime , EnemyBulletsManager enemyBulletsManager , int mapIndex) {
         float distanceToPlayer = playerPosition.dst(position);
 
         switch (gameMode) {
@@ -189,7 +203,7 @@ public class Enemy implements Pool.Poolable{
             case SHOOTING:
                 if (shootTimer >= BULLET_COOLDOWN) {
                     shootTimer = 0;
-                    shootBullet(enemyBulletsManager);
+                    shootBullet(enemyBulletsManager , mapIndex);
                 }
                 setBehaviorStatus(BehaviorStatus.IDLE);
                 break;
@@ -264,8 +278,9 @@ public class Enemy implements Pool.Poolable{
         for (CharacterBullet bullet : bullets) {
             if (Intersector.overlaps(bullet.getHitBox(), headHitbox) || Intersector.overlaps(bullet.getHitBox(), bodyHitbox)) {
                 boolean isCrit = isCrit();
-                takeDamage(isCrit ? bullet.getDamage() * 4 : bullet.getDamage());
-                damageTexts.add(new DamageText(bullet.getDamage(), bullet.getPosition().cpy(), 1f, isCrit));
+                float damageTaken = isCrit ? bullet.getDamage() * 4 : bullet.getDamage();
+                takeDamage(damageTaken);
+                damageTexts.add(new DamageText(damageTaken, bullet.getPosition().cpy(), 1f, isCrit));
                 isDamaged = true;
                 isAttacked = true;
                 lastHitByHost = bullet.isFromHost();
@@ -328,16 +343,16 @@ public class Enemy implements Pool.Poolable{
         batch.draw(currentFrame, position.x, position.y, scaledWidth / 2, scaledHeight / 2, scaledWidth, scaledHeight, isFlipped ? -1 : 1, 1, 0);
     }
 
-    protected TextureRegion[] splitEnemyTexture(Texture characterTexture, int n) {
-        TextureRegion[][] tmp = TextureRegion.split(characterTexture, 32, 32);
+    protected TextureRegion[] splitEnemyTexture(Texture characterTexture, int n , int tileWidth , int tileHeight) {
+        TextureRegion[][] tmp = TextureRegion.split(characterTexture, tileWidth, tileHeight);
         TextureRegion[] characterFrames = new TextureRegion[n];
         System.arraycopy(tmp[0], 0, characterFrames, 0, n);
         return characterFrames;
     }
 
-    public void shootBullet( EnemyBulletsManager enemyBulletsManager ) {
+    public void shootBullet( EnemyBulletsManager enemyBulletsManager , int mapIndex) {
         Vector2 direction = playerPosition.cpy().sub(position).nor().scl(110f);
-        enemyBulletsManager.generateBullet(position.cpy(), direction, 1, assets, soundVolume);
+        enemyBulletsManager.generateBullet(position.cpy(), direction, 1, assets, soundVolume , mapIndex);
     }
 
     public float getWidth() {
