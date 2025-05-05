@@ -107,5 +107,4 @@ public class GameScene extends ScreenAdapter {
     public CoopMode getCoopMode() {
         return coopMode;
     }
-
 }

@@ -5,19 +5,19 @@ import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
 import com.badlogic.gdx.graphics.Texture;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
-import com.badlogic.gdx.math.MathUtils;
-import com.badlogic.gdx.math.Rectangle;
-import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.math.Vector3;
+import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MyGdxGame;
+import com.mygdx.game.animations_effects.DamageText;
+import com.mygdx.game.combat_system.CharacterBullet;
 import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.entities.enemy.Enemy;
 import com.mygdx.game.entities.enemy.EnemyBoss;
@@ -75,6 +75,8 @@ public class BasicGameMode {
     private final Array<Rectangle> collisionRectangles = new Array<>();
     private boolean enableLeafs = true;
     private int currentMapIndex = 0;
+    private final Array<DamageText> damageTexts = new Array<>();
+    private final BitmapFont defaultFont;
 
     public BasicGameMode(Assets assets , Integer soundVolume, Integer musicVolume) {
         this.assets = assets;
@@ -90,6 +92,7 @@ public class BasicGameMode {
         bossMusic = assets.getAssetManager().get(Assets.bossMusic);
         healthBarTexture = assets.getAssetManager().get(Assets.BossHealthBarTexture);
         healthFillTexture = assets.getAssetManager().get(Assets.HealthTexture);
+        defaultFont = new BitmapFont();
     }
 
     protected void show(int cameraWidth, int cameraHeight){
@@ -133,9 +136,15 @@ public class BasicGameMode {
         tiledMapRenderer.render();
         enemyBulletsManager.updateAndRender(batch);
         characterBulletsManager.updateAndRender(batch);
-        enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, characterBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager ,currentMapIndex );
+
+        for (Enemy enemy : enemyManager.getActiveEnemies()) {
+            checkBulletCollisions(characterBulletsManager.getActiveCharacterBullets(), enemy);
+        }
+        renderDamageTexts(batch,delta);
+        enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager ,currentMapIndex );
         character.render(batch);
         character.drawHearts(batch,camera);
+
         if (shouldDrawBossHealthBar()) {
             drawBossHealthBar(camera ,batch);
         }
@@ -238,6 +247,51 @@ public class BasicGameMode {
                 getCollisionRectangles().add(rectObject.getRectangle());
             }
         }
+    }
+
+    public void checkBulletCollisions(Array<CharacterBullet> bullets , Enemy enemy) {
+        for (CharacterBullet bullet : bullets) {
+            if (Intersector.overlaps(bullet.getHitBox(), enemy.getHeadHitbox()) || Intersector.overlaps(bullet.getHitBox(), enemy.getBodyHitbox())) {
+                boolean isCrit = enemy.isCrit();
+                float damageTaken = isCrit ? bullet.getDamage() * 4 : bullet.getDamage();
+                enemy.takeDamage(damageTaken);
+                damageTexts.add(new DamageText(damageTaken, bullet.getPosition().cpy(), 1f, isCrit));
+                enemy.setIsDamaged(true);
+                enemy.setIsAttacked(true);
+                enemy.setLastHitByHost(bullet.isFromHost());
+
+                enemy.getPushBackDirection().set(enemy.getPosition()).sub(bullet.getPosition()).nor();
+                enemy.setPushBackTime(0f);
+                bullet.setAlive(false);
+            }
+        }
+    }
+
+    public void renderDamageTexts(SpriteBatch batch, float deltaTime) {
+        Array<DamageText> textsToRemove = new Array<>();
+
+        for (DamageText damageText : damageTexts) {
+            damageText.update(deltaTime);
+            float newY = damageText.getPosition().y + 20 * deltaTime;
+            damageText.getPosition().set(damageText.getPosition().x, newY);
+            float textScale = 0.5f;
+            defaultFont.getData().setScale(textScale, textScale);
+
+            if (!damageText.getIsCrit()) {
+                defaultFont.draw(batch, damageText.getText(), damageText.getPosition().x, damageText.getPosition().y);
+            } else {
+                defaultFont.setColor(1, 0, 0, 1);
+                defaultFont.draw(batch, damageText.getText(), damageText.getPosition().x, damageText.getPosition().y);
+                defaultFont.setColor(1, 1, 1, 1);
+            }
+
+
+            if (damageText.isFinished()) {
+                textsToRemove.add(damageText);
+            }
+        }
+
+        damageTexts.removeAll(textsToRemove, true);
     }
 
     public void setTiledMap(TiledMap tiledMap){
@@ -406,4 +460,6 @@ public class BasicGameMode {
     public void setCurrentMapIndex(int currentMapIndex) {
         this.currentMapIndex = currentMapIndex;
     }
+
+
 }

@@ -6,9 +6,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Pool;
 
 public class Bullet implements Pool.Poolable {
-    protected static final float MAX_LIFETIME = 10f;
-    protected static final float DAMAGE_SCALE_BASE = 0.8f;
-    protected static final float DAMAGE_SCALE_FACTOR = 200.0f;
+    private static final float MAX_LIFETIME = 10f;
 
     private final Vector2 position;
     private Vector2 velocity;
@@ -105,4 +103,6 @@ public class Bullet implements Pool.Poolable {
     public Vector2 getVelocity() {
         return velocity;
     }
+
+
 }

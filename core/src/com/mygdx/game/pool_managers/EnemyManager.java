@@ -16,19 +16,16 @@
     public class EnemyManager {
 
         private final Array<Enemy> activeEnemies = new Array<>();
-
         private final Pool<Enemy> enemiesPool = new Pool<>() {
             @Override
             protected Enemy newObject() {
                 return new Enemy();
             }
         };
-
         private Boolean scaled = false;
         private int score = 0;
         private final GameScene.GameMode gameMode;
         private final Array<EnemyMapLocationsInfo> mapInfos = new Array<>();
-
         public EnemyManager(GameScene.GameMode gameMode) {
         this.gameMode = gameMode;
         }
@@ -55,10 +52,10 @@
             enemiesPool.clear();
         }
 
-        public int updateAndRender(SpriteBatch batch , EnemyBulletsManager enemyBulletsManager , CharacterBulletsManager characterBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects , int mapIndex){
+        public int updateAndRender(SpriteBatch batch , EnemyBulletsManager enemyBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects , int mapIndex){
             for (int i = activeEnemies.size - 1; i >= 0; i--) {
                 Enemy enemy = activeEnemies.get(i);
-                enemy.update(Gdx.graphics.getDeltaTime(), enemyBulletsManager, characterBulletsManager.getActiveCharacterBullets(), isPaused, activeEnemies ,  mapIndex);
+                enemy.update(Gdx.graphics.getDeltaTime(), enemyBulletsManager, isPaused, activeEnemies ,  mapIndex);
                 if (!enemy.isAlive() && !enemy.isMarkedForRemoval()) {
                     Vector2 poz = new Vector2(enemy.getPosition());
                     particleEffects.DeathParticles(poz, enemy.getSizeScale(), scaled);
@@ -112,5 +109,7 @@
         public Array<EnemyMapLocationsInfo> getEnemyMapLocationsInfos() {
             return mapInfos;
         }
+
+
 
     }

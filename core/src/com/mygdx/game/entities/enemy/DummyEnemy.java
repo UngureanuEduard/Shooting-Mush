@@ -1,11 +1,15 @@
 package com.mygdx.game.entities.enemy;
 
+import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.utilities_resources.Assets;
 
 public class DummyEnemy extends Enemy {
+
+    private static final int TILE_SIZE = 32;
+    private static final float SCALE = 0.8f;
 
     private boolean shouldBeRemoved = false;
     private float deathTimer = -1f;
@@ -16,23 +20,20 @@ public class DummyEnemy extends Enemy {
 
     public DummyEnemy(Vector2 position, float health, boolean isFlipped, Assets assets  ) {
         super();
-        this.position = position;
-        this.health = health;
-        this.maxHealth = health;
+        setPosition(position);
+        setHealth(health);
+        setMaxHealth(health);
         setFlipped(isFlipped);
-        this.assets = assets;
-        this.sizeScale = SCALE;
+        setAssets(assets);
+        setSizeScale(SCALE);
         loadEnemyTextures(1);
-
-        walkAnimation = new com.badlogic.gdx.graphics.g2d.Animation<>(0.1f,
-                splitEnemyTexture(walkTexture, 6 ,32 ,32));
-        idleAnimation = new com.badlogic.gdx.graphics.g2d.Animation<>(0.1f,
-                splitEnemyTexture(idleTexture, 4 , 32, 32));
+        setWalkAnimation(new Animation<>(0.1f,splitEnemyTexture(getWalkTexture(), 6 ,TILE_SIZE ,TILE_SIZE)));
+        setIdleAnimation(new Animation<>(0.1f,splitEnemyTexture(getIdleTexture(), 4 , TILE_SIZE, TILE_SIZE)));
     }
 
     public void updateFromNetwork(Vector2 position, float health, boolean isFlipped) {
-        this.position.set(position);
-        this.health = health;
+        setPosition(position);
+        setHealth(health);
         setIsFlipped(isFlipped);
     }
 
@@ -52,7 +53,7 @@ public class DummyEnemy extends Enemy {
             return;
         }
 
-        stateTime += deltaTime;
+        setStateTime(getStateTime() + deltaTime);
     }
 
 
@@ -63,8 +64,8 @@ public class DummyEnemy extends Enemy {
         }
 
         TextureRegion frame = syncedIdle
-                ? idleAnimation.getKeyFrame(syncedStateTime, true)
-                : walkAnimation.getKeyFrame(syncedStateTime, true);
+                ? getIdleAnimation().getKeyFrame(syncedStateTime, true)
+                : getWalkAnimation().getKeyFrame(syncedStateTime, true);
 
         drawCurrentFrame(batch, frame,
                 calculateScaledDimension(getWidth()),

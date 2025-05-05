@@ -1,10 +1,8 @@
 package com.mygdx.game.entities.enemy;
 
-import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.graphics.g2d.TextureRegion;
 import com.badlogic.gdx.math.Circle;
@@ -14,8 +12,6 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.GameScene;
-import com.mygdx.game.animations_effects.DamageText;
-import com.mygdx.game.combat_system.CharacterBullet;
 import com.mygdx.game.pool_managers.EnemyBulletsManager;
 import com.mygdx.game.utilities_resources.Assets;
 
@@ -25,67 +21,51 @@ public class Enemy implements Pool.Poolable{
 
     public static final float MOVEMENT_SPEED = 15.0f;
     private static final float BULLET_COOLDOWN = 5.0f;
-    protected static final float SCALE = 0.8f;
+    private static final float SCALE = 0.8f;
     private static final Random RANDOM = new Random();
 
-    protected Vector2 position;
-    protected Vector2 playerPosition;
-    protected Texture walkTexture;
-    protected Texture idleTexture;
-    protected Animation<TextureRegion> walkAnimation;
-    protected Animation<TextureRegion> idleAnimation;
-    protected float stateTime;
+    private Vector2 position;
+    private Vector2 playerPosition;
+    private Texture walkTexture;
+    private Texture idleTexture;
+    private Animation<TextureRegion> walkAnimation;
+    private Animation<TextureRegion> idleAnimation;
+    private float stateTime;
     private boolean isFlipped = false;
-    protected float health;
+    private float health;
     private boolean isDamaged = false;
-    protected float maxHealth;
-    protected float sizeScale;
-    protected Sound sound;
-    protected float shootTimer = 5.0f;
-
-    protected Integer soundVolume;
-    Array<DamageText> damageTexts = new Array<>();
-    protected Assets assets;
-    protected BitmapFont defaultFont;
-
-    protected Integer critRate;
+    private float maxHealth;
+    private float sizeScale;
+    private Sound sound;
+    private float shootTimer = 5.0f;
+    private Integer soundVolume;
+    private Assets assets;
+    private Integer critRate;
     private float damagedDelay = 0.0f;
-    protected Rectangle bodyHitbox;
-    protected Circle headHitbox;
-    protected Vector2 direction;
+    private Rectangle bodyHitbox;
+    private Circle headHitbox;
     private Vector2 spawnPosition;
-
     public enum BehaviorStatus {
         MOVING,
         IDLE
     }
-
-    protected BehaviorStatus behaviorStatus;
-
+    private BehaviorStatus behaviorStatus;
     private Texture healthBarBackgroundTexture;
     private Texture healthBarForegroundTexture;
     private boolean alive;
-
     private boolean isAttacked;
-
-    protected final Vector2 pushBackDirection = new Vector2(0, 0);
-    protected float pushBackTime = 0f;
-    protected float PUSH_BACK_FORCE;
-
+    private final Vector2 pushBackDirection = new Vector2(0, 0);
+    private float pushBackTime = 0f;
+    private float PUSH_BACK_FORCE;
     private static int nextId = 0;
     private int id;
     private boolean markedForRemoval = false;
     private boolean lastHitByHost;
-
     public enum EnemyState {
         IDLE, WANDERING, MOVING_TO_PLAYER, SHOOTING
     }
-
     private GameScene.GameMode gameMode;
     private EnemyState currentState;
-
-
-
 
     public Enemy(){
         alive=false;
@@ -98,7 +78,6 @@ public class Enemy implements Pool.Poolable{
         position.set(-1,-1);
         alive = false;
         isAttacked = false;
-
     }
 
     public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode , int mapIndex){
@@ -117,7 +96,6 @@ public class Enemy implements Pool.Poolable{
         sizeScale = SCALE;
         bodyHitbox = new Rectangle();
         headHitbox = new Circle();
-        defaultFont = new BitmapFont();
         loadEnemyTextures(mapIndex);
         sound = assets.getAssetManager().get(Assets.duckSound);
         stateTime = 0.0f;
@@ -144,16 +122,13 @@ public class Enemy implements Pool.Poolable{
             walkAnimation = new Animation<>(0.1f, walkingFrames);
             idleAnimation = new Animation<>(0.1f, idleFrames);
         }
-
-
         healthBarBackgroundTexture = assets.getAssetManager().get(Assets.EnemyHealthBarTexture);
         healthBarForegroundTexture = assets.getAssetManager().get(Assets.EnemyHealthTexture);
     }
 
-    public void update(float deltaTime, EnemyBulletsManager enemyBulletsManager, Array<CharacterBullet> characterBullets, boolean isPaused, Array<Enemy> enemies
+    public void update(float deltaTime, EnemyBulletsManager enemyBulletsManager, boolean isPaused, Array<Enemy> enemies
     , int mapIndex ) {
         if (!isPaused) {
-            direction = playerPosition.cpy().sub(position).nor();
             boolean isColliding = isCollidingWithEnemy(enemies);
 
             if (!isColliding) {
@@ -163,8 +138,6 @@ public class Enemy implements Pool.Poolable{
             updateHitboxes();
 
             stateTime += deltaTime;
-
-            checkBulletCollisions(characterBullets);
 
             shootTimer += deltaTime;
 
@@ -274,23 +247,6 @@ public class Enemy implements Pool.Poolable{
         otherEnemy.position.add(collisionVector);
     }
 
-    public void checkBulletCollisions(Array<CharacterBullet> bullets) {
-        for (CharacterBullet bullet : bullets) {
-            if (Intersector.overlaps(bullet.getHitBox(), headHitbox) || Intersector.overlaps(bullet.getHitBox(), bodyHitbox)) {
-                boolean isCrit = isCrit();
-                float damageTaken = isCrit ? bullet.getDamage() * 4 : bullet.getDamage();
-                takeDamage(damageTaken);
-                damageTexts.add(new DamageText(damageTaken, bullet.getPosition().cpy(), 1f, isCrit));
-                isDamaged = true;
-                isAttacked = true;
-                lastHitByHost = bullet.isFromHost();
-                pushBackDirection.set(position).sub(bullet.getPosition()).nor();
-                pushBackTime = 0f;
-                bullet.setAlive(false);
-            }
-        }
-    }
-
     public void takeDamage(float damage) {
         health -= damage;
         if(damagedDelay >= 2.0f)
@@ -309,7 +265,6 @@ public class Enemy implements Pool.Poolable{
         float scaledHeight = calculateScaledDimension(getHeight());
 
         drawCurrentFrame(batch, currentFrame, scaledWidth, scaledHeight, isFlipped);
-        renderDamageTexts(batch, Gdx.graphics.getDeltaTime());
 
         if(isDamaged || isAttacked ){
             renderHealthBar(batch);
@@ -317,7 +272,7 @@ public class Enemy implements Pool.Poolable{
     }
 
     protected void renderHealthBar(SpriteBatch batch) {
-        float healthPercentage = Math.max(0, health) / maxHealth; // Assuming max health is 100
+        float healthPercentage = Math.max(0, health) / maxHealth;
         float barX = position.x;
         float barY = position.y;
         float barWidth = getWidth() * 0.8f;
@@ -373,34 +328,6 @@ public class Enemy implements Pool.Poolable{
 
     public float getHealth() {
         return health;
-    }
-
-
-    public void renderDamageTexts(SpriteBatch batch, float deltaTime) {
-        Array<DamageText> textsToRemove = new Array<>();
-
-        for (DamageText damageText : damageTexts) {
-            damageText.update(deltaTime);
-            float newY = damageText.getPosition().y + 20 * deltaTime;
-            damageText.getPosition().set(damageText.getPosition().x, newY);
-            float textScale = 0.5f;
-            defaultFont.getData().setScale(textScale, textScale);
-
-            if (!damageText.getIsCrit()) {
-                defaultFont.draw(batch, damageText.getText(), damageText.getPosition().x, damageText.getPosition().y);
-            } else {
-                defaultFont.setColor(1, 0, 0, 1);
-                defaultFont.draw(batch, damageText.getText(), damageText.getPosition().x, damageText.getPosition().y);
-                defaultFont.setColor(1, 1, 1, 1);
-            }
-
-
-            if (damageText.isFinished()) {
-                textsToRemove.add(damageText);
-            }
-        }
-
-        damageTexts.removeAll(textsToRemove, true);
     }
 
     public Boolean isCrit() {
@@ -475,5 +402,96 @@ public class Enemy implements Pool.Poolable{
         playerPosition = lastHitByHost ? hostPos : guestPos;
     }
 
+    public Rectangle getBodyHitbox() {
+        return bodyHitbox;
+    }
 
+    public Circle getHeadHitbox() {
+        return headHitbox;
+    }
+
+    public void setLastHitByHost(boolean lastHitByHost) {
+        this.lastHitByHost = lastHitByHost;
+    }
+
+
+    public void setPosition(Vector2 position) {
+        this.position = position;
+    }
+
+    public Texture getWalkTexture() {
+        return walkTexture;
+    }
+
+    public void setWalkTexture(Texture walkTexture) {
+        this.walkTexture = walkTexture;
+    }
+
+    public Texture getIdleTexture() {
+        return idleTexture;
+    }
+
+    public void setIdleTexture(Texture idleTexture) {
+        this.idleTexture = idleTexture;
+    }
+
+    public Animation<TextureRegion> getWalkAnimation() {
+        return walkAnimation;
+    }
+
+    public void setWalkAnimation(Animation<TextureRegion> walkAnimation) {
+        this.walkAnimation = walkAnimation;
+    }
+
+    public Animation<TextureRegion> getIdleAnimation() {
+        return idleAnimation;
+    }
+
+    public void setIdleAnimation(Animation<TextureRegion> idleAnimation) {
+        this.idleAnimation = idleAnimation;
+    }
+
+    public void setStateTime(float stateTime) {
+        this.stateTime = stateTime;
+    }
+
+    public void setHealth(float health) {
+        this.health = health;
+    }
+
+    public void setMaxHealth(float maxHealth) {
+        this.maxHealth = maxHealth;
+    }
+
+    public void setSizeScale(float sizeScale) {
+        this.sizeScale = sizeScale;
+    }
+
+    public Integer getSoundVolume() {
+        return soundVolume;
+    }
+
+    public void setSoundVolume(Integer soundVolume) {
+        this.soundVolume = soundVolume;
+    }
+
+    public Assets getAssets() {
+        return assets;
+    }
+
+    public void setAssets(Assets assets) {
+        this.assets = assets;
+    }
+
+    public Vector2 getPushBackDirection() {
+        return pushBackDirection;
+    }
+
+    public void setPushBackTime(float pushBackTime) {
+        this.pushBackTime = pushBackTime;
+    }
+
+    public void setPUSH_BACK_FORCE(float PUSH_BACK_FORCE) {
+        this.PUSH_BACK_FORCE = PUSH_BACK_FORCE;
+    }
 }

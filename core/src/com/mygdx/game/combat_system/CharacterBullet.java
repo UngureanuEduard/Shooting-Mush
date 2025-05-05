@@ -12,6 +12,9 @@ public class CharacterBullet extends Bullet{
 
     private static final float BULLET_SIZE = 35f;
     private static final float HITBOX_RADIUS_SCALE = 0.25f;
+    private static final float DAMAGE_SCALE_BASE = 0.8f;
+    private static final float DAMAGE_SCALE_FACTOR = 200.0f;
+
     private  Circle hitBox;
     private boolean isFromHost;
 
