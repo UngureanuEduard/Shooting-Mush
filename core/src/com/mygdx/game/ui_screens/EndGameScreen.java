@@ -73,7 +73,7 @@ public abstract class EndGameScreen extends ScreenAdapter {
         if(Settings.windowed){
             trophyImage.setScale((float) Settings.windowedScreenWidth /Settings.fullScreenWidth , (float) Settings.windowedScreenHeight /Settings.fullScreenHeight);
         }
-        trophyImage.setPosition(worldWidth / 2f - trophyImage.getWidth()*(float) Settings.windowedScreenWidth /Settings.fullScreenWidth / 2, worldHeight / 1.7f);
+        trophyImage.setPosition(worldWidth / 2f - trophyImage.getWidth() / 2, worldHeight / 1.7f);
         stage.addActor(trophyImage);
 
         inputTable = new Table();
@@ -87,7 +87,7 @@ public abstract class EndGameScreen extends ScreenAdapter {
 
         inputTable.add(scoreLabel).colspan(2).padBottom(20).row();
         inputTable.add(nameLabel).left().padRight(10);
-        inputTable.add(inputLabel).left().row();
+        inputTable.add(inputLabel).left().width(200).row();
 
         stage.addActor(inputTable);
     }

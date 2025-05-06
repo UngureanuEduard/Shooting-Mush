@@ -14,6 +14,7 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
+import com.mygdx.game.animations_effects.CloudShadow;
 import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.MyGdxGame;
@@ -28,6 +29,8 @@ import com.mygdx.game.utilities_resources.TransitionArea;
 
 public class StoryMode extends BasicGameMode {
 
+    private final static float CLOUD_SPAWN_INTERVAL = 5f;
+
     private final Array<MapDetails> maps = new Array<>();
     private Npc npc;
     private TransitionArea transitionArea;
@@ -37,6 +40,8 @@ public class StoryMode extends BasicGameMode {
     private World world;
     private int cameraWidth;
     private int cameraHeight;
+    private final Array<CloudShadow> cloudShadows = new Array<>();
+    private float cloudSpawnTimer = 0f;
 
     public StoryMode(Assets assets, Integer soundVolume, Integer musicVolume) {
         super(assets, soundVolume, musicVolume);
@@ -78,7 +83,6 @@ public class StoryMode extends BasicGameMode {
                 rayHandler.setShadows(true);
                 rayHandler.setBlurNum(3);
                 RayHandler.useDiffuseLight(true);
-
                 playerLight = new PointLight(rayHandler, 128, new Color(1f, 1f, 0.8f, 1f), 100,
                         getCharacter().getPosition().x, getCharacter().getPosition().y);
                 playerLight.setSoft(true);
@@ -117,8 +121,13 @@ public class StoryMode extends BasicGameMode {
 
         spawnStoryEnemy();
 
-        npc.update(delta, getIsPaused(), getCharacter().getPosition(), stage, getSkin());
-        npc.render(batch);
+        if (npc != null && getCurrentMapIndex() == 0) {
+            npc.update(delta, getIsPaused(), getCharacter().getPosition(), stage, getSkin());
+            npc.render(batch);
+            setInDialog(npc.getInDialog());
+        } else {
+            setInDialog(false);
+        }
 
         if (getCurrentMapIndex() == 1 && rayHandler != null && playerLight != null) {
             playerLight.setPosition(
@@ -127,6 +136,26 @@ public class StoryMode extends BasicGameMode {
             );
             rayHandler.setCombinedMatrix(getCamera());
             rayHandler.updateAndRender();
+        }
+
+        if (getCurrentMapIndex() == 0) {
+            cloudSpawnTimer += delta;
+
+            if (cloudSpawnTimer >= CLOUD_SPAWN_INTERVAL) {
+                cloudSpawnTimer = 0f;
+                cloudShadows.add(new CloudShadow(getAssets()));
+            }
+
+            for (CloudShadow shadow : cloudShadows) {
+                shadow.update(delta);
+                shadow.render(batch);
+            }
+
+            for (int i = cloudShadows.size - 1; i >= 0; i--) {
+                if (!cloudShadows.get(i).isActive()) {
+                    cloudShadows.removeIndex(i);
+                }
+            }
         }
 
         if (transitionArea.isWithinArea(getCharacter().getPosition().x, getCharacter().getPosition().y)
@@ -161,8 +190,10 @@ public class StoryMode extends BasicGameMode {
     }
 
     public void spawnStoryEnemy() {
-        int activeCount = getEnemyManager().getActiveEnemies().size;
         int mapIndex = getCurrentMapIndex();
+        if (mapIndex >= getEnemyManager().getEnemyMapLocationsInfos().size) return;
+
+        int activeCount = getEnemyManager().getActiveEnemies().size;
         if (activeCount < 9) {
             EnemyMapLocationsInfo enemyMapLocationsInfo = getEnemyManager().getEnemyMapLocationsInfos().get(mapIndex);
             Array<EnemyBasicInfo> toRemove = new Array<>();
@@ -184,11 +215,14 @@ public class StoryMode extends BasicGameMode {
 
 
 
+
     private void handleGameOver(MyGdxGame game) {
-        setIsGameOver(true);
-        endGameScreenStory = new EndGameScreenStory(game, (int) getTimePlayed(), getAssets(), getMusicVolume(), getSoundVolume());
-        getGameMusic().stop();
-        getBossMusic().stop();
+        if(getIsGameNotOver()){
+            setIsGameOver(true);
+            endGameScreenStory = new EndGameScreenStory(game, (int) getTimePlayed(), getAssets(), getMusicVolume(), getSoundVolume());
+            getGameMusic().stop();
+            getBossMusic().stop();
+        }
     }
 
     public void dispose() {
