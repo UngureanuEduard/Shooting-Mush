@@ -15,19 +15,21 @@ public class Assets {
 
     private final AssetManager assetManager = new AssetManager();
 
-    // Asset descriptors
     public static final AssetDescriptor<Skin> skin = new AssetDescriptor<>("Font/menu.json", Skin.class);
     public static final AssetDescriptor<TiledMap> arenaTiledMap = new AssetDescriptor<>("arenaMap.tmx", TiledMap.class);
+    public static final AssetDescriptor<TiledMap> cutscene1Map = new AssetDescriptor<>("cutSceen1.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> storyTiledMap = new AssetDescriptor<>("storyMap1.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> storyTiledMap_2 = new AssetDescriptor<>("Tiled_files/Dungeon1.tmx", TiledMap.class);
     public static final AssetDescriptor<Texture> walkTexture = new AssetDescriptor<>("Character/Character Walking Side.png", Texture.class);
     public static final AssetDescriptor<Texture> idleTexture = new AssetDescriptor<>("Character/Character Idle Side.png", Texture.class);
+    public static final AssetDescriptor<Texture> idleTextureGrandpa = new AssetDescriptor<>("Character/Character Idle Side Old.png", Texture.class);
     public static final AssetDescriptor<Texture> walkFrontTexture = new AssetDescriptor<>("Character/Character Walking Front.png", Texture.class);
     public static final AssetDescriptor<Texture> walkBackTexture = new AssetDescriptor<>("Character/Character Walking Back.png", Texture.class);
     public static final AssetDescriptor<Texture> heartTexture = new AssetDescriptor<>("Environment/heart.png", Texture.class);
     public static final AssetDescriptor<Texture> emptyHeartTexture = new AssetDescriptor<>("Environment/border.png", Texture.class);
     public static final AssetDescriptor<Texture> bulletTexture = new AssetDescriptor<>("Environment/apple.png", Texture.class);
     public static final AssetDescriptor<Sound> throwSound = new AssetDescriptor<>("mp3/throw.mp3",Sound.class);
+    public static final AssetDescriptor<Sound> throwExplosionSound = new AssetDescriptor<>("mp3/8-bit-fireball.mp3",Sound.class);
     public static final AssetDescriptor<ParticleEffect> explosionParticleEffect = new AssetDescriptor<>("Environment/explosion/explosion.party", ParticleEffect.class);
     public static final AssetDescriptor<Texture> skullTexture = new AssetDescriptor<>("Environment/skull.png", Texture.class);
     public static final AssetDescriptor<Texture> menuBackgroundTexture = new AssetDescriptor<>("Font/Background.jpg", Texture.class);
@@ -48,9 +50,8 @@ public class Assets {
     public static final AssetDescriptor<Texture> EnemyHealthBarTexture = new AssetDescriptor<>("Environment/HealthBarEmpty.png", Texture.class);
     public static final AssetDescriptor<Music> bossMusic = new AssetDescriptor<>("mp3/BossSong.mp3", Music.class);
     public static final AssetDescriptor<Music> dungeonMusic = new AssetDescriptor<>("mp3/dungeonSong.wav", Music.class);
-    public static final AssetDescriptor<Sound> DialogueNPC1Line1 = new AssetDescriptor<>("mp3/Mylo 1.wav",Sound.class);
-    public static final AssetDescriptor<Sound> DialogueNPC1Line2 = new AssetDescriptor<>("mp3/The Ducks 1.wav",Sound.class);
-    public static final AssetDescriptor<Sound> DialogueNPC1Line3 = new AssetDescriptor<>("mp3/You need to stop them 1.wav",Sound.class);
+    public static final AssetDescriptor<Music> introMusic = new AssetDescriptor<>("mp3/Eldertide.mp3", Music.class);
+    public static final AssetDescriptor<Music> trainMusic = new AssetDescriptor<>("mp3/Survivor.mp3", Music.class);
     public static final AssetDescriptor<Texture> fallingLeafTexture = new AssetDescriptor<>("Environment/Leaf.png", Texture.class);
     public static final AssetDescriptor<Texture> dialogTexture = new AssetDescriptor<>("Environment/Dialog.png", Texture.class);
     public static final AssetDescriptor<Texture> goldTrophyTexture = new AssetDescriptor<>("Environment/Golden Trophy Large.png", Texture.class);
@@ -61,10 +62,15 @@ public class Assets {
     public static final AssetDescriptor<Texture> fireworkRocketTexture = new AssetDescriptor<>("Environment/FireWorksRocket.png", Texture.class);
     public static final AssetDescriptor<Texture> co_opButtonTexture = new AssetDescriptor<>("co_op.png", Texture.class);
     public static final AssetDescriptor<Texture> backButtonTexture = new AssetDescriptor<>("backButton.png", Texture.class);
-    public static final AssetDescriptor<Sound> introSound = new AssetDescriptor<>("intro.wav",Sound.class);
     public static final AssetDescriptor<Texture> skeletonIdleTexture = new AssetDescriptor<>("Environment/skeleton-idle.png", Texture.class);
     public static final AssetDescriptor<Texture> skeletonWalkTexture = new AssetDescriptor<>("Environment/skeleton-walk.png", Texture.class);
     public static final AssetDescriptor<Texture> boneTexture = new AssetDescriptor<>("Environment/Bone.png", Texture.class);
+    public static final AssetDescriptor<Texture> dialogBoxTexture = new AssetDescriptor<>("Dialog.png", Texture.class);
+    public static final AssetDescriptor<Texture> grandpaPortraitTexture = new AssetDescriptor<>("portraits/Grandpa.png", Texture.class);
+    public static final AssetDescriptor<Texture> myloPortraitTexture = new AssetDescriptor<>("portraits/Mylo.png", Texture.class);
+    public static final AssetDescriptor<Texture> blackPixelTexture = new AssetDescriptor<>("black.png", Texture.class);
+    public static final AssetDescriptor<Texture> fireBallTexture = new AssetDescriptor<>("FireBall.png", Texture.class);
+
     public Assets() {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
     }
@@ -76,10 +82,12 @@ public class Assets {
                 throwSound, explosionParticleEffect, skullTexture, idleShoomTexture, lightningBoltTexture,
                 candyCornTexture, duckSound, gameMusic, bossTexture, EnemyHealthTexture, duckShootSound,
                 idleBossTexture, idleEnemyTexture, BossHealthBarTexture, EnemyHealthBarTexture, HealthTexture,
-                bossMusic, DialogueNPC1Line1, DialogueNPC1Line2, DialogueNPC1Line3, fallingLeafTexture, dialogTexture ,
+                bossMusic, fallingLeafTexture, dialogTexture ,
                 goldTrophyTexture , silverTrophyTexture , bronzeTrophyTexture , fireworkExplosionTexture , fireworkRocketTexture
-                , co_opButtonTexture , backButtonTexture , introSound , dungeonMusic ,
-                skeletonIdleTexture , skeletonWalkTexture , boneTexture , cloudTexture
+                , co_opButtonTexture , backButtonTexture  , dungeonMusic ,
+                skeletonIdleTexture , skeletonWalkTexture , boneTexture , cloudTexture ,cutscene1Map ,idleTextureGrandpa ,
+                dialogBoxTexture , grandpaPortraitTexture , blackPixelTexture , introMusic,myloPortraitTexture ,trainMusic ,
+                throwExplosionSound , fireBallTexture
         };
 
         for (AssetDescriptor<?> asset : assetsToLoad) {

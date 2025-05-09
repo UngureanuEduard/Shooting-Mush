@@ -7,7 +7,6 @@ import com.badlogic.gdx.scenes.scene2d.ui.*;
 import com.badlogic.gdx.scenes.scene2d.utils.ClickListener;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 import com.mygdx.game.game_modes.ArenaMode;
-import com.mygdx.game.combat_system.Wave;
 import com.mygdx.game.utilities_resources.Assets;
 
 import static com.badlogic.gdx.math.MathUtils.random;
@@ -30,9 +29,6 @@ public class WaveCompleteTable extends Table {
             public void clicked(InputEvent event, float x, float y) {
                 arenaMode.setIsPaused(false);
                 arenaMode.setDamage(arenaMode.getDamage()+ arenaMode.getDamage()*5/100);
-                for (Wave wave: arenaMode.getWaves()) {
-                    wave.setBulletDamage(arenaMode.getDamage());
-                }
             }
         });
 

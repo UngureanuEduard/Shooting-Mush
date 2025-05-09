@@ -2,7 +2,6 @@ package com.mygdx.game.entities;
 
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
-import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
@@ -30,7 +29,6 @@ public class Npc {
     private final List<String> dialogueLines;
     private int currentLineIndex = 0;
     private boolean isDialogPromptVisible = false;
-    private final List<Sound> dialogueSounds;
     private final int soundVolume;
 
     public Npc(Vector2 position, Assets assets , int soundVolume) {
@@ -49,10 +47,7 @@ public class Npc {
         dialogueLines.add("{EASE}{SLOW} MYLO!                 ");
         dialogueLines.add("{EASE}{SLOW} The DUCKS!            ");
         dialogueLines.add("{EASE}{SLOW} You need to stop them!");
-        dialogueSounds = new ArrayList<>();
-        dialogueSounds.add(assets.getAssetManager().get(Assets.DialogueNPC1Line1));
-        dialogueSounds.add(assets.getAssetManager().get(Assets.DialogueNPC1Line2));
-        dialogueSounds.add(assets.getAssetManager().get(Assets.DialogueNPC1Line3));
+
     }
 
     public void setPosition(Vector2 position) {
@@ -118,7 +113,6 @@ public class Npc {
             label.setFontScale(0.60f);
             label.setPosition( (position.x + stage.getWidth() /2  - label.getPrefWidth()), (float) (position.y + stage.getHeight() / 2.3));
             stage.addActor(label);
-            dialogueSounds.get(currentLineIndex).play(soundVolume / 100f);
             currentLineIndex++;
 
         } else {
@@ -140,13 +134,10 @@ public class Npc {
             label.remove();
             label = null;
         }
-        for (Sound sound : dialogueSounds) {
-            if (sound != null) {
-                sound.dispose();
-            }
-        }
-        dialogueSounds.clear();
         dialogueLines.clear();
     }
 
+    public Vector2 getPosition() {
+        return position;
+    }
 }

@@ -85,34 +85,33 @@
                 SPEED = movementSpeed;
             }
 
-            if (moveUp) {
-                potentialY += SPEED * deltaTime;
-                direction = "up";
-            }
-            if (moveDown) {
-                potentialY -= SPEED * deltaTime;
-                direction = "down";
-            }
+            Vector2 movement = new Vector2(0, 0);
+            if (moveUp) movement.y += 1;
+            if (moveDown) movement.y -= 1;
             if (moveLeft) {
-                potentialX -= SPEED * deltaTime;
+                movement.x -= 1;
                 if (!getIsFlipped()) {
                     flipAnimations();
                     setIsFlipped(true);
                 }
-                direction = "left";
             }
             if (moveRight) {
-                potentialX += SPEED * deltaTime;
+                movement.x += 1;
                 if (getIsFlipped()) {
                     flipAnimations();
                     setIsFlipped(false);
                 }
-                direction = "right";
+            }
+
+            if (movement.len() > 0) {
+                movement.nor().scl(SPEED * deltaTime);
+                potentialX += movement.x;
+                potentialY += movement.y;
+                direction = moveUp ? "up" : moveDown ? "down" : moveLeft ? "left" : "right";
             }
 
             setIsWalking(direction);
 
-            // Create a hitbox for the potential new position
             Rectangle futureHitbox = new Rectangle(potentialX, potentialY, getWidth(), getHeight());
 
             boolean collides = false;
@@ -251,5 +250,7 @@
         public void setCollisionRectangles(Array<Rectangle> rectangles) {
             this.collisionRectangles = rectangles;
         }
+
+
 
     }

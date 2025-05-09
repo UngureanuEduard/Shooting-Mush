@@ -49,8 +49,8 @@ public class ArenaMode  extends BasicGameMode{
 
     private void initArenaWaves() {
         waves = new Array<>();
-        waves.add(new Wave(1, 0, 5, 0.5f, 90, super.getDamage()));
-        waves.add(new Wave(2, 1, 0, 0.4f, 500, super.getDamage()));
+        waves.add(new Wave(1, 0, 5, 0.5f, 90));
+        waves.add(new Wave(2, 1, 0, 0.4f, 500));
         imageActor.setSize(imageActor.getWidth() / 1.5f, imageActor.getHeight() / 1.5f);
         setEnemiesLeftToKill(waves.first().getNumEnemies());
         waveCompleteTable = new WaveCompleteTable(getSkin(), getAssets() , this);
@@ -149,10 +149,6 @@ public class ArenaMode  extends BasicGameMode{
         endGameScreenArena = new EndGameScreenArena(game , (int)(getTimePlayed() * completedWaves), getAssets() , getMusicVolume() ,getSoundVolume() , completedWaves);
         getGameMusic().stop();
         getBossMusic().stop();
-    }
-
-    public Array<Wave> getWaves() {
-        return waves;
     }
 
     public void incrementCritRate() {

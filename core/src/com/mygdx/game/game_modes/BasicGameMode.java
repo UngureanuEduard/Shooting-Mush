@@ -70,8 +70,8 @@ public class BasicGameMode {
     private float damage = 5;
     private Integer critRate = 15;
     private float timePlayed = 0f;
-    private float worldWidth ;
-    private float worldHeight ;
+    private float worldWidth;
+    private float worldHeight;
     private final Array<Rectangle> collisionRectangles = new Array<>();
     private boolean enableLeafs = true;
     private int currentMapIndex = 0;
@@ -285,7 +285,6 @@ public class BasicGameMode {
                 defaultFont.setColor(1, 1, 1, 1);
             }
 
-
             if (damageText.isFinished()) {
                 textsToRemove.add(damageText);
             }
@@ -460,6 +459,4 @@ public class BasicGameMode {
     public void setCurrentMapIndex(int currentMapIndex) {
         this.currentMapIndex = currentMapIndex;
     }
-
-
 }

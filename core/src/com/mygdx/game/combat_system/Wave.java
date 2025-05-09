@@ -5,16 +5,15 @@ public class Wave {
     private  int numEnemies;
     private final float enemySpawnInterval;
     private final float enemyHealth;
-    private float bulletDamage;
+
     private int numBossEnemies;
 
-    public Wave(int waveNumber,int numBossEnemies, int numEnemies, float enemySpawnInterval, float enemyHealth, float bulletDamage) {
+    public Wave(int waveNumber,int numBossEnemies, int numEnemies, float enemySpawnInterval, float enemyHealth ) {
         this.waveNumber = waveNumber;
         this.numBossEnemies = numBossEnemies;
         this.numEnemies = numEnemies;
         this.enemySpawnInterval = enemySpawnInterval;
         this.enemyHealth = enemyHealth;
-        this.bulletDamage = bulletDamage;
     }
 
 
@@ -34,15 +33,10 @@ public class Wave {
         return enemyHealth;
     }
 
-    public float getBulletDamage() {
-        return bulletDamage;
-    }
-
     public void setNumEnemies(int numEnemies){
         this.numEnemies = numEnemies;
     }
 
-    public void setBulletDamage(float damage){this.bulletDamage=damage;}
     public int getNumBossEnemies() {
         return numBossEnemies;
     }

@@ -44,16 +44,23 @@ public class BasicCharacter {
 
     }
 
-    public void render(SpriteBatch batch ) {
-        TextureRegion currentFrame;
-        if (!(timeSinceLastLifeLost < 5.0f)) {
-            currentFrame=getCurrentFrame();
-            batch.draw(currentFrame, position.x, position.y,getWidth(),getHeight());
+    public void render(SpriteBatch batch) {
+        TextureRegion currentFrame = getCurrentFrame();
+
+        float drawX = position.x;
+        float drawWidth = getWidth();
+
+        if (isFlipped) {
+            drawX += getWidth();
+            drawWidth = -getWidth();
+        }
+
+        if (timeSinceLastLifeLost >= 5.0f) {
+            batch.draw(currentFrame, drawX, position.y, drawWidth, getHeight());
         } else {
             float flashTime = 0.3f;
             if ((int) (timeSinceLastLifeLost / flashTime) % 2 == 0) {
-                currentFrame=getCurrentFrame();
-                batch.draw(currentFrame, position.x, position.y,getWidth(),getHeight());
+                batch.draw(currentFrame, drawX, position.y, drawWidth, getHeight());
             }
         }
     }
@@ -215,5 +222,7 @@ public class BasicCharacter {
                 getHeight() * 0.38f
         );
     }
+
+
 
 }
