@@ -31,6 +31,7 @@ public class CutsceneScreen implements Screen {
     OrthographicCamera camera ;
     private final OrthogonalTiledMapRenderer tiledMapRenderer;
     private final Music cutsceneMusic;
+    private final Music trainMusic;
     private final  TiledMap tiledMap;
 
 
@@ -42,6 +43,7 @@ public class CutsceneScreen implements Screen {
         this.stage = new Stage(new ExtendViewport(1920, 1080));
         this.cutsceneManager = new CutsceneManager();
         cutsceneMusic = assets.getAssetManager().get(Assets.introMusic);
+        trainMusic = assets.getAssetManager().get(Assets.trainMusic);
         cutsceneMusic.setLooping(true);
         cutsceneMusic.setVolume(musicVolume / 100f);
         cutsceneMusic.play();
@@ -104,7 +106,7 @@ public class CutsceneScreen implements Screen {
 
         cutsceneManager.addEvent(new ChangeMusicEvent(
                 cutsceneMusic,
-                assets.getAssetManager().get(Assets.trainMusic),
+                trainMusic,
                 musicVolume / 100f
         ));
 
@@ -165,17 +167,10 @@ public class CutsceneScreen implements Screen {
         cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " You are ready. "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.grandpaPortraitTexture) ));
 
-
-        cutsceneManager.addEvent(new ChangeMusicEvent(
-                cutsceneMusic,
-                assets.getAssetManager().get(Assets.trainMusic),
-                0 / 100f
-        ));
-
         cutsceneManager.addEvent(new WaitEvent(0.4f));
 
 
-        cutsceneManager.addEvent(new FadeToBlackEvent(
+        cutsceneManager.addEvent(new FadeEndEvent(
                 stage,
                 assets.getAssetManager().get(Assets.blackPixelTexture),
                 1f,
@@ -220,13 +215,23 @@ public class CutsceneScreen implements Screen {
         stage.draw();
 
         if (cutsceneManager.isFinished()) {
-            cutsceneMusic.stop();
+            trainMusic.stop();
+            dispose();
             game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.STORY, assets));
         }
     }
 
 
-    @Override public void dispose() { stage.dispose(); }
+    @Override
+    public void dispose() {
+        stage.dispose();
+        batch.dispose();
+        tiledMapRenderer.dispose();
+        tiledMap.dispose();
+        cutsceneMusic.dispose();
+        trainMusic.dispose();
+    }
+
     @Override public void resize(int w, int h) {}
     @Override public void pause() {}
     @Override public void resume() {}

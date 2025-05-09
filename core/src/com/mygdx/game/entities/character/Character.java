@@ -96,7 +96,6 @@
                 movement.x += 1;
             }
 
-
             if (movement.len() > 0) {
                 movement.nor().scl(SPEED * deltaTime);
                 potentialX += movement.x;

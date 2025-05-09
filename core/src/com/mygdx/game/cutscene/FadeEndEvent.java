@@ -6,7 +6,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 import com.badlogic.gdx.scenes.scene2d.ui.Image;
 import com.badlogic.gdx.scenes.scene2d.utils.TextureRegionDrawable;
 
-public class FadeToBlackEvent implements CutsceneEvent {
+public class FadeEndEvent implements CutsceneEvent {
 
     private final Image blackOverlay;
     private boolean complete = false;
@@ -14,10 +14,9 @@ public class FadeToBlackEvent implements CutsceneEvent {
     private final float fadeInDuration;
     private final float waitDuration;
 
-    public FadeToBlackEvent(Stage stage, Texture blackPixel, float fadeInDuration, float waitDuration) {
+    public FadeEndEvent(Stage stage, Texture blackPixel, float fadeInDuration, float waitDuration ) {
         this.fadeInDuration = fadeInDuration;
         this.waitDuration = waitDuration;
-
         blackOverlay = new Image(new TextureRegionDrawable(blackPixel));
         blackOverlay.getColor().a = 0f;
         stage.addActor(blackOverlay);
