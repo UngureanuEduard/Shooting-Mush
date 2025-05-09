@@ -88,20 +88,14 @@
             Vector2 movement = new Vector2(0, 0);
             if (moveUp) movement.y += 1;
             if (moveDown) movement.y -= 1;
+
             if (moveLeft) {
                 movement.x -= 1;
-                if (!getIsFlipped()) {
-                    flipAnimations();
-                    setIsFlipped(true);
-                }
             }
             if (moveRight) {
                 movement.x += 1;
-                if (getIsFlipped()) {
-                    flipAnimations();
-                    setIsFlipped(false);
-                }
             }
+
 
             if (movement.len() > 0) {
                 movement.nor().scl(SPEED * deltaTime);
@@ -241,7 +235,7 @@
         @Override
         protected void colidedWithBullet(EnemyBullet enemyBullet){
             loseLife();
-            Vector2 bulletDirection = new Vector2(getPosition()).sub(enemyBullet.getPosition()).nor(); // Reverse the direction
+            Vector2 bulletDirection = new Vector2(getPosition()).sub(enemyBullet.getPosition()).nor();
             pushBackDirection.set(bulletDirection);
             pushBackTime = 0.5f;
             enemyBullet.setAlive(false);

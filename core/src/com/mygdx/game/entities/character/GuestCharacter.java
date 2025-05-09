@@ -22,15 +22,6 @@ public class GuestCharacter extends BasicCharacter {
             float deltaTime = Gdx.graphics.getDeltaTime();
             setStateTime(getStateTime() + deltaTime);
             setTimeSinceLastLifeLost(getTimeSinceLastLifeLost() + deltaTime);
-            if(getIsWalking() .equals("left") && !getIsFlipped()) {
-                    flipAnimations();
-                    setIsFlipped(true);
-            }
-            else  if(getIsWalking() .equals("right") && getIsFlipped()) {
-                flipAnimations();
-                setIsFlipped(false);
-            }
-
             checkBulletCollisions(enemyBullets);
         }
 
@@ -46,7 +37,5 @@ public class GuestCharacter extends BasicCharacter {
             client.sendTCP(deactivation);
         }
     }
-
-
 
 }

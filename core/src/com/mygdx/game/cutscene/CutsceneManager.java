@@ -20,8 +20,18 @@ public class CutsceneManager {
         }
     }
 
+    public void skipEvent() {
+        if (currentEvent != null) {
+            // Force-complete current event
+            while (!currentEvent.isComplete()) {
+                currentEvent.update(Float.MAX_VALUE);
+            }
+        }
+    }
+
     public boolean isFinished() {
         return currentEvent == null && events.isEmpty();
     }
 }
+
 

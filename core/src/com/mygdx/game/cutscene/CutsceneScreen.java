@@ -1,6 +1,7 @@
 package com.mygdx.game.cutscene;
 
 import com.badlogic.gdx.Gdx;
+import com.badlogic.gdx.Input;
 import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.OrthographicCamera;
@@ -164,7 +165,15 @@ public class CutsceneScreen implements Screen {
         cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " You are ready. "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.grandpaPortraitTexture) ));
 
+
+        cutsceneManager.addEvent(new ChangeMusicEvent(
+                cutsceneMusic,
+                assets.getAssetManager().get(Assets.trainMusic),
+                0 / 100f
+        ));
+
         cutsceneManager.addEvent(new WaitEvent(0.4f));
+
 
         cutsceneManager.addEvent(new FadeToBlackEvent(
                 stage,
@@ -183,6 +192,11 @@ public class CutsceneScreen implements Screen {
 
     @Override
     public void render(float delta) {
+
+        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.justTouched()) {
+            cutsceneManager.skipEvent();
+        }
+
         ScreenUtils.clear(0, 0, 0, 1);
         cutsceneManager.update(delta);
 
