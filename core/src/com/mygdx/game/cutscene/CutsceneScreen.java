@@ -169,13 +169,17 @@ public class CutsceneScreen implements Screen {
 
         cutsceneManager.addEvent(new WaitEvent(0.4f));
 
-
         cutsceneManager.addEvent(new FadeEndEvent(
                 stage,
+                assets.getAssetManager().get(Assets.skin),
                 assets.getAssetManager().get(Assets.blackPixelTexture),
                 1f,
-                1f
+                1f,
+                1f,
+                "And so , Mylo's journey stared..."
         ));
+
+
 
 
     }

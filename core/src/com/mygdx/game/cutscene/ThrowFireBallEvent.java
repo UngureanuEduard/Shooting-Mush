@@ -42,10 +42,7 @@ public class ThrowFireBallEvent implements CutsceneEvent {
     @Override
     public boolean update(float delta) {
         if (!started) {
-            effectImage.setPosition(start.x, start.y);
-            effectImage.setVisible(true);
-            stage.addActor(effectImage);
-            if (throwSound != null) throwSound.play();
+            CutsceneUtils.startThrow(stage, effectImage, start, throwSound);
             started = true;
         }
 

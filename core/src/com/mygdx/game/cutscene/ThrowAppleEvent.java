@@ -36,12 +36,7 @@ public class ThrowAppleEvent implements CutsceneEvent {
     @Override
     public boolean update(float delta) {
         if (!started) {
-            appleImage.setPosition(start.x, start.y);
-            appleImage.setVisible(true);
-            stage.addActor(appleImage);
-            if (throwSound != null) {
-                throwSound.play();
-            }
+            CutsceneUtils.startThrow(stage, appleImage, start, throwSound);
             started = true;
         }
 

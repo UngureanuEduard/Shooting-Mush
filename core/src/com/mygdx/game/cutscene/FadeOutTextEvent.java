@@ -13,7 +13,7 @@ import com.badlogic.gdx.scenes.scene2d.actions.Actions;
 public class FadeOutTextEvent implements CutsceneEvent {
     private final Stage stage;
     private final Label label;
-    private final Image blackBackground;
+    private final Image blackOverlay;
     private boolean complete = false;
     private final OrthographicCamera camera;
 
@@ -22,9 +22,9 @@ public class FadeOutTextEvent implements CutsceneEvent {
         this.stage = stage;
         this.camera = (OrthographicCamera) stage.getCamera();
 
-        blackBackground = new Image(new TextureRegionDrawable(blackPixel));
-        blackBackground.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
-        blackBackground.getColor().a = 1f;
+        blackOverlay = new Image(new TextureRegionDrawable(blackPixel));
+        blackOverlay.setSize(stage.getViewport().getWorldWidth(), stage.getViewport().getWorldHeight());
+        blackOverlay.getColor().a = 1f;
 
         label = new Label(text, skin);
         label.setFontScale(0.4f);
@@ -41,40 +41,26 @@ public class FadeOutTextEvent implements CutsceneEvent {
         ));
 
         float totalTextDuration = fadeInDuration + displayDuration + fadeOutDuration;
-        blackBackground.addAction(Actions.sequence(
+        blackOverlay.addAction(Actions.sequence(
                 Actions.delay(totalTextDuration),
                 Actions.fadeOut(1f),
                 Actions.run(() -> complete = true)
         ));
 
-        stage.addActor(blackBackground);
+        stage.addActor(blackOverlay);
         stage.addActor(label);
     }
 
     @Override
     public boolean update(float delta) {
-        float camX = camera.position.x;
-        float camY = camera.position.y;
-        float zoom = camera.zoom;
-
-        float worldWidth = stage.getViewport().getWorldWidth() * zoom;
-        float worldHeight = stage.getViewport().getWorldHeight() * zoom;
-
-        blackBackground.setPosition(camX - worldWidth / 2f, camY - worldHeight / 2f);
-        blackBackground.setSize(worldWidth, worldHeight);
-
-        label.setPosition(
-                camX - label.getPrefWidth() / 2f,
-                camY - label.getPrefHeight() / 2f
-        );
-
+        CutsceneUtils.centerOverlayAndLabel(camera, stage, blackOverlay, label);
         return complete;
     }
 
     @Override
     public void skip() {
         complete = true;
-        blackBackground.remove();
+        blackOverlay.remove();
         label.remove();
     }
 
