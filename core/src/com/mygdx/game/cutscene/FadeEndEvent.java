@@ -39,6 +39,12 @@ public class FadeEndEvent implements CutsceneEvent {
     }
 
     @Override
+    public void skip() {
+        complete = true;
+    }
+
+
+    @Override
     public boolean isComplete() {
         return complete;
     }

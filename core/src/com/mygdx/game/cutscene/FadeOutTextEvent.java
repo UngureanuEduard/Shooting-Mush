@@ -71,6 +71,14 @@ public class FadeOutTextEvent implements CutsceneEvent {
         return complete;
     }
 
+    @Override
+    public void skip() {
+        complete = true;
+        blackBackground.remove();
+        label.remove();
+    }
+
+
 
     @Override
     public boolean isComplete() {

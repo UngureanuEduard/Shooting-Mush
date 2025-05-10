@@ -22,8 +22,9 @@ public class CutsceneManager {
 
     public void skipEvent() {
         if (currentEvent != null) {
-            // Force-complete current event
-            while (!currentEvent.isComplete()) {
+            currentEvent.skip();
+            int safeguard = 0;
+            while (!currentEvent.isComplete() && safeguard++ < 100) {
                 currentEvent.update(Float.MAX_VALUE);
             }
         }

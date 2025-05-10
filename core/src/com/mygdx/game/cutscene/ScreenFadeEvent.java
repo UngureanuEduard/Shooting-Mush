@@ -60,6 +60,13 @@ public class ScreenFadeEvent implements CutsceneEvent {
     }
 
     @Override
+    public void skip() {
+        complete = true;
+        blackOverlay.remove();
+    }
+
+
+    @Override
     public boolean isComplete() {
         return complete;
     }
