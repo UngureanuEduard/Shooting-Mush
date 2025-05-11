@@ -57,6 +57,20 @@ public class GameScene extends ScreenAdapter {
         }
     }
 
+    public GameScene(MyGdxGame game, StoryMode existingStoryMode) {
+        this.game = game;
+        this.gameMode = GameMode.STORY;
+        this.assets = existingStoryMode.getAssets();
+        this.storyMode = existingStoryMode;
+
+        if (Settings.windowed) {
+            Gdx.graphics.setWindowedMode(Settings.windowedScreenWidth, Settings.windowedScreenHeight);
+        } else {
+            Gdx.graphics.setFullscreenMode(Gdx.graphics.getDisplayMode());
+        }
+    }
+
+
     @Override
     public void show() {
         batch = new SpriteBatch();

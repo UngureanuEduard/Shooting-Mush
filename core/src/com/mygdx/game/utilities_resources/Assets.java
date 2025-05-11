@@ -18,6 +18,7 @@ public class Assets {
     public static final AssetDescriptor<Skin> skin = new AssetDescriptor<>("Font/menu.json", Skin.class);
     public static final AssetDescriptor<TiledMap> arenaTiledMap = new AssetDescriptor<>("arenaMap.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> cutscene1Map = new AssetDescriptor<>("cutSceen1.tmx", TiledMap.class);
+    public static final AssetDescriptor<TiledMap> cutscene2Map = new AssetDescriptor<>("cutScreen2.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> storyTiledMap = new AssetDescriptor<>("storyMap1.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> storyTiledMap_2 = new AssetDescriptor<>("Tiled_files/Dungeon1.tmx", TiledMap.class);
     public static final AssetDescriptor<Texture> walkTexture = new AssetDescriptor<>("Character/Character Walking Side.png", Texture.class);
@@ -35,6 +36,7 @@ public class Assets {
     public static final AssetDescriptor<Texture> menuBackgroundTexture = new AssetDescriptor<>("Font/Background.jpg", Texture.class);
     public static final AssetDescriptor<Texture> duckTexture = new AssetDescriptor<>("Environment/Duck.png", Texture.class);
     public static final AssetDescriptor<Sound> duckSound = new AssetDescriptor<>("mp3/duck.mp3",Sound.class);
+    public static final AssetDescriptor<Sound> thunderSound = new AssetDescriptor<>("mp3/thunder.mp3",Sound.class);
     public static final AssetDescriptor<Music> menuMusic = new AssetDescriptor<>("mp3/menuMusic.ogg", Music.class);
     public static final AssetDescriptor<Music> gameMusic = new AssetDescriptor<>("mp3/gameMusic.mp3", Music.class);
     public static final AssetDescriptor<Texture> lightningBoltTexture = new AssetDescriptor<>("Environment/lightningBolt.png", Texture.class);
@@ -52,6 +54,7 @@ public class Assets {
     public static final AssetDescriptor<Music> dungeonMusic = new AssetDescriptor<>("mp3/dungeonSong.wav", Music.class);
     public static final AssetDescriptor<Music> introMusic = new AssetDescriptor<>("mp3/Eldertide.mp3", Music.class);
     public static final AssetDescriptor<Music> trainMusic = new AssetDescriptor<>("mp3/Survivor.mp3", Music.class);
+    public static final AssetDescriptor<Music> portalMusic = new AssetDescriptor<>("mp3/portal.mp3", Music.class);
     public static final AssetDescriptor<Texture> fallingLeafTexture = new AssetDescriptor<>("Environment/Leaf.png", Texture.class);
     public static final AssetDescriptor<Texture> dialogTexture = new AssetDescriptor<>("Environment/Dialog.png", Texture.class);
     public static final AssetDescriptor<Texture> goldTrophyTexture = new AssetDescriptor<>("Environment/Golden Trophy Large.png", Texture.class);
@@ -70,6 +73,10 @@ public class Assets {
     public static final AssetDescriptor<Texture> myloPortraitTexture = new AssetDescriptor<>("portraits/Mylo.png", Texture.class);
     public static final AssetDescriptor<Texture> blackPixelTexture = new AssetDescriptor<>("black.png", Texture.class);
     public static final AssetDescriptor<Texture> fireBallTexture = new AssetDescriptor<>("FireBall.png", Texture.class);
+    public static final AssetDescriptor<Texture> portalTexture = new AssetDescriptor<>("portal.png", Texture.class);
+    public static final AssetDescriptor<Texture> fireBallFillTexture = new AssetDescriptor<>("lava.png", Texture.class);
+    public static final AssetDescriptor<Texture> fireBallBarTexture = new AssetDescriptor<>("coal.png", Texture.class);
+
 
     public Assets() {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
@@ -87,7 +94,8 @@ public class Assets {
                 , co_opButtonTexture , backButtonTexture  , dungeonMusic ,
                 skeletonIdleTexture , skeletonWalkTexture , boneTexture , cloudTexture ,cutscene1Map ,idleTextureGrandpa ,
                 dialogBoxTexture , grandpaPortraitTexture , blackPixelTexture , introMusic,myloPortraitTexture ,trainMusic ,
-                throwExplosionSound , fireBallTexture
+                throwExplosionSound , fireBallTexture , cutscene2Map , thunderSound , portalTexture , portalMusic,
+                fireBallBarTexture,fireBallFillTexture
         };
 
         for (AssetDescriptor<?> asset : assetsToLoad) {

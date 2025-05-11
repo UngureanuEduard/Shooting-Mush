@@ -32,4 +32,11 @@ public class CutsceneUtils {
             throwSound.play();
         }
     }
+
+    public static void centerOverlay(OrthographicCamera camera, Stage stage, Image overlay) {
+        overlay.setPosition(
+                camera.position.x - stage.getViewport().getWorldWidth() / 2f,
+                camera.position.y - stage.getViewport().getWorldHeight() / 2f
+        );
+    }
 }

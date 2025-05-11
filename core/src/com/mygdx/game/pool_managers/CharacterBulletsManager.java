@@ -27,7 +27,11 @@ public class CharacterBulletsManager {
         activeCharacterBullets.clear();
     }
     public void generateBullet(Vector2 bulletStartPosition, Vector2 directionToCursor, float damage, Assets assets, Integer soundVolume , boolean isFromHost){
-        CharacterBullet item = characterBulletPool.obtain();
+        CharacterBullet item;
+        do {
+            item = characterBulletPool.obtain();
+        } while (!(item.getClass() == CharacterBullet.class));
+
         item.init(bulletStartPosition, directionToCursor, damage, assets, soundVolume , isFromHost);
         activeCharacterBullets.add(item);
     }

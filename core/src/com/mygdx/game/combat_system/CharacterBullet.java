@@ -27,11 +27,15 @@ public class CharacterBullet extends Bullet{
         super.init(position,velocity,damage);
         setDamageScale(DAMAGE_SCALE_BASE + damage / DAMAGE_SCALE_FACTOR);
         this.isFromHost = fromHost;
+        setTextureAndSound(assets,soundVolume);
+        hitBox=new Circle();
+    }
+
+    protected void setTextureAndSound(Assets assets , Integer soundVolume){
         Texture bulletAppleTexture = assets.getAssetManager().get(Assets.bulletTexture);
         Sound soundCharacter = assets.getAssetManager().get(Assets.throwSound);
         setTexture(new TextureRegion(bulletAppleTexture));
         soundCharacter.play(soundVolume/100f);
-        hitBox=new Circle();
     }
 
     public void update(float deltaTime){
@@ -47,11 +51,11 @@ public class CharacterBullet extends Bullet{
                 (float) (getDamageScale()-0.3), getAngle());
     }
 
-    private float getWidth() {
+    protected float getWidth() {
         return BULLET_SIZE * getDamageScale() * 0.8f;
     }
 
-    private float getHeight() {
+    protected float getHeight() {
         return BULLET_SIZE * getDamageScale() * 0.8f;
     }
 

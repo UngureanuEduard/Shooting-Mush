@@ -15,6 +15,7 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.animations_effects.CloudShadow;
+import com.mygdx.game.cutscene.CutsceneScreenDungeon;
 import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.MyGdxGame;
@@ -35,9 +36,7 @@ public class StoryMode extends BasicGameMode {
     private Npc npc;
     private TransitionArea transitionArea;
     private EndGameScreenStory endGameScreenStory;
-    private RayHandler rayHandler;
     private PointLight playerLight;
-    private World world;
     private int cameraWidth;
     private int cameraHeight;
     private final Array<CloudShadow> cloudShadows = new Array<>();
@@ -58,10 +57,11 @@ public class StoryMode extends BasicGameMode {
     public void show(int cameraWidth, int cameraHeight) {
         this.cameraWidth = cameraWidth;
         this.cameraHeight = cameraHeight;
-        setCharacter(new Character(new Vector2(120, 100), getAssets()));
+        if (getCharacter() == null) {
+            setCharacter(new Character(new Vector2(120, 100), getAssets()));
+        }
         loadMap(getCurrentMapIndex());
         super.show(cameraWidth, cameraHeight);
-        setCurrentMapIndex(0);
         npc = new Npc(getEnemyManager().getEnemyMapLocationsInfos().get(0).getNpcPosition(), getAssets(), getSoundVolume());
     }
 
@@ -77,13 +77,18 @@ public class StoryMode extends BasicGameMode {
             getCharacter().setCollisionRectangles(getCollisionRectangles());
 
             if (index == 1) {
-                world = new World(new Vector2(0, 0), true);
-                rayHandler = new RayHandler(world);
-                rayHandler.setAmbientLight(0.05f);
-                rayHandler.setShadows(true);
-                rayHandler.setBlurNum(3);
+
+                if (getWorld() == null) {
+                    setWorld(new World(new Vector2(0, 0), true));
+                }
+                if (getRayHandler() == null) {
+                    setRayHandler(new RayHandler(getWorld()));
+                }
+                getRayHandler().setAmbientLight(0.05f);
+                getRayHandler().setShadows(true);
+                getRayHandler().setBlurNum(3);
                 RayHandler.useDiffuseLight(true);
-                playerLight = new PointLight(rayHandler, 128, new Color(1f, 1f, 0.8f, 1f), 100,
+                playerLight = new PointLight(getRayHandler(), 128, new Color(1f, 1f, 0.8f, 1f), 100,
                         getCharacter().getPosition().x, getCharacter().getPosition().y);
                 playerLight.setSoft(true);
                 playerLight.setSoftnessLength(10f);
@@ -95,7 +100,7 @@ public class StoryMode extends BasicGameMode {
                         float x = rect.x + rect.width / 2f;
                         float y = rect.y + rect.height / 2f;
 
-                        PointLight light = new PointLight(rayHandler, 128, new Color(1f, 1f, 0.8f, 1f), 80, x, y);
+                        PointLight light = new PointLight(getRayHandler(), 128, new Color(1f, 1f, 0.8f, 1f), 80, x, y);
                         light.setSoft(true);
                         light.setSoftnessLength(10f);
                         light.setStaticLight(true);
@@ -109,9 +114,9 @@ public class StoryMode extends BasicGameMode {
                 setEnableLeafs(false);
 
             } else {
-                if (rayHandler != null) rayHandler.dispose();
-                rayHandler = null;
-                world = null;
+                if (getRayHandler() != null) getRayHandler().dispose();
+                setRayHandler(null);
+                setWorld(null);
             }
         }
     }
@@ -129,13 +134,14 @@ public class StoryMode extends BasicGameMode {
             setInDialog(false);
         }
 
-        if (getCurrentMapIndex() == 1 && rayHandler != null && playerLight != null) {
+        if (getCurrentMapIndex() == 1 && getRayHandler() != null && playerLight != null) {
             playerLight.setPosition(
                     getCharacter().getPosition().x + getCharacter().getWidth() / 2,
                     getCharacter().getPosition().y + getCharacter().getHeight() / 2
             );
-            rayHandler.setCombinedMatrix(getCamera());
-            rayHandler.updateAndRender();
+            getRayHandler().setCombinedMatrix(getCamera());
+            getRayHandler().updateAndRender();
+
         }
 
         if (getCurrentMapIndex() == 0) {
@@ -160,7 +166,13 @@ public class StoryMode extends BasicGameMode {
 
         if (transitionArea.isWithinArea(getCharacter().getPosition().x, getCharacter().getPosition().y)
                 && getEnemyManager().getActiveEnemies().isEmpty()) {
-            loadNextMap(game);
+            if (getCurrentMapIndex() == 0) {
+                getGameMusic().stop();
+                getBossMusic().stop();
+                game.setScreen(new CutsceneScreenDungeon(game, getMusicVolume(), getSoundVolume(), getAssets(), getCharacter()));
+            } else {
+                loadNextMap(game);
+            }
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
@@ -177,6 +189,12 @@ public class StoryMode extends BasicGameMode {
         if (getCharacter().getLives() == 0) {
             handleGameOver(game);
         }
+
+        batch.end();
+        batch.begin();
+        getCharacter().drawHearts(batch, getCamera());
+        batch.end();
+        batch.begin();
     }
 
     private void loadNextMap(MyGdxGame game) {
@@ -230,8 +248,8 @@ public class StoryMode extends BasicGameMode {
         if (npc != null) npc.dispose();
         if (endGameScreenStory != null) endGameScreenStory.dispose();
         if (maps != null) maps.clear();
-        if (rayHandler != null) rayHandler.dispose();
-        if (world != null) world.dispose();
+        if (getRayHandler() != null) getRayHandler().dispose();
+        if (getWorld() != null) getWorld().dispose();
     }
 
 }

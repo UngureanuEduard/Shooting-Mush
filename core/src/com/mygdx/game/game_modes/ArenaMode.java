@@ -61,6 +61,8 @@ public class ArenaMode  extends BasicGameMode{
 
         super.render(delta , batch , game , stage);
 
+        getCharacter().drawHearts(batch,getCamera());
+
         if (!waves.isEmpty()) {
             Wave currentWave = waves.first();
             enemySpawnTimer += Gdx.graphics.getDeltaTime();

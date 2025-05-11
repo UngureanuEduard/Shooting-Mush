@@ -17,16 +17,19 @@ public class Sprite {
     private String isWalking;
     private final Animation<TextureRegion> idleAnimation;
     private final Animation<TextureRegion> walkAnimation;
+    private final Animation<TextureRegion> walkUpAnimation;
     private float animationSpeed = 0.1f;
 
 
 
-    public Sprite(Vector2 position , Texture idleTexture , Texture walkTexture , int idleTextureSplit , int walkTextureSplit , int tileSize) {
+    public Sprite(Vector2 position , Texture idleTexture , Texture walkTexture , Texture walkUpTexture , int idleTextureSplit , int walkTextureSplit , int walkUpTextureSplit , int tileSize) {
         this.position = position;
         TextureRegion[] walkFrames = splitCharacterTexture(walkTexture,walkTextureSplit ,tileSize);
         TextureRegion[] idleFrames = splitCharacterTexture(idleTexture,idleTextureSplit ,tileSize);
+        TextureRegion[] walkUpFrames = splitCharacterTexture(walkUpTexture,walkUpTextureSplit ,tileSize);
         idleAnimation = new Animation<>(animationSpeed, idleFrames);
         walkAnimation = new Animation<>(animationSpeed, walkFrames);
+        walkUpAnimation = new Animation<>(animationSpeed+0.1f, walkUpFrames);
         isWalking = "";
         isFlipped = false;
     }
@@ -58,6 +61,8 @@ public class Sprite {
             case "right":
             case "left":
                 return walkAnimation.getKeyFrame(stateTime, true);
+            case "up" :
+                return walkUpAnimation.getKeyFrame(stateTime, true);
             default:
                 return idleAnimation.getKeyFrame(stateTime, true);
         }

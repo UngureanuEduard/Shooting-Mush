@@ -33,6 +33,8 @@ public class MoveCharacterEvent implements CutsceneEvent {
             character.setPosition(current.add(direction));
             if (Math.abs(direction.x) > Math.abs(direction.y)) {
                 character.setIsWalking(direction.x > 0 ? "right" : "left");
+            }else {
+                character.setIsWalking(direction.y > 0 ? "up" : "down");
             }
         }
 

@@ -1,5 +1,6 @@
 package com.mygdx.game.game_modes;
 
+import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.audio.Music;
@@ -12,12 +13,14 @@ import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.*;
+import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.scenes.scene2d.ui.Skin;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.animations_effects.DamageText;
 import com.mygdx.game.combat_system.CharacterBullet;
+import com.mygdx.game.combat_system.FireBall;
 import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.entities.enemy.Enemy;
 import com.mygdx.game.entities.enemy.EnemyBoss;
@@ -77,6 +80,14 @@ public class BasicGameMode {
     private int currentMapIndex = 0;
     private final Array<DamageText> damageTexts = new Array<>();
     private final BitmapFont defaultFont;
+    private float fireballChargeTime = 0f;
+    private static final float FIREBALL_CHARGE_REQUIRED = 1.3f;
+    private boolean isChargingFireball = false;
+    private boolean fireballReady = false;
+    private World world;
+    private RayHandler rayHandler;
+
+
 
     public BasicGameMode(Assets assets , Integer soundVolume, Integer musicVolume) {
         this.assets = assets;
@@ -93,6 +104,8 @@ public class BasicGameMode {
         healthBarTexture = assets.getAssetManager().get(Assets.BossHealthBarTexture);
         healthFillTexture = assets.getAssetManager().get(Assets.HealthTexture);
         defaultFont = new BitmapFont();
+        world = new World(new Vector2(0, 0), true);
+        rayHandler = new RayHandler(world);
     }
 
     protected void show(int cameraWidth, int cameraHeight){
@@ -127,7 +140,7 @@ public class BasicGameMode {
         updateCamera();
         worldWidth = stage.getViewport().getWorldWidth();
         worldHeight = stage.getViewport().getWorldHeight();
-        character.update(enemyManager.getActiveEnemies(), isPaused , enemyBulletsManager.getActiveEnemyBullets(),inDialog||isGameOver);
+        character.update(enemyManager.getActiveEnemies(), isPaused , enemyBulletsManager.getActiveEnemyBullets(), inDialog || isGameOver ,isChargingFireball);
         handleShootLogic(delta);
         batch.setProjectionMatrix(camera.combined);
         particleEffectsManager.update();
@@ -137,11 +150,17 @@ public class BasicGameMode {
         enemyBulletsManager.updateAndRender(batch);
         characterBulletsManager.updateAndRender(batch);
 
+        if (isChargingFireball) {
+            drawFireballChargeBar(batch);
+        }
+
+
         for (Enemy enemy : enemyManager.getActiveEnemies()) {
             checkBulletCollisions(characterBulletsManager.getActiveCharacterBullets(), enemy);
         }
         renderDamageTexts(batch,delta);
         enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager ,currentMapIndex );
+
         character.render(batch);
         character.drawHearts(batch,camera);
 
@@ -162,6 +181,23 @@ public class BasicGameMode {
             game.setScreen(new MainMenuScreen(game, assets, musicVolume, soundVolume));
         }
     }
+
+    private void drawFireballChargeBar(SpriteBatch batch) {
+        float barWidth = 14f;
+        float barHeight = 4f;
+        float x = character.getPosition().x + character.getWidth() / 2 - barWidth / 2;
+        float y = character.getPosition().y + character.getHeight();
+
+        float progress = Math.min(fireballChargeTime / FIREBALL_CHARGE_REQUIRED, 1.0f);
+        batch.setColor(1, 1, 1, 1);
+        batch.draw(assets.getAssetManager().get(Assets.fireBallBarTexture), x, y, barWidth, barHeight);
+
+        batch.setColor(1, 0.3f, 0.1f, 1);
+        batch.draw(assets.getAssetManager().get(Assets.fireBallFillTexture), x + 1, y + 1, (barWidth - 2) * progress, barHeight - 2);
+
+        batch.setColor(1, 1, 1, 1);
+    }
+
 
     protected void setupMusic() {
         gameMusic.setLooping(true);
@@ -184,11 +220,31 @@ public class BasicGameMode {
     }
 
     private void handleShootLogic(float delta) {
-        timeSinceLastShot += delta;
-        if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && timeSinceLastShot >= SHOOT_COOLDOWN && !isPaused) {
-            shootBullet();
-            timeSinceLastShot = 0.0f;
+        if (!isPaused) {
+            if (Gdx.input.isButtonPressed(Input.Buttons.RIGHT)) {
+                fireballChargeTime += delta;
+                isChargingFireball = true;
+                getCharacter().setIsWalking("");
+
+                if (fireballChargeTime >= FIREBALL_CHARGE_REQUIRED) {
+                    fireballReady = true;
+                }
+            } else {
+                if (isChargingFireball && fireballReady) {
+                    shootFireBall();
+                }
+                fireballChargeTime = 0f;
+                isChargingFireball = false;
+                fireballReady = false;
+            }
+
+            timeSinceLastShot += delta;
+            if (Gdx.input.isButtonPressed(Input.Buttons.LEFT) && timeSinceLastShot >= SHOOT_COOLDOWN) {
+                shootBullet();
+                timeSinceLastShot = 0.0f;
+            }
         }
+
     }
 
     protected void shootBullet() {
@@ -196,6 +252,16 @@ public class BasicGameMode {
         Vector2 directionToCursor = calculateDirectionToCursor(bulletStartPosition);
         directionToCursor.nor().scl(BULLET_SPEED);
         characterBulletsManager.generateBullet(bulletStartPosition, directionToCursor, 25, assets, soundVolume ,true);
+    }
+
+    private void shootFireBall() {
+        Vector2 bulletStartPosition = new Vector2(character.getPosition().x, character.getPosition().y);
+        Vector2 directionToCursor = calculateDirectionToCursor(bulletStartPosition);
+        directionToCursor.nor().scl(BULLET_SPEED);
+
+        FireBall fireBall = new FireBall();
+        fireBall.init(bulletStartPosition, directionToCursor, 75, assets, soundVolume, true , rayHandler);
+        characterBulletsManager.getActiveCharacterBullets().add(fireBall);
     }
 
     protected Vector2 calculateDirectionToCursor(Vector2 startingPoint) {
@@ -458,5 +524,21 @@ public class BasicGameMode {
 
     public void setCurrentMapIndex(int currentMapIndex) {
         this.currentMapIndex = currentMapIndex;
+    }
+
+    public World getWorld() {
+        return world;
+    }
+
+    public RayHandler getRayHandler() {
+        return rayHandler;
+    }
+
+    public void setRayHandler(RayHandler rayHandler) {
+        this.rayHandler = rayHandler;
+    }
+
+    public void setWorld(World world) {
+        this.world = world;
     }
 }

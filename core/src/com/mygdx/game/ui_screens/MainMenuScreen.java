@@ -21,7 +21,7 @@ import com.esotericsoftware.kryonet.Connection;
 import com.esotericsoftware.kryonet.Listener;
 import com.esotericsoftware.kryonet.Server;
 import com.mygdx.game.*;
-import com.mygdx.game.cutscene.CutsceneScreen;
+import com.mygdx.game.cutscene.CutsceneScreenIntro;
 import com.mygdx.game.newtork.Network;
 import com.mygdx.game.utilities_resources.Assets;
 import com.mygdx.game.utilities_resources.Settings;
@@ -156,7 +156,7 @@ public class    MainMenuScreen extends ScreenAdapter {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new CutsceneScreen(game, musicVolume, soundVolume, assets));
+                game.setScreen(new CutsceneScreenIntro(game, musicVolume, soundVolume, assets));
 
             }
         });

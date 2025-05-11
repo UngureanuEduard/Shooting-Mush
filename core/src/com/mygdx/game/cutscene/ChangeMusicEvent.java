@@ -3,28 +3,28 @@ package com.mygdx.game.cutscene;
 import com.badlogic.gdx.audio.Music;
 
 public class ChangeMusicEvent implements CutsceneEvent {
-    private final Music cutsceneMusic;
-    private final Music trainMusic;
+    private final Music currentMusic;
+    private final Music newMusic;
     private final float volume;
     private boolean complete = false;
 
-    public ChangeMusicEvent(Music cutsceneMusic, Music trainMusic, float volume) {
-        this.cutsceneMusic = cutsceneMusic;
-        this.trainMusic = trainMusic;
+    public ChangeMusicEvent(Music currentMusic, Music newMusic, float volume) {
+        this.currentMusic = currentMusic;
+        this.newMusic = newMusic;
         this.volume = volume;
     }
 
     @Override
     public boolean update(float delta) {
         if (!complete) {
-            if (cutsceneMusic != null && cutsceneMusic.isPlaying()) {
-                cutsceneMusic.stop();
+            if (currentMusic != null && currentMusic.isPlaying()) {
+                currentMusic.stop();
             }
 
-            if (trainMusic != null) {
-                trainMusic.setLooping(true);
-                trainMusic.setVolume(volume);
-                trainMusic.play();
+            if (newMusic != null) {
+                newMusic.setLooping(true);
+                newMusic.setVolume(volume);
+                newMusic.play();
             }
 
             complete = true;

@@ -40,7 +40,7 @@
 
         }
 
-        public void update(Array<Enemy> enemies , Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog) {
+        public void update(Array<Enemy> enemies , Boolean isPaused, Array<EnemyBullet> enemyBullets , Boolean inDialog , Boolean isChargingFireBall) {
             if (!isPaused) {
                 float deltaTime = Gdx.graphics.getDeltaTime();
                 setStateTime(getStateTime()+deltaTime);
@@ -48,9 +48,11 @@
 
                 if (!inDialog) {
 
-                    handleMovement(deltaTime);
+                    if(!isChargingFireBall){
+                        handleMovement(deltaTime);
 
-                    handleDash(deltaTime);
+                        handleDash(deltaTime);
+                    }
 
                     updateHitboxes();
 
@@ -229,7 +231,7 @@
             }
         }
 
-        public Integer getLives(){return lives;}
+        public int getLives(){return lives;}
 
         @Override
         protected void colidedWithBullet(EnemyBullet enemyBullet){
@@ -243,7 +245,5 @@
         public void setCollisionRectangles(Array<Rectangle> rectangles) {
             this.collisionRectangles = rectangles;
         }
-
-
 
     }

@@ -17,7 +17,7 @@ import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.entities.character.Sprite;
 import com.mygdx.game.utilities_resources.Assets;
 
-public class CutsceneScreen implements Screen {
+public class CutsceneScreenIntro implements Screen {
     private final MyGdxGame game;
     private final int musicVolume;
     private final int soundVolume;
@@ -35,13 +35,14 @@ public class CutsceneScreen implements Screen {
     private final  TiledMap tiledMap;
 
 
-        public CutsceneScreen(MyGdxGame game, int musicVolume, int soundVolume, Assets assets  ) {
+        public CutsceneScreenIntro(MyGdxGame game, int musicVolume, int soundVolume, Assets assets  ) {
         this.game = game;
         this.musicVolume = musicVolume;
         this.soundVolume = soundVolume;
         this.assets = assets;
         this.stage = new Stage(new ExtendViewport(1920, 1080));
         this.cutsceneManager = new CutsceneManager();
+
         cutsceneMusic = assets.getAssetManager().get(Assets.introMusic);
         trainMusic = assets.getAssetManager().get(Assets.trainMusic);
         cutsceneMusic.setLooping(true);
@@ -61,9 +62,9 @@ public class CutsceneScreen implements Screen {
         camera.zoom = 0.2f;
         camera.position.set(490, 500, 0);
 
-        c1 = new Sprite(new Vector2(0, 0), assets.getAssetManager().get(Assets.idleTexture) , assets.getAssetManager().get(Assets.walkTexture) ,9, 3 , 48);
-        c2 = new Sprite(new Vector2(500, 470), assets.getAssetManager().get(Assets.idleTextureGrandpa) , assets.getAssetManager().get(Assets.walkTexture) , 9, 3 ,48);
-        c3 = new Sprite(new Vector2(700, 470), assets.getAssetManager().get(Assets.idleEnemyTexture) , assets.getAssetManager().get(Assets.duckTexture) , 4 , 6 ,32);
+        c1 = new Sprite(new Vector2(0, 0), assets.getAssetManager().get(Assets.idleTexture) , assets.getAssetManager().get(Assets.walkTexture) , assets.getAssetManager().get(Assets.walkBackTexture) ,9, 3 ,4, 48);
+        c2 = new Sprite(new Vector2(500, 470), assets.getAssetManager().get(Assets.idleTextureGrandpa) , assets.getAssetManager().get(Assets.walkTexture) , assets.getAssetManager().get(Assets.walkBackTexture) , 9, 3 ,4,48);
+        c3 = new Sprite(new Vector2(700, 470), assets.getAssetManager().get(Assets.idleEnemyTexture) , assets.getAssetManager().get(Assets.duckTexture) , assets.getAssetManager().get(Assets.walkBackTexture) ,  4 , 6 ,4,32);
         c3.setFlipped(true);
 
 
@@ -178,10 +179,6 @@ public class CutsceneScreen implements Screen {
                 1f,
                 "And so , Mylo's journey stared..."
         ));
-
-
-
-
     }
 
     @Override
@@ -208,11 +205,11 @@ public class CutsceneScreen implements Screen {
 
         batch.setProjectionMatrix(camera.combined);
         batch.begin();
-        c1.setStateTime(c2.getStateTime() + delta);
+        c1.setStateTime(c1.getStateTime() + delta);
         c1.render(batch);
         c2.setStateTime(c2.getStateTime() + delta);
         c2.render(batch);
-        c3.setStateTime(c2.getStateTime() + delta);
+        c3.setStateTime(c3.getStateTime() + delta);
         c3.render(batch);
         batch.end();
 
