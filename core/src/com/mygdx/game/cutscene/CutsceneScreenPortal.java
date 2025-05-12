@@ -1,16 +1,9 @@
 package com.mygdx.game.cutscene;
 
 import com.badlogic.gdx.Gdx;
-import com.badlogic.gdx.Input;
-import com.badlogic.gdx.Screen;
 import com.badlogic.gdx.audio.Music;
-import com.badlogic.gdx.graphics.OrthographicCamera;
-import com.badlogic.gdx.graphics.g2d.SpriteBatch;
-import com.badlogic.gdx.maps.tiled.TiledMap;
-import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.scenes.scene2d.Stage;
-import com.badlogic.gdx.utils.ScreenUtils;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.MyGdxGame;
@@ -19,30 +12,23 @@ import com.mygdx.game.entities.character.Sprite;
 import com.mygdx.game.game_modes.StoryMode;
 import com.mygdx.game.utilities_resources.Assets;
 
-public class CutsceneScreenDungeon implements Screen {
+public class CutsceneScreenPortal extends  BaseCutsceneScreen {
 
     private final MyGdxGame game;
     private final int musicVolume;
     private final int soundVolume;
     private final Assets assets;
-    private final Stage stage;
-    private final CutsceneManager cutsceneManager;
-    private final SpriteBatch batch = new SpriteBatch();
     private Sprite c1;
-    OrthographicCamera camera ;
-    private final OrthogonalTiledMapRenderer tiledMapRenderer;
     private final Music cutsceneMusic;
     private final Music portalMusic;
-    private final TiledMap tiledMap;
     private final Character character;
 
-    public CutsceneScreenDungeon(MyGdxGame game, int musicVolume, int soundVolume, Assets assets  , Character character) {
+    public CutsceneScreenPortal(MyGdxGame game, int musicVolume, int soundVolume, Assets assets  , Character character) {
+        super(new Stage(new ExtendViewport(1920, 1080)), new CutsceneManager(), assets.getAssetManager().get(Assets.cutscene2Map));
         this.game = game;
         this.musicVolume = musicVolume;
         this.soundVolume = soundVolume;
         this.assets = assets;
-        this.stage = new Stage(new ExtendViewport(1920, 1080));
-        this.cutsceneManager = new CutsceneManager();
         this.character = character;
 
         portalMusic = assets.getAssetManager().get(Assets.portalMusic);
@@ -53,11 +39,6 @@ public class CutsceneScreenDungeon implements Screen {
         cutsceneMusic.setLooping(true);
         cutsceneMusic.setVolume(musicVolume / 100f);
         cutsceneMusic.play();
-
-        camera = (OrthographicCamera) stage.getCamera();
-
-        tiledMap = assets.getAssetManager().get(Assets.cutscene2Map);
-        tiledMapRenderer = new OrthogonalTiledMapRenderer(tiledMap);
 
         setupCutscene();
     }
@@ -115,42 +96,15 @@ public class CutsceneScreenDungeon implements Screen {
 
 
     @Override
-    public void show() {
-        Gdx.input.setInputProcessor(stage);
-    }
-
-    @Override
     public void render(float delta) {
 
-        if (Gdx.input.isKeyJustPressed(Input.Keys.SPACE) || Gdx.input.justTouched()) {
-            cutsceneManager.skipEvent();
-        }
-
-        ScreenUtils.clear(0, 0, 0, 1);
-        cutsceneManager.update(delta);
-
-        camera.update();
-
-        tiledMapRenderer.setView(camera);
-        tiledMapRenderer.render();
-
-        stage.act(delta);
-
-        batch.setProjectionMatrix(camera.combined);
-        batch.begin();
-        c1.setStateTime(c1.getStateTime() + delta);
-        c1.render(batch);
-        batch.end();
-
-        stage.draw();
+        super.render(delta);
 
         if (cutsceneManager.isFinished()) {
             portalMusic.stop();
             dispose();
             StoryMode storyMode = new StoryMode(assets, soundVolume, musicVolume);
             storyMode.setCurrentMapIndex(1);
-
-            character.setPosition(new Vector2(243, 450));
             storyMode.setCharacter(character);
 
             storyMode.show(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
@@ -159,31 +113,14 @@ public class CutsceneScreenDungeon implements Screen {
     }
 
     @Override
-    public void resize(int i, int i1) {
-
-    }
-
-    @Override
-    public void pause() {
-
-    }
-
-    @Override
-    public void resume() {
-
-    }
-
-    @Override
-    public void hide() {
-
+    protected void renderSprites(float delta) {
+        c1.setStateTime(c1.getStateTime() + delta);
+        c1.render(batch);
     }
 
     @Override
     public void dispose() {
-        stage.dispose();
-        batch.dispose();
-        tiledMapRenderer.dispose();
-        tiledMap.dispose();
+        super.dispose();
         cutsceneMusic.dispose();
         portalMusic.dispose();
     }

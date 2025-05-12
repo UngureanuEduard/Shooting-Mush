@@ -24,12 +24,31 @@ public class EnemyBoss extends Enemy {
 
     @Override
     protected void loadEnemyTextures(int mapIndex) {
-        setWalkTexture(getAssets().getAssetManager().get(Assets.bossTexture));
-        setIdleTexture(getAssets().getAssetManager().get(Assets.idleBossTexture));
-        TextureRegion[] walkingFrames = splitEnemyTexture(getWalkTexture(), 6 ,32 ,32);
-        TextureRegion[] idleFrames = splitEnemyTexture(getIdleTexture(), 4,32,32);
-        setWalkAnimation(new Animation<>(0.1f, walkingFrames));
-        setIdleAnimation(new Animation<>(0.1f, idleFrames));
+        if( mapIndex == 0 ){
+            setWalkTexture(getAssets().getAssetManager().get(Assets.bossTexture));
+            setIdleTexture(getAssets().getAssetManager().get(Assets.idleBossTexture));
+            TextureRegion[] walkingFrames = splitEnemyTexture(getWalkTexture(), 6 ,32 ,32);
+            TextureRegion[] idleFrames = splitEnemyTexture(getIdleTexture(), 4,32,32);
+            setWalkAnimation(new Animation<>(0.1f, walkingFrames));
+            setIdleAnimation(new Animation<>(0.1f, idleFrames));
+            setSound(getAssets().getAssetManager().get(Assets.duckSound));
+        } else if( mapIndex == 1 ){
+            setWalkTexture(getAssets().getAssetManager().get(Assets.skeletonBossWalkTexture));
+            setIdleTexture(getAssets().getAssetManager().get(Assets.skeletonBossIdleTexture));
+            TextureRegion[] walkingFrames = splitEnemyTexture(getWalkTexture(), 4 ,48 ,48);
+            TextureRegion[] idleFrames = splitEnemyTexture(getIdleTexture(), 6,48,48);
+            setWalkAnimation(new Animation<>(0.1f, walkingFrames));
+            setIdleAnimation(new Animation<>(0.1f, idleFrames));
+            setSound(getAssets().getAssetManager().get(Assets.skeletonSound));
+        } else {
+            setWalkTexture(getAssets().getAssetManager().get(Assets.zombieBossWalkTexture));
+            setIdleTexture(getAssets().getAssetManager().get(Assets.zombieBossIdleTexture));
+            TextureRegion[] walkingFrames = splitEnemyTexture(getWalkTexture(), 4 ,48 ,48);
+            TextureRegion[] idleFrames = splitEnemyTexture(getIdleTexture(), 6,48,48);
+            setWalkAnimation(new Animation<>(0.1f, walkingFrames));
+            setIdleAnimation(new Animation<>(0.1f, idleFrames));
+            setSound(getAssets().getAssetManager().get(Assets.zombieSound));
+        }
     }
 
 

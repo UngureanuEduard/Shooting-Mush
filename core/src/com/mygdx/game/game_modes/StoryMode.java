@@ -8,6 +8,7 @@ import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
+import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -15,68 +16,117 @@ import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.animations_effects.CloudShadow;
-import com.mygdx.game.cutscene.CutsceneScreenDungeon;
+import com.mygdx.game.cutscene.CutsceneDungeon;
+import com.mygdx.game.cutscene.CutsceneScreenPortal;
 import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.entities.Npc;
 import com.mygdx.game.pool_managers.EnemyManager;
-import com.mygdx.game.pool_managers.EnemyMapLocationsInfo;
 import com.mygdx.game.ui_screens.EndGameScreenStory;
 import com.mygdx.game.utilities_resources.Assets;
-import com.mygdx.game.utilities_resources.EnemyBasicInfo;
-import com.mygdx.game.utilities_resources.MapDetails;
 import com.mygdx.game.utilities_resources.TransitionArea;
 
 public class StoryMode extends BasicGameMode {
 
     private final static float CLOUD_SPAWN_INTERVAL = 5f;
 
-    private final Array<MapDetails> maps = new Array<>();
+    private final Array<TiledMap> tiledMaps = new Array<>();
     private Npc npc;
     private TransitionArea transitionArea;
+    private TransitionArea bossSpawnBorder;
     private EndGameScreenStory endGameScreenStory;
     private PointLight playerLight;
     private int cameraWidth;
     private int cameraHeight;
     private final Array<CloudShadow> cloudShadows = new Array<>();
     private float cloudSpawnTimer = 0f;
+    private Vector2 bossSpawnLocation;
 
     public StoryMode(Assets assets, Integer soundVolume, Integer musicVolume) {
         super(assets, soundVolume, musicVolume);
         setEnemyManager(new EnemyManager(GameScene.GameMode.STORY));
-        getEnemyManager().loadEnemiesFromJson("storyInfo.json");
         initializeMaps();
     }
 
     private void initializeMaps() {
-        maps.add(new MapDetails(Assets.storyTiledMap.fileName, new Vector2(120, 100), new TransitionArea(1380, 1290, 128, 192)));
-        maps.add(new MapDetails(Assets.storyTiledMap_2.fileName, new Vector2(243, 450), new TransitionArea(274, 649, 100, 100)));
+        tiledMaps.add(getAssets().getAssetManager().get(Assets.storyTiledMap));
+        tiledMaps.add(getAssets().getAssetManager().get(Assets.storyTiledMap_2));
+        tiledMaps.add(getAssets().getAssetManager().get(Assets.storyTiledMap_3));
     }
 
     public void show(int cameraWidth, int cameraHeight) {
         this.cameraWidth = cameraWidth;
         this.cameraHeight = cameraHeight;
-        if (getCharacter() == null) {
-            setCharacter(new Character(new Vector2(120, 100), getAssets()));
-        }
         loadMap(getCurrentMapIndex());
         super.show(cameraWidth, cameraHeight);
-        npc = new Npc(getEnemyManager().getEnemyMapLocationsInfos().get(0).getNpcPosition(), getAssets(), getSoundVolume());
+
+        npc = null;
+        if (getTiledMap().getLayers().get("NPC") != null) {
+            for (MapObject object : getTiledMap().getLayers().get("NPC").getObjects()) {
+                if (object instanceof RectangleMapObject) {
+                    Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                    Vector2 npcPosition = new Vector2(rect.x, rect.y);
+                    npc = new Npc(npcPosition, getAssets(), getSoundVolume());
+                    break;
+                }
+            }
+        }
     }
 
     private void loadMap(int index) {
-        if (index < maps.size) {
-            MapDetails mapDetails = maps.get(index);
-            setTiledMap(getAssets().getAssetManager().get(mapDetails.getMapAsset()));
+        if (index < tiledMaps.size) {
+            setTiledMap(tiledMaps.get(index));
             setTiledMapRenderer(new OrthogonalTiledMapRenderer(getTiledMap()));
-            getCharacter().setPosition(mapDetails.getSpawnPoint());
-            transitionArea = mapDetails.getTransitionArea();
+
+            Vector2 spawnPoint = null;
+            if (getTiledMap().getLayers().get("SpawnPoint") != null) {
+                for (MapObject object : getTiledMap().getLayers().get("SpawnPoint").getObjects()) {
+                    if (object instanceof RectangleMapObject) {
+                        Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                        spawnPoint = new Vector2(rect.x, rect.y);
+                        break;
+                    }
+                }
+            }
+
+            if (getCharacter() == null) {
+                setCharacter(new Character(spawnPoint, getAssets()));
+            }
+
+            getCharacter().setPosition(spawnPoint);
+
+            transitionArea = null;
+            if (getTiledMap().getLayers().get("TransitionZone") != null) {
+                for (MapObject object : getTiledMap().getLayers().get("TransitionZone").getObjects()) {
+                    if (object instanceof RectangleMapObject) {
+                        Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                        transitionArea = new TransitionArea(rect.x, rect.y, rect.width, rect.height);
+                        break;
+                    }
+                }
+            }
+
+            bossSpawnBorder = null;
+            if (getTiledMap().getLayers().get("BossArea") != null) {
+                for (MapObject object : getTiledMap().getLayers().get("BossArea").getObjects()) {
+                    if (object instanceof RectangleMapObject) {
+                        Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                        bossSpawnBorder = new TransitionArea(rect.x, rect.y, rect.width, rect.height);
+                        break;
+                    }
+                }
+            }
+
             initCamera(cameraWidth, cameraHeight);
+
             loadCollisionObjects();
+
             getCharacter().setCollisionRectangles(getCollisionRectangles());
 
-            if (index == 1) {
+            spawnStoryEnemy();
+
+            if (index == 1 || index == 2) {
 
                 if (getWorld() == null) {
                     setWorld(new World(new Vector2(0, 0), true));
@@ -108,7 +158,11 @@ public class StoryMode extends BasicGameMode {
                 }
 
                 getGameMusic().stop();
-                setGameMusic(getAssets().getAssetManager().get(Assets.dungeonMusic));
+                if(index == 1){
+                    setGameMusic(getAssets().getAssetManager().get(Assets.dungeonMusic));
+                }else{
+                    setGameMusic(getAssets().getAssetManager().get(Assets.plotTwistMusic));
+                }
                 getGameMusic().setLooping(true);
                 getGameMusic().play();
                 setEnableLeafs(false);
@@ -124,8 +178,6 @@ public class StoryMode extends BasicGameMode {
     public void Render(float delta, SpriteBatch batch, MyGdxGame game, Stage stage) {
         super.render(delta, batch, game, stage);
 
-        spawnStoryEnemy();
-
         if (npc != null && getCurrentMapIndex() == 0) {
             npc.update(delta, getIsPaused(), getCharacter().getPosition(), stage, getSkin());
             npc.render(batch);
@@ -134,7 +186,7 @@ public class StoryMode extends BasicGameMode {
             setInDialog(false);
         }
 
-        if (getCurrentMapIndex() == 1 && getRayHandler() != null && playerLight != null) {
+        if ((getCurrentMapIndex() == 1 || getCurrentMapIndex() ==2) && getRayHandler() != null && playerLight != null) {
             playerLight.setPosition(
                     getCharacter().getPosition().x + getCharacter().getWidth() / 2,
                     getCharacter().getPosition().y + getCharacter().getHeight() / 2
@@ -164,14 +216,26 @@ public class StoryMode extends BasicGameMode {
             }
         }
 
+
+        if(bossSpawnBorder !=null)
+        {
+            if (bossSpawnBorder.isWithinArea(getCharacter().getPosition().x, getCharacter().getPosition().y)) {
+                spawnBoss(500,bossSpawnLocation, GameScene.GameMode.STORY , getCurrentMapIndex());
+                bossSpawnBorder = null;
+            }
+        }
+
         if (transitionArea.isWithinArea(getCharacter().getPosition().x, getCharacter().getPosition().y)
                 && getEnemyManager().getActiveEnemies().isEmpty()) {
             if (getCurrentMapIndex() == 0) {
                 getGameMusic().stop();
                 getBossMusic().stop();
-                game.setScreen(new CutsceneScreenDungeon(game, getMusicVolume(), getSoundVolume(), getAssets(), getCharacter()));
-            } else {
-                loadNextMap(game);
+                game.setScreen(new CutsceneScreenPortal(game, getMusicVolume(), getSoundVolume(), getAssets(), getCharacter()));
+            }
+            else if(getCurrentMapIndex() ==1){
+                getGameMusic().stop();
+                getBossMusic().stop();
+                game.setScreen(new CutsceneDungeon(game, getMusicVolume(), getSoundVolume(), getAssets() , getCharacter()));
             }
         }
 
@@ -193,6 +257,9 @@ public class StoryMode extends BasicGameMode {
         batch.end();
         batch.begin();
         getCharacter().drawHearts(batch, getCamera());
+        if (shouldDrawBossHealthBar()) {
+            drawBossHealthBar(getCamera() ,batch);
+        }
         batch.end();
         batch.begin();
     }
@@ -200,7 +267,7 @@ public class StoryMode extends BasicGameMode {
     private void loadNextMap(MyGdxGame game) {
         setCurrentMapIndex( getCurrentMapIndex() + 1);
         getBossMusic().stop();
-        if (getCurrentMapIndex() < maps.size) {
+        if (getCurrentMapIndex() < tiledMaps.size) {
             loadMap(getCurrentMapIndex());
         } else {
             handleGameOver(game);
@@ -208,31 +275,23 @@ public class StoryMode extends BasicGameMode {
     }
 
     public void spawnStoryEnemy() {
-        int mapIndex = getCurrentMapIndex();
-        if (mapIndex >= getEnemyManager().getEnemyMapLocationsInfos().size) return;
 
-        int activeCount = getEnemyManager().getActiveEnemies().size;
-        if (activeCount < 9) {
-            EnemyMapLocationsInfo enemyMapLocationsInfo = getEnemyManager().getEnemyMapLocationsInfos().get(mapIndex);
-            Array<EnemyBasicInfo> toRemove = new Array<>();
-            for (EnemyBasicInfo enemyInfo : enemyMapLocationsInfo.getEnemies()) {
-                Vector2 enemyPosition = enemyInfo.getPosition();
-                String type = enemyInfo.getType();
-                if (type.equals("normal")) {
-                    getEnemyManager().spawnEnemy(enemyPosition, getCharacter().getPosition(), 100, getAssets(), getSoundVolume(), getCritRate(), mapIndex);
-                    toRemove.add(enemyInfo);
-                } else if (type.equals("boss") && (getCharacter().getPosition().x > transitionArea.getX() - 480
-                        && getCharacter().getPosition().y > transitionArea.getY() - 90) ) {
-                    spawnBoss(500, enemyPosition, GameScene.GameMode.STORY);
-                    toRemove.add(enemyInfo);
-                }
+        if (!getEnemyManager().getActiveEnemies().isEmpty()) return;
+
+        if (getTiledMap().getLayers().get("Enemies") == null) return;
+
+        for (MapObject object : getTiledMap().getLayers().get("Enemies").getObjects()) {
+            if (object instanceof RectangleMapObject) {
+                Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                Vector2 position = new Vector2(rect.x, rect.y);
+                getEnemyManager().spawnEnemy(position, getCharacter().getPosition(), 100, getAssets(), getSoundVolume(), getCritRate(), getCurrentMapIndex());
+            } else {
+                float x = Float.parseFloat(object.getProperties().get("x").toString());
+                float y = Float.parseFloat(object.getProperties().get("y").toString());
+                bossSpawnLocation =  new Vector2(x, y);
             }
-            enemyMapLocationsInfo.getEnemies().removeAll(toRemove, true);
         }
     }
-
-
-
 
     private void handleGameOver(MyGdxGame game) {
         if(getIsGameNotOver()){
@@ -247,7 +306,7 @@ public class StoryMode extends BasicGameMode {
         disposeBasicGameMode();
         if (npc != null) npc.dispose();
         if (endGameScreenStory != null) endGameScreenStory.dispose();
-        if (maps != null) maps.clear();
+        if (tiledMaps != null) tiledMaps.clear();
         if (getRayHandler() != null) getRayHandler().dispose();
         if (getWorld() != null) getWorld().dispose();
     }

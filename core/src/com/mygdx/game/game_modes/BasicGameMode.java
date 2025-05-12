@@ -278,7 +278,7 @@ public class BasicGameMode {
 
         if (!enemyManager.getActiveEnemies().isEmpty() && !isPaused) {
             for (Enemy enemy : enemyManager.getActiveEnemies()) {
-                if (enemy instanceof EnemyBoss) {
+                if (enemy instanceof EnemyBoss && enemy.getHealth() > 0 ) {
                     bossHealthPercentage = enemy.getHealth() / maxBossHealth;
                     return true;
                 }
@@ -288,7 +288,7 @@ public class BasicGameMode {
         return false;
     }
 
-    private void drawBossHealthBar(OrthographicCamera camera , SpriteBatch batch) {
+    protected void drawBossHealthBar(OrthographicCamera camera , SpriteBatch batch) {
         Vector2 healthBarPosition = new Vector2(
                 camera.position.x - (healthBarWidth * camera.zoom),
                 camera.position.y + (worldHeight * camera.zoom) / 3
@@ -298,8 +298,9 @@ public class BasicGameMode {
         batch.draw(healthFillTexture, healthBarPosition.x + healthBarWidth / 90, healthBarPosition.y + healthBarHeight / 25, healthBarFillWidth / 2 - healthBarWidth / 50, healthBarHeight / 2 - healthBarHeight / 10);
     }
 
-    protected void spawnBoss(float health, Vector2 bossPosition , GameScene.GameMode gameMode) {
-        EnemyBoss enemy = new EnemyBoss(bossPosition, character.getPosition(), health, assets, soundVolume, critRate, gameMode , 0);
+
+    protected void spawnBoss(float health, Vector2 bossPosition , GameScene.GameMode gameMode , int MapIndex) {
+        EnemyBoss enemy = new EnemyBoss(bossPosition, character.getPosition(), health, assets, soundVolume, critRate, gameMode , MapIndex);
         getEnemyManager().getActiveEnemies().add(enemy);
         getGameMusic().stop();
         getBossMusic().play();

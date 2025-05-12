@@ -36,7 +36,7 @@ public class FadeEndEvent implements CutsceneEvent {
         stage.addActor(blackOverlay);
 
         label = new Label(text, skin);
-        label.setFontScale(0.4f);
+        label.setFontScale(0.30f);
         label.setColor(new Color(1, 1, 1, 0));
         stage.addActor(label);
     }

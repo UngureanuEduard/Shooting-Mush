@@ -97,7 +97,6 @@ public class Enemy implements Pool.Poolable{
         bodyHitbox = new Rectangle();
         headHitbox = new Circle();
         loadEnemyTextures(mapIndex);
-        sound = assets.getAssetManager().get(Assets.duckSound);
         stateTime = 0.0f;
         damagedDelay = 0.0f;
         PUSH_BACK_FORCE = 50.0f;
@@ -113,14 +112,26 @@ public class Enemy implements Pool.Poolable{
             TextureRegion[] idleFrames = splitEnemyTexture(idleTexture, 6,48,48);
             walkAnimation = new Animation<>(0.1f, walkingFrames);
             idleAnimation = new Animation<>(0.1f, idleFrames);
+            sound = assets.getAssetManager().get(Assets.skeletonSound);
             sizeScale += 0.2f;
-        } else {
+        } else if(mapIndex ==0 ){
             walkTexture = assets.getAssetManager().get(Assets.duckTexture);
             idleTexture = assets.getAssetManager().get(Assets.idleEnemyTexture);
             TextureRegion[] walkingFrames = splitEnemyTexture(walkTexture, 6 ,32 ,32);
             TextureRegion[] idleFrames = splitEnemyTexture(idleTexture, 4,32,32);
             walkAnimation = new Animation<>(0.1f, walkingFrames);
             idleAnimation = new Animation<>(0.1f, idleFrames);
+            sound = assets.getAssetManager().get(Assets.duckSound);
+        }
+        else {
+            walkTexture = assets.getAssetManager().get(Assets.zombieWalkTexture);
+            idleTexture = assets.getAssetManager().get(Assets.zombieIdleTexture);
+            TextureRegion[] walkingFrames = splitEnemyTexture(walkTexture, 4 ,48 ,48);
+            TextureRegion[] idleFrames = splitEnemyTexture(idleTexture, 7,48,48);
+            walkAnimation = new Animation<>(0.1f, walkingFrames);
+            idleAnimation = new Animation<>(0.1f, idleFrames);
+            sound = assets.getAssetManager().get(Assets.zombieSound);
+            sizeScale += 0.2f;
         }
         healthBarBackgroundTexture = assets.getAssetManager().get(Assets.EnemyHealthBarTexture);
         healthBarForegroundTexture = assets.getAssetManager().get(Assets.EnemyHealthTexture);
@@ -493,5 +504,9 @@ public class Enemy implements Pool.Poolable{
 
     public void setPUSH_BACK_FORCE(float PUSH_BACK_FORCE) {
         this.PUSH_BACK_FORCE = PUSH_BACK_FORCE;
+    }
+
+    public void setSound(Sound sound) {
+        this.sound = sound;
     }
 }

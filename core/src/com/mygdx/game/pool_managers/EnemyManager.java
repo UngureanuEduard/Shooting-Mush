@@ -4,14 +4,11 @@
     import com.badlogic.gdx.graphics.g2d.SpriteBatch;
     import com.badlogic.gdx.math.Vector2;
     import com.badlogic.gdx.utils.Array;
-    import com.badlogic.gdx.utils.JsonReader;
-    import com.badlogic.gdx.utils.JsonValue;
     import com.badlogic.gdx.utils.Pool;
     import com.mygdx.game.utilities_resources.Assets;
     import com.mygdx.game.entities.enemy.Enemy;
     import com.mygdx.game.entities.enemy.EnemyBoss;
     import com.mygdx.game.GameScene;
-    import com.mygdx.game.utilities_resources.EnemyBasicInfo;
 
     public class EnemyManager {
 
@@ -25,7 +22,6 @@
         private Boolean scaled = false;
         private int score = 0;
         private final GameScene.GameMode gameMode;
-        private final Array<EnemyMapLocationsInfo> mapInfos = new Array<>();
         public EnemyManager(GameScene.GameMode gameMode) {
         this.gameMode = gameMode;
         }
@@ -85,31 +81,5 @@
         public int getScore() {
             return this.score;
         }
-
-        public void loadEnemiesFromJson(String filePath) {
-            JsonReader json = new JsonReader();
-            JsonValue base = json.parse(Gdx.files.internal(filePath));
-
-            for (JsonValue map : base.get("maps")) {
-                JsonValue npcLocation = map.get("npcLocation");
-                float frogX = npcLocation.getFloat("x");
-                float frogY = npcLocation.getFloat("y");
-                Vector2 npcPosition = new Vector2(frogX, frogY);
-                EnemyMapLocationsInfo mapInfo = new EnemyMapLocationsInfo(npcPosition);
-                for (JsonValue enemy : map.get("enemies")) {
-                    float x = enemy.getFloat("x");
-                    float y = enemy.getFloat("y");
-                    String type = enemy.getString("type");
-                    mapInfo.addEnemy(new EnemyBasicInfo(new Vector2(x, y), type));
-                }
-                mapInfos.add(mapInfo);
-            }
-        }
-
-        public Array<EnemyMapLocationsInfo> getEnemyMapLocationsInfos() {
-            return mapInfos;
-        }
-
-
 
     }

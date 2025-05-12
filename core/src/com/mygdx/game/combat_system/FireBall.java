@@ -12,11 +12,9 @@ import com.badlogic.gdx.math.Vector2;
 import com.mygdx.game.utilities_resources.Assets;
 
 public class FireBall extends CharacterBullet {
-
     private Animation<TextureRegion> animation;
     private float animationTime;
     private PointLight fireballLight;
-
 
     public FireBall() {
         super();

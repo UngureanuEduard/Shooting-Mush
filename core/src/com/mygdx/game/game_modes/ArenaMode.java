@@ -74,7 +74,7 @@ public class ArenaMode  extends BasicGameMode{
             if (currentWave.getNumBossEnemies() > 0 && !getIsPaused()) {
                 int health = 500;
                 Vector2 bossPosition = new Vector2(MathUtils.random(getMinCameraX(), getMaxCameraX()), MathUtils.random(getMinCameraY(), getMaxCameraY()));
-                spawnBoss(health, bossPosition , GameScene.GameMode.ARENA);
+                spawnBoss(health, bossPosition , GameScene.GameMode.ARENA , 0);
                 enemySpawnTimer = 0.0f;
                 currentWave.setNumBossEnemies(currentWave.getNumBossEnemies() - 1);
             }
