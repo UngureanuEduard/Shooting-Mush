@@ -904,7 +904,7 @@
   </object>
  </objectgroup>
  <objectgroup id="39" name="TransitionZone">
-  <object id="154" x="253.333" y="1300.67" width="63.3333" height="47.3333"/>
+  <object id="154" x="250.333" y="1259.67" width="63.3333" height="113.333"/>
  </objectgroup>
  <objectgroup id="40" name="NPC">
   <object id="156" x="1353" y="40.5" width="3.5" height="3"/>
@@ -913,6 +913,6 @@
   <object id="157" x="1379" y="74.5" width="5" height="2.5"/>
  </objectgroup>
  <objectgroup id="42" name="BossArea">
-  <object id="162" x="673" y="1052" width="29" height="220"/>
+  <object id="162" x="673" y="1035.33" width="29" height="260"/>
  </objectgroup>
 </map>

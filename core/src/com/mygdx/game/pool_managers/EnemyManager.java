@@ -1,5 +1,6 @@
     package com.mygdx.game.pool_managers;
 
+    import box2dLight.RayHandler;
     import com.badlogic.gdx.Gdx;
     import com.badlogic.gdx.graphics.g2d.SpriteBatch;
     import com.badlogic.gdx.math.Vector2;
@@ -48,10 +49,10 @@
             enemiesPool.clear();
         }
 
-        public int updateAndRender(SpriteBatch batch , EnemyBulletsManager enemyBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects , int mapIndex){
+        public int updateAndRender(SpriteBatch batch , EnemyBulletsManager enemyBulletsManager , boolean isPaused , int enemiesLeftToKill, ParticleEffectsManager particleEffects , int mapIndex , RayHandler rayHandler){
             for (int i = activeEnemies.size - 1; i >= 0; i--) {
                 Enemy enemy = activeEnemies.get(i);
-                enemy.update(Gdx.graphics.getDeltaTime(), enemyBulletsManager, isPaused, activeEnemies ,  mapIndex);
+                enemy.update(Gdx.graphics.getDeltaTime(), enemyBulletsManager, isPaused, activeEnemies ,  mapIndex ,rayHandler);
                 if (!enemy.isAlive() && !enemy.isMarkedForRemoval()) {
                     Vector2 poz = new Vector2(enemy.getPosition());
                     particleEffects.DeathParticles(poz, enemy.getSizeScale(), scaled);

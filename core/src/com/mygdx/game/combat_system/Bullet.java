@@ -103,6 +103,4 @@ public class Bullet implements Pool.Poolable {
     public Vector2 getVelocity() {
         return velocity;
     }
-
-
 }

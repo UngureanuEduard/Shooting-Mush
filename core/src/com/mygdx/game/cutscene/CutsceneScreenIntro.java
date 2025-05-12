@@ -64,7 +64,7 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
 
         cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " Nooooooo! "
                         , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.grandpaPortraitTexture) ));
-
+        cutsceneManager.addEvent(new RemoveCharacterEvent(c3));
         cutsceneManager.addEvent(new ScreenFadeEvent(
                 stage,
                 assets.getAssetManager().get(Assets.blackPixelTexture),
@@ -72,6 +72,7 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
                 c1, new Vector2(480, 470),
                 c3, new Vector2(0, 0)
         ));
+
 
         cutsceneManager.addEvent(new FlipCharacterEvent(c2));
 

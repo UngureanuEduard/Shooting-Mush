@@ -280,7 +280,7 @@ public class    MainMenuScreen extends ScreenAdapter {
                         }
 
                         GameScene gameScene = new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.CO_OP, assets);
-                        gameScene.getCoopMode().setNetworkInfo(true, null, server); // isHost=true
+                        gameScene.getCoopMode().setNetworkInfo(true, null, server);
                         game.setScreen(gameScene);
 
 

@@ -156,10 +156,13 @@ public class BasicGameMode {
 
 
         for (Enemy enemy : enemyManager.getActiveEnemies()) {
-            checkBulletCollisions(characterBulletsManager.getActiveCharacterBullets(), enemy);
+            checkBulletsCollisionWithEnemy(characterBulletsManager.getActiveCharacterBullets(), enemy);
         }
+
+        checkBulletsWallCollision(characterBulletsManager.getActiveCharacterBullets());
+
         renderDamageTexts(batch,delta);
-        enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager ,currentMapIndex );
+        enemiesLeftToKill = enemyManager.updateAndRender(batch, enemyBulletsManager, isPaused, enemiesLeftToKill, particleEffectsManager ,currentMapIndex , rayHandler);
 
         character.render(batch);
         character.drawHearts(batch,camera);
@@ -244,7 +247,6 @@ public class BasicGameMode {
                 timeSinceLastShot = 0.0f;
             }
         }
-
     }
 
     protected void shootBullet() {
@@ -270,7 +272,6 @@ public class BasicGameMode {
         Vector2 cursorPositionWorld2D = new Vector2(cursorPositionWorld.x, cursorPositionWorld.y);
         return cursorPositionWorld2D.sub(startingPoint).nor();
     }
-
 
     protected boolean shouldDrawBossHealthBar() {
         if(isGameOver)
@@ -316,7 +317,7 @@ public class BasicGameMode {
         }
     }
 
-    public void checkBulletCollisions(Array<CharacterBullet> bullets , Enemy enemy) {
+    public void checkBulletsCollisionWithEnemy(Array<CharacterBullet> bullets , Enemy enemy) {
         for (CharacterBullet bullet : bullets) {
             if (Intersector.overlaps(bullet.getHitBox(), enemy.getHeadHitbox()) || Intersector.overlaps(bullet.getHitBox(), enemy.getBodyHitbox())) {
                 boolean isCrit = enemy.isCrit();
@@ -333,6 +334,18 @@ public class BasicGameMode {
             }
         }
     }
+
+    public void checkBulletsWallCollision(Array<CharacterBullet> bullets) {
+        for (CharacterBullet bullet : bullets) {
+            for (Rectangle rect : collisionRectangles) {
+                if (Intersector.overlaps(bullet.getHitBox(), rect)) {
+                    bullet.setAlive(false);
+                    break;
+                }
+            }
+        }
+    }
+
 
     public void renderDamageTexts(SpriteBatch batch, float deltaTime) {
         Array<DamageText> textsToRemove = new Array<>();
@@ -541,5 +554,9 @@ public class BasicGameMode {
 
     public void setWorld(World world) {
         this.world = world;
+    }
+
+    public void setTimePlayed(float timePlayed) {
+        this.timePlayed = timePlayed;
     }
 }

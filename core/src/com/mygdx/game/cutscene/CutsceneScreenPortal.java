@@ -22,14 +22,16 @@ public class CutsceneScreenPortal extends  BaseCutsceneScreen {
     private final Music cutsceneMusic;
     private final Music portalMusic;
     private final Character character;
+    private final float timePlayed;
 
-    public CutsceneScreenPortal(MyGdxGame game, int musicVolume, int soundVolume, Assets assets  , Character character) {
+    public CutsceneScreenPortal(MyGdxGame game, int musicVolume, int soundVolume, Assets assets  , Character character , float timePlayed) {
         super(new Stage(new ExtendViewport(1920, 1080)), new CutsceneManager(), assets.getAssetManager().get(Assets.cutscene2Map));
         this.game = game;
         this.musicVolume = musicVolume;
         this.soundVolume = soundVolume;
         this.assets = assets;
         this.character = character;
+        this.timePlayed = timePlayed;
 
         portalMusic = assets.getAssetManager().get(Assets.portalMusic);
         portalMusic.setLooping(true);
@@ -106,6 +108,7 @@ public class CutsceneScreenPortal extends  BaseCutsceneScreen {
             StoryMode storyMode = new StoryMode(assets, soundVolume, musicVolume);
             storyMode.setCurrentMapIndex(1);
             storyMode.setCharacter(character);
+            storyMode.setTimePlayed(timePlayed);
 
             storyMode.show(Gdx.graphics.getWidth(), Gdx.graphics.getHeight());
             game.setScreen(new GameScene(game, storyMode));

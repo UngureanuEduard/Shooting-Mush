@@ -1,5 +1,6 @@
 package com.mygdx.game.entities.enemy;
 
+import box2dLight.RayHandler;
 import com.badlogic.gdx.audio.Sound;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -138,12 +139,12 @@ public class Enemy implements Pool.Poolable{
     }
 
     public void update(float deltaTime, EnemyBulletsManager enemyBulletsManager, boolean isPaused, Array<Enemy> enemies
-    , int mapIndex ) {
+    , int mapIndex  , RayHandler rayHandler ) {
         if (!isPaused) {
             boolean isColliding = isCollidingWithEnemy(enemies);
 
             if (!isColliding) {
-                simpleAI(deltaTime , enemyBulletsManager , mapIndex);
+                simpleAI(deltaTime , enemyBulletsManager , mapIndex , rayHandler);
             }
 
             updateHitboxes();
@@ -161,7 +162,7 @@ public class Enemy implements Pool.Poolable{
         }
     }
 
-    private void simpleAI(float deltaTime , EnemyBulletsManager enemyBulletsManager , int mapIndex) {
+    protected void simpleAI(float deltaTime , EnemyBulletsManager enemyBulletsManager , int mapIndex , RayHandler rayHandler) {
         float distanceToPlayer = playerPosition.dst(position);
 
         switch (gameMode) {
@@ -187,7 +188,7 @@ public class Enemy implements Pool.Poolable{
             case SHOOTING:
                 if (shootTimer >= BULLET_COOLDOWN) {
                     shootTimer = 0;
-                    shootBullet(enemyBulletsManager , mapIndex);
+                    shootBullet(enemyBulletsManager , mapIndex , rayHandler);
                 }
                 setBehaviorStatus(BehaviorStatus.IDLE);
                 break;
@@ -204,7 +205,7 @@ public class Enemy implements Pool.Poolable{
         }
     }
 
-    private void moveTowards(Vector2 target, float deltaTime) {
+    protected void moveTowards(Vector2 target, float deltaTime) {
         Vector2 direction = target.cpy().sub(position).nor();
         position.add(direction.scl(MOVEMENT_SPEED * deltaTime));
         setIsFlipped(target.x < position.x);
@@ -316,9 +317,9 @@ public class Enemy implements Pool.Poolable{
         return characterFrames;
     }
 
-    public void shootBullet( EnemyBulletsManager enemyBulletsManager , int mapIndex) {
+    public void shootBullet( EnemyBulletsManager enemyBulletsManager , int mapIndex ,  RayHandler rayHandler) {
         Vector2 direction = playerPosition.cpy().sub(position).nor().scl(110f);
-        enemyBulletsManager.generateBullet(position.cpy(), direction, 1, assets, soundVolume , mapIndex);
+        enemyBulletsManager.generateBullet(position.cpy(), direction, 1, assets, soundVolume , mapIndex ,rayHandler);
     }
 
     public float getWidth() {
@@ -508,5 +509,9 @@ public class Enemy implements Pool.Poolable{
 
     public void setSound(Sound sound) {
         this.sound = sound;
+    }
+
+    public Vector2 getPlayerPosition() {
+        return playerPosition;
     }
 }

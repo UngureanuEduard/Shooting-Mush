@@ -1,5 +1,6 @@
 package com.mygdx.game.pool_managers;
 
+import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.math.Vector2;
@@ -47,9 +48,9 @@ public class EnemyBulletsManager {
         }
     }
 
-    public void generateBullet(Vector2 bulletStartPosition, Vector2 playerPosition, float damage, Assets assets, Integer soundVolume , int mapIndex){
+    public void generateBullet(Vector2 bulletStartPosition, Vector2 playerPosition, float damage, Assets assets, Integer soundVolume , int mapIndex , RayHandler rayHandler){
         EnemyBullet item = enemyBulletPool.obtain();
-        item.init(bulletStartPosition, playerPosition, damage, assets, soundVolume , mapIndex);
+        item.init(bulletStartPosition, playerPosition, damage, assets, soundVolume , mapIndex , rayHandler);
         activeEnemyBullets.add(item);
     }
 }

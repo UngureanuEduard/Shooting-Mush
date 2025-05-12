@@ -17,6 +17,7 @@ import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.Array;
 import com.mygdx.game.animations_effects.CloudShadow;
 import com.mygdx.game.cutscene.CutsceneDungeon;
+import com.mygdx.game.cutscene.CutsceneEnding;
 import com.mygdx.game.cutscene.CutsceneScreenPortal;
 import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.GameScene;
@@ -42,10 +43,12 @@ public class StoryMode extends BasicGameMode {
     private final Array<CloudShadow> cloudShadows = new Array<>();
     private float cloudSpawnTimer = 0f;
     private Vector2 bossSpawnLocation;
+    private boolean finishedGame;
 
     public StoryMode(Assets assets, Integer soundVolume, Integer musicVolume) {
         super(assets, soundVolume, musicVolume);
         setEnemyManager(new EnemyManager(GameScene.GameMode.STORY));
+        finishedGame = false;
         initializeMaps();
     }
 
@@ -186,6 +189,10 @@ public class StoryMode extends BasicGameMode {
             setInDialog(false);
         }
 
+        if(finishedGame){
+            handleGameOver(game);
+        }
+
         if ((getCurrentMapIndex() == 1 || getCurrentMapIndex() ==2) && getRayHandler() != null && playerLight != null) {
             playerLight.setPosition(
                     getCharacter().getPosition().x + getCharacter().getWidth() / 2,
@@ -230,17 +237,22 @@ public class StoryMode extends BasicGameMode {
             if (getCurrentMapIndex() == 0) {
                 getGameMusic().stop();
                 getBossMusic().stop();
-                game.setScreen(new CutsceneScreenPortal(game, getMusicVolume(), getSoundVolume(), getAssets(), getCharacter()));
+                game.setScreen(new CutsceneScreenPortal(game, getMusicVolume(), getSoundVolume(), getAssets(), getCharacter() , getTimePlayed()));
             }
             else if(getCurrentMapIndex() ==1){
                 getGameMusic().stop();
                 getBossMusic().stop();
-                game.setScreen(new CutsceneDungeon(game, getMusicVolume(), getSoundVolume(), getAssets() , getCharacter()));
+                game.setScreen(new CutsceneDungeon(game, getMusicVolume(), getSoundVolume(), getAssets() , getCharacter() , getTimePlayed()));
+            }
+            else if(getCurrentMapIndex() ==2){
+                getGameMusic().stop();
+                getBossMusic().stop();
+                game.setScreen(new CutsceneEnding(game, getMusicVolume(), getSoundVolume(), getAssets() , getTimePlayed()));
             }
         }
 
         if (Gdx.input.isKeyJustPressed(Input.Keys.L)) {
-            loadNextMap(game);
+            loadNextMap();
         }
 
         setInDialog(npc.getInDialog());
@@ -256,7 +268,9 @@ public class StoryMode extends BasicGameMode {
 
         batch.end();
         batch.begin();
-        getCharacter().drawHearts(batch, getCamera());
+        if(getIsGameNotOver()){
+            getCharacter().drawHearts(batch, getCamera());
+        }
         if (shouldDrawBossHealthBar()) {
             drawBossHealthBar(getCamera() ,batch);
         }
@@ -264,14 +278,11 @@ public class StoryMode extends BasicGameMode {
         batch.begin();
     }
 
-    private void loadNextMap(MyGdxGame game) {
+    private void loadNextMap() {
         setCurrentMapIndex( getCurrentMapIndex() + 1);
         getBossMusic().stop();
-        if (getCurrentMapIndex() < tiledMaps.size) {
-            loadMap(getCurrentMapIndex());
-        } else {
-            handleGameOver(game);
-        }
+        loadMap(getCurrentMapIndex());
+
     }
 
     public void spawnStoryEnemy() {
@@ -311,4 +322,7 @@ public class StoryMode extends BasicGameMode {
         if (getWorld() != null) getWorld().dispose();
     }
 
+    public void setFinishedGame(boolean finishedGame) {
+        this.finishedGame = finishedGame;
+    }
 }

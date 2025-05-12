@@ -23,6 +23,7 @@ public class Assets {
     public static final AssetDescriptor<TiledMap> storyTiledMap = new AssetDescriptor<>("storyMap1.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> storyTiledMap_2 = new AssetDescriptor<>("Tiled_files/Dungeon1.tmx", TiledMap.class);
     public static final AssetDescriptor<TiledMap> storyTiledMap_3 = new AssetDescriptor<>("Tiled_files/Story3.tmx", TiledMap.class);
+    public static final AssetDescriptor<TiledMap> cutscene4Map = new AssetDescriptor<>("cutSceen4.tmx", TiledMap.class);
     public static final AssetDescriptor<Texture> walkTexture = new AssetDescriptor<>("Character/Character Walking Side.png", Texture.class);
     public static final AssetDescriptor<Texture> idleTexture = new AssetDescriptor<>("Character/Character Idle Side.png", Texture.class);
     public static final AssetDescriptor<Texture> idleTextureGrandpa = new AssetDescriptor<>("Character/Character Idle Side Old.png", Texture.class);
@@ -85,10 +86,14 @@ public class Assets {
     public static final AssetDescriptor<Texture> zombieWalkTexture = new AssetDescriptor<>("Environment/zombie-walk.png", Texture.class);
     public static final AssetDescriptor<Texture> zombieIdleTexture = new AssetDescriptor<>("Environment/zombie-idle.png", Texture.class);
     public static final AssetDescriptor<Texture> pigKingPortraitTexture = new AssetDescriptor<>("portraits/PigKing.png", Texture.class);
+    public static final AssetDescriptor<Texture> evilGrandpaPortraitTexture = new AssetDescriptor<>("portraits/GrandpaEvil.png", Texture.class);
     public static final AssetDescriptor<Texture> skeletonBossIdleTexture = new AssetDescriptor<>("Environment/skeleton-idle-boss.png", Texture.class);
     public static final AssetDescriptor<Texture> skeletonBossWalkTexture = new AssetDescriptor<>("Environment/skeleton-walk-boss.png", Texture.class);
     public static final AssetDescriptor<Texture> zombieBossIdleTexture = new AssetDescriptor<>("Environment/zombie-idle-boss.png", Texture.class);
     public static final AssetDescriptor<Texture> zombieBossWalkTexture = new AssetDescriptor<>("Environment/zombie-walk-boss.png", Texture.class);
+    public static final AssetDescriptor<Texture> zombieBulletTexture = new AssetDescriptor<>("Environment/blob.png", Texture.class);
+    public static final AssetDescriptor<Texture> goldenAppleTexture = new AssetDescriptor<>("Environment/apple_golden.png", Texture.class);
+
 
     public Assets() {
         assetManager.setLoader(TiledMap.class, new TmxMapLoader(new InternalFileHandleResolver()));
@@ -110,7 +115,7 @@ public class Assets {
                 fireBallBarTexture , fireBallFillTexture , skeletonSound , cutscene3Map , portraitTexture , zombieIdleTexture ,
                 zombieWalkTexture , pigKingIdleTexture , pigKingWalkTexture ,pigKingPortraitTexture , plotTwistMusic
                 ,storyTiledMap_3 , zombieSound , skeletonBossIdleTexture , skeletonBossWalkTexture , zombieBossIdleTexture
-                , zombieBossWalkTexture
+                , zombieBossWalkTexture , zombieBulletTexture , cutscene4Map ,evilGrandpaPortraitTexture , goldenAppleTexture
         };
 
         for (AssetDescriptor<?> asset : assetsToLoad) {
