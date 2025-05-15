@@ -24,8 +24,9 @@ public class CutsceneDungeon extends  BaseCutsceneScreen{
     private final Music plotTwistMusic;
     private final Character character;
     private final float timePlayed;
+    private final String language;
 
-    public CutsceneDungeon(MyGdxGame game, int musicVolume, int soundVolume, Assets assets , Character character , float timePlayed) {
+    public CutsceneDungeon(MyGdxGame game, int musicVolume, int soundVolume, Assets assets , Character character , float timePlayed , String language) {
         super(new Stage(new ExtendViewport(1920, 1080)), new CutsceneManager(), assets.getAssetManager().get(Assets.cutscene3Map));
         this.game = game;
         this.musicVolume = musicVolume;
@@ -33,6 +34,7 @@ public class CutsceneDungeon extends  BaseCutsceneScreen{
         this.assets = assets;
         this.character = character;
         this.timePlayed = timePlayed;
+        this.language = language;
 
 
         plotTwistMusic = assets.getAssetManager().get(Assets.plotTwistMusic);
@@ -57,13 +59,13 @@ public class CutsceneDungeon extends  BaseCutsceneScreen{
                 cutsceneManager.addEvent(new FadeOutTextEvent(
                 stage,
                 assets.getAssetManager().get(Assets.skin),
-                "Mylo reached the treasure room....",
+                        language.equals("romana") ? "Mylo a ajuns intr-o camera plina de comori...   " :"Mylo reached the treasure room....",
                 assets.getAssetManager().get(Assets.blackPixelTexture),
                 1f, 2f, 1f
         ));
 
         cutsceneManager.addEvent(new MoveCharacterEvent(c1, new Vector2(c1.getPosition().x,c1.getPosition().y+200), 40));
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " What's with that painting? "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? "  Ce este in acel tablou ?  " :" What's with that painting? "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
         cutsceneManager.addEvent(new MoveCharacterEvent(c1, new Vector2(c1.getPosition().x,c1.getPosition().y+300), 40));
         cutsceneManager.addEvent(new ImageDisplayEvent(
@@ -79,18 +81,18 @@ public class CutsceneDungeon extends  BaseCutsceneScreen{
                 musicVolume / 100f
         ));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " No! This can't be , this is... "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin),  language.equals("romana") ? "  Nu! Nu se poate , in tablou este " : " No! This can't be , this is... "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " Your Grandfather. Oink ! Oink! "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin),  language.equals("romana") ? " Bunicul tau . Guit! Guit!  " : " Your Grandfather. Oink ! Oink! "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.pigKingPortraitTexture)));
         cutsceneManager.addEvent(new MoveCharacterEvent(c2, new Vector2(c2.getPosition().x-300,c2.getPosition().y), 40));
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " Your grandfather used the apple to enslave the animals.  Oink ! Oink! "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin),  language.equals("romana") ? " Bunicul tau a folosit marul pentru a ne controla. Guit! Guit!  " : " Your grandfather used the apple to enslave the animals.  Oink ! Oink! "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.pigKingPortraitTexture)));
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " He never lost the apple  Mylo, he just wanted you to learn to hate us.  Oink ! Oink! "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? " Nu a pierdut niciodata marul , doar a vrut sa scape de noi.  Guit! Guit!  " : " He never lost the apple  Mylo, he just wanted you to learn to hate us.  Oink ! Oink! "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.pigKingPortraitTexture)));
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " I will stop him and set you free. "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? " O sa-l opresc si o sa va eliberez " : " I will stop him and set you free. "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " I will show you the way back. Oink ! Oink! "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? " Multe animale au fost schimbate datorita infulentei marului , mult noroc!  " :" Many animals were changed thanks to the influence of the apple. Good Luck! . Oink ! Oink! "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.pigKingPortraitTexture)));
         cutsceneManager.addEvent(new WaitEvent(0.3f));
         cutsceneManager.addEvent(new FadeEndEvent(
@@ -100,7 +102,7 @@ public class CutsceneDungeon extends  BaseCutsceneScreen{
                 1f,
                 1f,
                 1f,
-                "Mylo rushed back , he needed to make things right..."
+                language.equals("romana") ? " Mylo s-a grabit inapoi , el trebuie sa salveze animalele " : "Mylo rushed back , he needed to make things right..."
         ));
     }
 
@@ -112,7 +114,7 @@ public class CutsceneDungeon extends  BaseCutsceneScreen{
         if (cutsceneManager.isFinished()) {
             plotTwistMusic.stop();
             dispose();
-            StoryMode storyMode = new StoryMode(assets, soundVolume, musicVolume);
+            StoryMode storyMode = new StoryMode(assets, soundVolume, musicVolume , language);
             storyMode.setCurrentMapIndex(2);
             storyMode.setCharacter(character);
             storyMode.setTimePlayed(timePlayed);

@@ -93,6 +93,8 @@ public class Assets {
     public static final AssetDescriptor<Texture> zombieBossWalkTexture = new AssetDescriptor<>("Environment/zombie-walk-boss.png", Texture.class);
     public static final AssetDescriptor<Texture> zombieBulletTexture = new AssetDescriptor<>("Environment/blob.png", Texture.class);
     public static final AssetDescriptor<Texture> goldenAppleTexture = new AssetDescriptor<>("Environment/apple_golden.png", Texture.class);
+    public static final AssetDescriptor<Texture> roFlagTexture = new AssetDescriptor<>("RO.png", Texture.class);
+    public static final AssetDescriptor<Texture> enFlagTexture = new AssetDescriptor<>("EN.png", Texture.class);
 
 
     public Assets() {
@@ -115,7 +117,8 @@ public class Assets {
                 fireBallBarTexture , fireBallFillTexture , skeletonSound , cutscene3Map , portraitTexture , zombieIdleTexture ,
                 zombieWalkTexture , pigKingIdleTexture , pigKingWalkTexture ,pigKingPortraitTexture , plotTwistMusic
                 ,storyTiledMap_3 , zombieSound , skeletonBossIdleTexture , skeletonBossWalkTexture , zombieBossIdleTexture
-                , zombieBossWalkTexture , zombieBulletTexture , cutscene4Map ,evilGrandpaPortraitTexture , goldenAppleTexture
+                , zombieBossWalkTexture , zombieBulletTexture , cutscene4Map ,evilGrandpaPortraitTexture , goldenAppleTexture ,
+                roFlagTexture , enFlagTexture
         };
 
         for (AssetDescriptor<?> asset : assetsToLoad) {

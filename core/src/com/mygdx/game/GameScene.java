@@ -34,7 +34,7 @@ public class GameScene extends ScreenAdapter {
     private  CoopMode coopMode;
 
 
-    public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume, GameMode gameMode ,Assets assets) {
+    public GameScene(MyGdxGame game, Integer musicVolume, Integer soundVolume, GameMode gameMode ,Assets assets , String language) {
         this.game = game;
         this.gameMode = gameMode;
         this.assets = assets;
@@ -49,7 +49,7 @@ public class GameScene extends ScreenAdapter {
                 arenaMode = new ArenaMode(assets,soundVolume,musicVolume);
                 break;
             case STORY:
-                storyMode = new StoryMode(assets ,soundVolume ,musicVolume);
+                storyMode = new StoryMode(assets ,soundVolume ,musicVolume , language);
                 break;
             case CO_OP:
                 coopMode = new CoopMode(assets, soundVolume, musicVolume);

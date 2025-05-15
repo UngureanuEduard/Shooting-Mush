@@ -19,14 +19,16 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
     private Sprite c3;
     private final Music cutsceneMusic;
     private final Music trainMusic;
+    private final String language;
 
 
-        public CutsceneScreenIntro(MyGdxGame game, int musicVolume, int soundVolume, Assets assets  ) {
+        public CutsceneScreenIntro(MyGdxGame game, int musicVolume, int soundVolume, Assets assets , String language ) {
             super(new Stage(new ExtendViewport(1920, 1080)), new CutsceneManager(), assets.getAssetManager().get(Assets.cutscene1Map));
         this.game = game;
         this.musicVolume = musicVolume;
         this.soundVolume = soundVolume;
         this.assets = assets;
+        this.language = language;
 
         cutsceneMusic = assets.getAssetManager().get(Assets.introMusic);
         trainMusic = assets.getAssetManager().get(Assets.trainMusic);
@@ -51,7 +53,7 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
         cutsceneManager.addEvent(new FadeOutTextEvent(
                 stage,
                 assets.getAssetManager().get(Assets.skin),
-                "A long time ago....",
+                language.equals("romana") ? "Cu mult timp in urma...":"A long time ago..." ,
                 assets.getAssetManager().get(Assets.blackPixelTexture),
                 1f, 2f, 1f
         ));
@@ -62,7 +64,7 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " Nooooooo! "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin),  language.equals("romana") ? "Nuuuuu" :" Nooooooo! "
                         , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.grandpaPortraitTexture) ));
         cutsceneManager.addEvent(new RemoveCharacterEvent(c3));
         cutsceneManager.addEvent(new ScreenFadeEvent(
@@ -76,12 +78,12 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
 
         cutsceneManager.addEvent(new FlipCharacterEvent(c2));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " Mylo you need to save the world , get the apple back , I will train you. "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin),  language.equals("romana") ? "Mylo trebuie sa salvezi lumea , sa aduci marul inapoi , o sa te antrenez " : " Mylo you need to save the world , get the apple back , I will train you. "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.grandpaPortraitTexture) ));
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " Ok grandpa , I will train. "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin),language.equals("romana") ? " Ok bunicule , o sa ma antrenez": " Ok grandpa , I will train. "
                          , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
@@ -115,7 +117,7 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " Further! "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin),language.equals("romana") ? "Mai departe! ": " Further! "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.grandpaPortraitTexture) ));
 
         cutsceneManager.addEvent(new ThrowAppleEvent(
@@ -129,7 +131,7 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), "Now, Mylo... channel everything you've got!"
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? "Canalizeaza-ti toata puterea. " : "Now, Mylo... channel everything you've got!"
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.grandpaPortraitTexture) ));
 
         cutsceneManager.addEvent(new WaitEvent(0.8f));
@@ -146,7 +148,7 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " You are ready. "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? "Esti pregatit. ":" You are ready. "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.grandpaPortraitTexture) ));
 
         cutsceneManager.addEvent(new WaitEvent(0.4f));
@@ -158,7 +160,7 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
                 1f,
                 1f,
                 1f,
-                "And so , Mylo's journey stared..."
+                language.equals("romana") ? "Si asa calatoria lui Mylo a inceput ":"And so , Mylo's journey stared..."
         ));
     }
 
@@ -169,7 +171,7 @@ public class CutsceneScreenIntro extends BaseCutsceneScreen {
         if (cutsceneManager.isFinished()) {
             trainMusic.stop();
             dispose();
-            game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.STORY, assets));
+            game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.STORY, assets , language));
         }
     }
 

@@ -23,8 +23,9 @@ public class CutsceneScreenPortal extends  BaseCutsceneScreen {
     private final Music portalMusic;
     private final Character character;
     private final float timePlayed;
+    private final String language;
 
-    public CutsceneScreenPortal(MyGdxGame game, int musicVolume, int soundVolume, Assets assets  , Character character , float timePlayed) {
+    public CutsceneScreenPortal(MyGdxGame game, int musicVolume, int soundVolume, Assets assets  , Character character , float timePlayed , String language) {
         super(new Stage(new ExtendViewport(1920, 1080)), new CutsceneManager(), assets.getAssetManager().get(Assets.cutscene2Map));
         this.game = game;
         this.musicVolume = musicVolume;
@@ -32,6 +33,7 @@ public class CutsceneScreenPortal extends  BaseCutsceneScreen {
         this.assets = assets;
         this.character = character;
         this.timePlayed = timePlayed;
+        this.language = language;
 
         portalMusic = assets.getAssetManager().get(Assets.portalMusic);
         portalMusic.setLooping(true);
@@ -52,13 +54,13 @@ public class CutsceneScreenPortal extends  BaseCutsceneScreen {
         cutsceneManager.addEvent(new FadeOutTextEvent(
                 stage,
                 assets.getAssetManager().get(Assets.skin),
-                "Mylo managed to reach the portal....",
+                language.equals("romana") ? " Mylo a ajuns la portal" : "Mylo managed to reach the portal....",
                 assets.getAssetManager().get(Assets.blackPixelTexture),
                 1f, 2f, 1f
         ));
         cutsceneManager.addEvent(new MoveCharacterEvent(c1, new Vector2(c1.getPosition().x,c1.getPosition().y+150), 40));
         cutsceneManager.addEvent(new WaitEvent(0.2f));
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " This should take me to the Duck Empire. "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin),  language.equals("romana") ? " Portalul acesta ar trebuii sa ma duca in regatul animalelor  " : " This should take me to the Animal Empire. "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
         cutsceneManager.addEvent(new WaitEvent(0.2f));
         cutsceneManager.addEvent(new MoveCharacterEvent(c1, new Vector2(c1.getPosition().x,c1.getPosition().y+320), 40));
@@ -73,7 +75,7 @@ public class CutsceneScreenPortal extends  BaseCutsceneScreen {
                 portalMusic,
                 musicVolume / 100f
         ));
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " This can't be good. "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin),  language.equals("romana") ? " Ceva cred ca nu e bine " : " This can't be good. "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
         cutsceneManager.addEvent(new PortalSpawnEvent(
                 stage,
@@ -91,7 +93,7 @@ public class CutsceneScreenPortal extends  BaseCutsceneScreen {
                 1.4f,
                 1f,
                 1f,
-                "The journey continues..."
+                language.equals("romana") ? " Calatoria continua... " : "The journey continues..."
         ));
 
     }
@@ -105,7 +107,7 @@ public class CutsceneScreenPortal extends  BaseCutsceneScreen {
         if (cutsceneManager.isFinished()) {
             portalMusic.stop();
             dispose();
-            StoryMode storyMode = new StoryMode(assets, soundVolume, musicVolume);
+            StoryMode storyMode = new StoryMode(assets, soundVolume, musicVolume ,language);
             storyMode.setCurrentMapIndex(1);
             storyMode.setCharacter(character);
             storyMode.setTimePlayed(timePlayed);

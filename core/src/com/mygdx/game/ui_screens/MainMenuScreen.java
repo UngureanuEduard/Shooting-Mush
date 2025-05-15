@@ -3,6 +3,7 @@ package com.mygdx.game.ui_screens;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.ScreenAdapter;
 import com.badlogic.gdx.audio.Music;
+import com.badlogic.gdx.graphics.Color;
 import com.badlogic.gdx.graphics.GL20;
 import com.badlogic.gdx.graphics.Texture;
 import com.badlogic.gdx.graphics.g2d.Animation;
@@ -76,6 +77,10 @@ public class    MainMenuScreen extends ScreenAdapter {
     private float duckScaleX;
     private float duckScaleY;
 
+    private String language = "english";
+    private ImageButton englishButton;
+    private ImageButton romanianButton;
+
     public MainMenuScreen(MyGdxGame game, Assets assets , int musicVolume, int soundVolume) {
         this.game = game;
         this.assets = assets;
@@ -109,6 +114,45 @@ public class    MainMenuScreen extends ScreenAdapter {
 
         stage.addActor(backgroundImage);
         stage.addActor(mainTable);
+
+
+        Texture englishTexture = assets.getAssetManager().get(Assets.enFlagTexture);
+        Texture romanianTexture = assets.getAssetManager().get(Assets.roFlagTexture);
+
+        TextureRegionDrawable englishDrawable = new TextureRegionDrawable(new TextureRegion(englishTexture));
+        TextureRegionDrawable romanianDrawable = new TextureRegionDrawable(new TextureRegion(romanianTexture));
+
+        englishButton = new ImageButton(englishDrawable);
+        romanianButton = new ImageButton(romanianDrawable);
+
+        englishButton.getImage().setColor(Color.WHITE);
+        romanianButton.getImage().setColor(Color.GRAY);
+
+        englishButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                language = "english";
+                englishButton.getImage().setColor(Color.WHITE);
+                romanianButton.getImage().setColor(Color.GRAY);
+            }
+        });
+
+        romanianButton.addListener(new ClickListener() {
+            @Override
+            public void clicked(InputEvent event, float x, float y) {
+                language = "romana";
+                romanianButton.getImage().setColor(Color.WHITE);
+                englishButton.getImage().setColor(Color.GRAY);
+            }
+        });
+
+        Table languageTable = new Table();
+        languageTable.top().right().padTop(20).padRight(20);
+        languageTable.setFillParent(true);
+        languageTable.add(englishButton).width(64).height(64).padRight(10);
+        languageTable.add(romanianButton).width(64).height(64);
+
+        stage.addActor(languageTable);
 
         optionsTable = new OptionsTable(assets, () -> {
             updateVolumes();
@@ -156,7 +200,7 @@ public class    MainMenuScreen extends ScreenAdapter {
         playButton.addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new CutsceneScreenIntro(game, musicVolume, soundVolume, assets));
+                game.setScreen(new CutsceneScreenIntro(game, musicVolume, soundVolume, assets , language));
 
             }
         });
@@ -215,7 +259,7 @@ public class    MainMenuScreen extends ScreenAdapter {
                                     public void connected(Connection connection) {
                                         System.out.println("Connected to server at IP: " + ipAddress);
                                         Gdx.app.postRunnable(() -> {
-                                            GameScene gameScene = new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.CO_OP, assets);
+                                            GameScene gameScene = new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.CO_OP, assets , language);
 
                                             gameScene.getCoopMode().setNetworkInfo(false, client, null);
                                             gameScene.getCoopMode().setClientListener();
@@ -279,7 +323,7 @@ public class    MainMenuScreen extends ScreenAdapter {
                             e.printStackTrace();
                         }
 
-                        GameScene gameScene = new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.CO_OP, assets);
+                        GameScene gameScene = new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.CO_OP, assets , language);
                         gameScene.getCoopMode().setNetworkInfo(true, null, server);
                         game.setScreen(gameScene);
 
@@ -309,7 +353,7 @@ public class    MainMenuScreen extends ScreenAdapter {
         addButton("Arena").addListener(new ClickListener() {
             @Override
             public void clicked(InputEvent event, float x, float y) {
-                game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.ARENA, assets));
+                game.setScreen(new GameScene(game, musicVolume, soundVolume, GameScene.GameMode.ARENA, assets , language));
             }
         });
 
@@ -402,6 +446,7 @@ public class    MainMenuScreen extends ScreenAdapter {
 
     @Override
     public void resize(int width, int height) {
+
         stage.getViewport().update(width, height, true);
     }
 

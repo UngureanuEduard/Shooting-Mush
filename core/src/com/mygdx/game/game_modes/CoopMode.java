@@ -37,7 +37,7 @@
 
 
         public CoopMode(Assets assets, Integer soundVolume, Integer musicVolume) {
-            super(assets, soundVolume, musicVolume);
+            super(assets, soundVolume, musicVolume , "english");
             guestCharacter = new GuestCharacter(new Vector2(200, 100), getAssets());
         }
 

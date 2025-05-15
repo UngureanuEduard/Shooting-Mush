@@ -1,12 +1,9 @@
 package com.mygdx.game.cutscene;
 
-import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.audio.Music;
 import com.badlogic.gdx.graphics.GL20;
-import com.badlogic.gdx.maps.tiled.TiledMap;
 import com.badlogic.gdx.math.Vector2;
-import com.badlogic.gdx.physics.box2d.World;
 import com.badlogic.gdx.scenes.scene2d.Stage;
 import com.badlogic.gdx.utils.viewport.ExtendViewport;
 import com.mygdx.game.GameScene;
@@ -24,29 +21,22 @@ public class CutsceneEnding extends BaseCutsceneScreen{
     private Sprite c1;
     private Sprite c2;
     private final Music cutsceneMusic;
-    private final RayHandler rayHandler;
-    TiledMap tiledMap;
     private final float timePlayed;
+    private final String language;
 
-    public CutsceneEnding(MyGdxGame game, int musicVolume, int soundVolume, Assets assets , float timePlayed) {
+    public CutsceneEnding(MyGdxGame game, int musicVolume, int soundVolume, Assets assets , float timePlayed , String language) {
         super(new Stage(new ExtendViewport(1920, 1080)), new CutsceneManager(), assets.getAssetManager().get(Assets.cutscene4Map));
         this.game = game;
         this.musicVolume = musicVolume;
         this.soundVolume = soundVolume;
         this.assets = assets;
         this.timePlayed = timePlayed;
-
-        tiledMap = assets.getAssetManager().get(Assets.cutscene4Map);
-        World world = new World(new Vector2(0, 0), true);
-        rayHandler = new RayHandler(world);
-        RayHandler.useDiffuseLight(true);
-        rayHandler.setAmbientLight(0.55f);
+        this.language = language;
 
         cutsceneMusic = assets.getAssetManager().get(Assets.plotTwistMusic);
         cutsceneMusic.setLooping(true);
         cutsceneMusic.setVolume(musicVolume / 100f);
         cutsceneMusic.play();
-
 
         setupCutscene();
     }
@@ -66,7 +56,7 @@ public class CutsceneEnding extends BaseCutsceneScreen{
         cutsceneManager.addEvent(new FadeOutTextEvent(
                 stage,
                 assets.getAssetManager().get(Assets.skin),
-                "Mylo reached his grandpa....",
+                language.equals("romana") ? " Mylo a ajuns la bunicul lui " : "Mylo reached his grandpa....",
                 assets.getAssetManager().get(Assets.blackPixelTexture),
                 1f, 2f, 1f
         ));
@@ -77,22 +67,22 @@ public class CutsceneEnding extends BaseCutsceneScreen{
 
         cutsceneManager.addEvent(new MoveCharacterEvent(c1, new Vector2(400,360), 80));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " Grandpa , You lied , you need to stop , the world is dying. "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? " Bunicule m-ai mintit , trebuie sa te opresti animalele sufera. " :" Grandpa , You lied , you need to stop , the world is dying. "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " You are a fool! You will never understand true power! "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? " Nu o sa ma opresc , nu intelegi puterea adevarata" : " You are a fool! You will never understand true power! "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.evilGrandpaPortraitTexture)));
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " You leave me no choice .  "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? " Nu imi dai de ales. " :" You leave me no choice .  "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
 
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " I'm sorry Grandpa .  "
+        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), language.equals("romana") ? " Imi pare rau bunicule .  " :" I'm sorry Grandpa .  "
                 , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
 
         cutsceneManager.addEvent(new WaitEvent(0.2f));
@@ -107,10 +97,7 @@ public class CutsceneEnding extends BaseCutsceneScreen{
         ));
 
         cutsceneManager.addEvent(new RemoveImageEvent(showImageEvent.getImage()));
-
-        cutsceneManager.addEvent(new SpeakEvent( stage, assets.getAssetManager().get(Assets.skin), " I'm sorry grandpa ! .  "
-                , assets.getAssetManager().get(Assets.dialogBoxTexture) , assets.getAssetManager().get(Assets.myloPortraitTexture)));
-
+        cutsceneManager.addEvent(new RemoveCharacterEvent(c2));
         cutsceneManager.addEvent(new WaitEvent(0.2f));
 
         cutsceneManager.addEvent(new FadeEndEvent(
@@ -120,7 +107,7 @@ public class CutsceneEnding extends BaseCutsceneScreen{
                 1f,
                 1f,
                 1f,
-                "Mylo saved the world , but at high cost."
+                language.equals("romana") ? "  Mylo a salvat slumea , dar cu ce pret?  " : " Mylo saved the world , but at high cost. "
         ));
     }
 
@@ -132,8 +119,8 @@ public class CutsceneEnding extends BaseCutsceneScreen{
             cutsceneMusic.stop();
             dispose();
 
-            StoryMode storyMode = new StoryMode(assets, soundVolume, musicVolume);
-            storyMode.setCurrentMapIndex(2);
+            StoryMode storyMode = new StoryMode(assets, soundVolume, musicVolume , language);
+            storyMode.setCurrentMapIndex(0);
             storyMode.setTimePlayed(timePlayed);
             storyMode.setFinishedGame(true);
 

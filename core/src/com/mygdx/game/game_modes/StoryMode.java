@@ -44,9 +44,11 @@ public class StoryMode extends BasicGameMode {
     private float cloudSpawnTimer = 0f;
     private Vector2 bossSpawnLocation;
     private boolean finishedGame;
+    private final String language;
 
-    public StoryMode(Assets assets, Integer soundVolume, Integer musicVolume) {
+    public StoryMode(Assets assets, Integer soundVolume, Integer musicVolume , String language) {
         super(assets, soundVolume, musicVolume);
+        this.language = language;
         setEnemyManager(new EnemyManager(GameScene.GameMode.STORY));
         finishedGame = false;
         initializeMaps();
@@ -237,17 +239,17 @@ public class StoryMode extends BasicGameMode {
             if (getCurrentMapIndex() == 0) {
                 getGameMusic().stop();
                 getBossMusic().stop();
-                game.setScreen(new CutsceneScreenPortal(game, getMusicVolume(), getSoundVolume(), getAssets(), getCharacter() , getTimePlayed()));
+                game.setScreen(new CutsceneScreenPortal(game, getMusicVolume(), getSoundVolume(), getAssets(), getCharacter() , getTimePlayed() , language));
             }
-            else if(getCurrentMapIndex() ==1){
+            else if(getCurrentMapIndex() ==1) {
                 getGameMusic().stop();
                 getBossMusic().stop();
-                game.setScreen(new CutsceneDungeon(game, getMusicVolume(), getSoundVolume(), getAssets() , getCharacter() , getTimePlayed()));
+                game.setScreen(new CutsceneDungeon(game, getMusicVolume(), getSoundVolume(), getAssets() , getCharacter() , getTimePlayed() ,language));
             }
-            else if(getCurrentMapIndex() ==2){
+            else if(getCurrentMapIndex() ==2) {
                 getGameMusic().stop();
                 getBossMusic().stop();
-                game.setScreen(new CutsceneEnding(game, getMusicVolume(), getSoundVolume(), getAssets() , getTimePlayed()));
+                game.setScreen(new CutsceneEnding(game, getMusicVolume(), getSoundVolume(), getAssets() , getTimePlayed() ,language));
             }
         }
 
@@ -268,12 +270,15 @@ public class StoryMode extends BasicGameMode {
 
         batch.end();
         batch.begin();
-        if(getIsGameNotOver()){
+
+        if(getIsGameNotOver()) {
             getCharacter().drawHearts(batch, getCamera());
         }
+
         if (shouldDrawBossHealthBar()) {
             drawBossHealthBar(getCamera() ,batch);
         }
+
         batch.end();
         batch.begin();
     }
