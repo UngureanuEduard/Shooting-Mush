@@ -5,10 +5,12 @@ import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
+import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
+import com.badlogic.gdx.maps.tiled.TiledMapTileLayer;
 import com.badlogic.gdx.maps.tiled.renderers.OrthogonalTiledMapRenderer;
 import com.badlogic.gdx.math.Rectangle;
 import com.badlogic.gdx.math.Vector2;
@@ -45,6 +47,8 @@ public class StoryMode extends BasicGameMode {
     private Vector2 bossSpawnLocation;
     private boolean finishedGame;
     private final String language;
+    private boolean[][] walkable;
+    private boolean printed = false;
 
     public StoryMode(Assets assets, Integer soundVolume, Integer musicVolume , String language) {
         super(assets, soundVolume, musicVolume);
@@ -123,6 +127,19 @@ public class StoryMode extends BasicGameMode {
                 }
             }
 
+            TiledMapTileLayer canWalkLayer = (TiledMapTileLayer) getTiledMap().getLayers().get("CanWalk");
+            int width = canWalkLayer.getWidth();
+            int height = canWalkLayer.getHeight();
+
+            walkable = new boolean[height][width];
+            for (int x = 0; x < width; x++) {
+                for (int y = 0; y < height; y++) {
+                    TiledMapTileLayer.Cell cell = canWalkLayer.getCell(x, y);
+                    walkable[y][x] = (cell != null);
+                }
+            }
+
+
             initCamera(cameraWidth, cameraHeight);
 
             loadCollisionObjects();
@@ -193,6 +210,16 @@ public class StoryMode extends BasicGameMode {
 
         if(finishedGame){
             handleGameOver(game);
+        }
+
+        if(!printed){
+            for (int y = walkable[0].length - 1; y >= 0; y--) {
+                for (boolean[] booleans : walkable) {
+                    System.out.print(booleans[y] ? "1 " : "0 ");
+                }
+                System.out.println();
+            }
+            printed = true;
         }
 
         if ((getCurrentMapIndex() == 1 || getCurrentMapIndex() ==2) && getRayHandler() != null && playerLight != null) {
@@ -281,6 +308,21 @@ public class StoryMode extends BasicGameMode {
 
         batch.end();
         batch.begin();
+
+
+        BitmapFont font = new BitmapFont();
+
+        TiledMapTileLayer canWalkLayer = (TiledMapTileLayer) getTiledMap().getLayers().get("CanWalk");
+        if (canWalkLayer != null) {
+
+            for (int x = 0; x < canWalkLayer.getWidth(); x++) {
+                for (int y = 0; y < canWalkLayer.getHeight(); y++) {
+                    TiledMapTileLayer.Cell cell = canWalkLayer.getCell(x, y);
+                    boolean walkable = cell != null;
+                    font.draw(batch, walkable ? "1" : "0", x * 16 + 5, y * 16 + 16 - 5);
+                }
+            }
+        }
     }
 
     private void loadNextMap() {
@@ -300,7 +342,7 @@ public class StoryMode extends BasicGameMode {
             if (object instanceof RectangleMapObject) {
                 Rectangle rect = ((RectangleMapObject) object).getRectangle();
                 Vector2 position = new Vector2(rect.x, rect.y);
-                getEnemyManager().spawnEnemy(position, getCharacter().getPosition(), 100, getAssets(), getSoundVolume(), getCritRate(), getCurrentMapIndex());
+                getEnemyManager().spawnEnemy(position, getCharacter().getPosition(), 100, getAssets(), getSoundVolume(), getCritRate(), getCurrentMapIndex() , walkable);
             } else {
                 float x = Float.parseFloat(object.getProperties().get("x").toString());
                 float y = Float.parseFloat(object.getProperties().get("y").toString());
@@ -330,4 +372,5 @@ public class StoryMode extends BasicGameMode {
     public void setFinishedGame(boolean finishedGame) {
         this.finishedGame = finishedGame;
     }
+
 }

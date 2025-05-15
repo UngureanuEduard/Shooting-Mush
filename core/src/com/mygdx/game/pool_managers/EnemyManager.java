@@ -29,12 +29,25 @@
         public void fillPool(int amount){
             enemiesPool.fill(amount);
         }
+
+        public void spawnEnemy(Vector2 enemyPosition, Vector2 playerPosition, float health, Assets assets,
+                               Integer soundVolume, Integer critRate, int mapIndex , boolean[][] walkable) {
+            Enemy item = enemiesPool.obtain();
+
+            if (item instanceof EnemyBoss) {
+               item = new Enemy();
+            }
+
+            item.init(enemyPosition, playerPosition, health, assets, soundVolume, critRate, gameMode, mapIndex ,walkable);
+            activeEnemies.add(item);
+        }
+
         public void spawnEnemy(Vector2 enemyPosition, Vector2 playerPosition, float health, Assets assets,
                                Integer soundVolume, Integer critRate, int mapIndex) {
             Enemy item = enemiesPool.obtain();
 
             if (item instanceof EnemyBoss) {
-               item = new Enemy();
+                item = new Enemy();
             }
 
             item.init(enemyPosition, playerPosition, health, assets, soundVolume, critRate, gameMode, mapIndex);

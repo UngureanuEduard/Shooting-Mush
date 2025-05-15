@@ -13,9 +13,11 @@ import com.badlogic.gdx.math.Vector2;
 import com.badlogic.gdx.utils.Array;
 import com.badlogic.gdx.utils.Pool;
 import com.mygdx.game.GameScene;
+import com.mygdx.game.combat_system.AStarPathfinder;
 import com.mygdx.game.pool_managers.EnemyBulletsManager;
 import com.mygdx.game.utilities_resources.Assets;
 
+import java.util.List;
 import java.util.Random;
 
 public class Enemy implements Pool.Poolable{
@@ -24,6 +26,7 @@ public class Enemy implements Pool.Poolable{
     private static final float BULLET_COOLDOWN = 5.0f;
     private static final float SCALE = 0.8f;
     private static final Random RANDOM = new Random();
+    private static final int TILE_SIZE = 16;
 
     private Vector2 position;
     private Vector2 playerPosition;
@@ -63,10 +66,11 @@ public class Enemy implements Pool.Poolable{
     private boolean markedForRemoval = false;
     private boolean lastHitByHost;
     public enum EnemyState {
-        IDLE, WANDERING, MOVING_TO_PLAYER, SHOOTING
+        IDLE, WANDERING, MOVING_TO_PLAYER, SHOOTING , MOVING_TO_PLAYER_WITH_PATH
     }
     private GameScene.GameMode gameMode;
     private EnemyState currentState;
+    private boolean[][] walkable;
 
     public Enemy(){
         alive=false;
@@ -81,7 +85,16 @@ public class Enemy implements Pool.Poolable{
         isAttacked = false;
     }
 
-    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode , int mapIndex){
+    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate, GameScene.GameMode gameMode, int mapIndex, boolean[][] walkable) {
+        initCommon(position, playerPosition, health, assets, soundVolume, critRate, gameMode, mapIndex);
+        this.walkable = walkable;
+    }
+
+    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate, GameScene.GameMode gameMode, int mapIndex) {
+        initCommon(position, playerPosition, health, assets, soundVolume, critRate, gameMode, mapIndex);
+    }
+
+    private void initCommon(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate, GameScene.GameMode gameMode, int mapIndex) {
         this.assets = assets;
         this.health = health;
         this.maxHealth = health;
@@ -104,6 +117,7 @@ public class Enemy implements Pool.Poolable{
         id = nextId++;
         markedForRemoval = false;
     }
+
 
     protected void loadEnemyTextures(int mapIndex){
         if(mapIndex == 1){
@@ -177,7 +191,7 @@ public class Enemy implements Pool.Poolable{
             case STORY:
                 if (distanceToPlayer < 150f || isAttacked) {
                     isAttacked = true ;
-                    currentState = (distanceToPlayer < 100f) ? EnemyState.SHOOTING : EnemyState.MOVING_TO_PLAYER;
+                    currentState = (distanceToPlayer < 100f) ? EnemyState.SHOOTING : EnemyState.MOVING_TO_PLAYER_WITH_PATH;
                 } else {
                     currentState = EnemyState.WANDERING;
                 }
@@ -196,6 +210,10 @@ public class Enemy implements Pool.Poolable{
                 moveTowards(playerPosition, deltaTime);
                 setBehaviorStatus(BehaviorStatus.MOVING);
                 break;
+            case MOVING_TO_PLAYER_WITH_PATH:
+                moveTowards(playerPosition , walkable);
+                setBehaviorStatus(BehaviorStatus.MOVING);
+                break;
             case WANDERING:
                 wander();
                 setBehaviorStatus(BehaviorStatus.MOVING);
@@ -210,6 +228,24 @@ public class Enemy implements Pool.Poolable{
         position.add(direction.scl(MOVEMENT_SPEED * deltaTime));
         setIsFlipped(target.x < position.x);
     }
+
+    public void moveTowards(Vector2 playerPos, boolean[][] walkable) {
+
+        int startX = (int)(position.x / TILE_SIZE);
+        int startY = (int)(position.y / TILE_SIZE);
+        int endX = (int)(playerPos.x / TILE_SIZE);
+        int endY = (int)(playerPos.y / TILE_SIZE);
+
+        List<AStarPathfinder.Node> path = AStarPathfinder.findPath(startX, startY, endX, endY, walkable);
+
+        if (path != null && path.size() > 1) {
+            AStarPathfinder.Node next = path.get(1);
+            position.x = next.x * TILE_SIZE;
+            position.y = next.y * TILE_SIZE;
+        }
+    }
+
+
 
     private void wander() {
         float wanderAmplitude = 10f;
