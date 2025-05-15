@@ -22,7 +22,7 @@ import java.util.Random;
 
 public class Enemy implements Pool.Poolable{
 
-    public static final float MOVEMENT_SPEED = 15.0f;
+    public static final float MOVEMENT_SPEED = 25.0f;
     private static final float BULLET_COOLDOWN = 5.0f;
     private static final float SCALE = 0.8f;
     private static final Random RANDOM = new Random();
@@ -72,6 +72,9 @@ public class Enemy implements Pool.Poolable{
     private EnemyState currentState;
     private boolean[][] walkable;
 
+    private int currentPathIndex = 1;
+
+
     public Enemy(){
         alive=false;
         isAttacked=false;
@@ -83,18 +86,19 @@ public class Enemy implements Pool.Poolable{
         position.set(-1,-1);
         alive = false;
         isAttacked = false;
+        currentPathIndex = 1;
     }
 
-    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate, GameScene.GameMode gameMode, int mapIndex, boolean[][] walkable) {
-        initCommon(position, playerPosition, health, assets, soundVolume, critRate, gameMode, mapIndex);
+    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode , int mapIndex , boolean[][] walkable){
+       initCommon(position,playerPosition,health,assets,soundVolume,critRate,gameMode,mapIndex);
         this.walkable = walkable;
     }
 
-    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate, GameScene.GameMode gameMode, int mapIndex) {
-        initCommon(position, playerPosition, health, assets, soundVolume, critRate, gameMode, mapIndex);
+    public void init(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode , int mapIndex){
+       initCommon(position,playerPosition,health,assets,soundVolume,critRate,gameMode,mapIndex);
     }
 
-    private void initCommon(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate, GameScene.GameMode gameMode, int mapIndex) {
+    private void initCommon(Vector2 position, Vector2 playerPosition, float health, Assets assets, Integer soundVolume, Integer critRate , GameScene.GameMode gameMode , int mapIndex){
         this.assets = assets;
         this.health = health;
         this.maxHealth = health;
@@ -117,7 +121,6 @@ public class Enemy implements Pool.Poolable{
         id = nextId++;
         markedForRemoval = false;
     }
-
 
     protected void loadEnemyTextures(int mapIndex){
         if(mapIndex == 1){
@@ -211,7 +214,7 @@ public class Enemy implements Pool.Poolable{
                 setBehaviorStatus(BehaviorStatus.MOVING);
                 break;
             case MOVING_TO_PLAYER_WITH_PATH:
-                moveTowards(playerPosition , walkable);
+                moveTowards(playerPosition , walkable ,deltaTime);
                 setBehaviorStatus(BehaviorStatus.MOVING);
                 break;
             case WANDERING:
@@ -229,20 +232,30 @@ public class Enemy implements Pool.Poolable{
         setIsFlipped(target.x < position.x);
     }
 
-    public void moveTowards(Vector2 playerPos, boolean[][] walkable) {
+    public void moveTowards(Vector2 playerPos, boolean[][] walkable , float deltaTime) {
 
         int startX = (int)(position.x / TILE_SIZE);
         int startY = (int)(position.y / TILE_SIZE);
         int endX = (int)(playerPos.x / TILE_SIZE);
         int endY = (int)(playerPos.y / TILE_SIZE);
 
-        List<AStarPathfinder.Node> path = AStarPathfinder.findPath(startX, startY, endX, endY, walkable);
+        List<AStarPathfinder.Node> currentPath = AStarPathfinder.findPath(startX, startY, endX, endY, walkable);
+        currentPathIndex = 1;
 
-        if (path != null && path.size() > 1) {
-            AStarPathfinder.Node next = path.get(1);
-            position.x = next.x * TILE_SIZE;
-            position.y = next.y * TILE_SIZE;
+
+        if (currentPath != null && currentPathIndex < currentPath.size()) {
+            AStarPathfinder.Node nextNode = currentPath.get(currentPathIndex);
+            Vector2 targetTileCenter = new Vector2(nextNode.x * TILE_SIZE + TILE_SIZE / 2f,
+                    nextNode.y * TILE_SIZE + TILE_SIZE / 2f);
+
+            moveTowards(targetTileCenter, deltaTime);
+
+            float TILE_REACH_THRESHOLD = 1f;
+            if (position.dst(targetTileCenter) < TILE_REACH_THRESHOLD) {
+                currentPathIndex++;
+            }
         }
+
     }
 
 

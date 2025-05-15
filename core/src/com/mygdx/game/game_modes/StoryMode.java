@@ -5,8 +5,9 @@ import box2dLight.RayHandler;
 import com.badlogic.gdx.Gdx;
 import com.badlogic.gdx.Input;
 import com.badlogic.gdx.graphics.Color;
-import com.badlogic.gdx.graphics.g2d.BitmapFont;
 import com.badlogic.gdx.graphics.g2d.SpriteBatch;
+import com.badlogic.gdx.graphics.glutils.ShapeRenderer;
+import com.badlogic.gdx.maps.MapLayer;
 import com.badlogic.gdx.maps.MapObject;
 import com.badlogic.gdx.maps.objects.RectangleMapObject;
 import com.badlogic.gdx.maps.tiled.TiledMap;
@@ -25,6 +26,7 @@ import com.mygdx.game.entities.character.Character;
 import com.mygdx.game.GameScene;
 import com.mygdx.game.MyGdxGame;
 import com.mygdx.game.entities.Npc;
+import com.mygdx.game.entities.turret.MonkeyTurret;
 import com.mygdx.game.pool_managers.EnemyManager;
 import com.mygdx.game.ui_screens.EndGameScreenStory;
 import com.mygdx.game.utilities_resources.Assets;
@@ -48,13 +50,17 @@ public class StoryMode extends BasicGameMode {
     private boolean finishedGame;
     private final String language;
     private boolean[][] walkable;
-    private boolean printed = false;
+    private final Array<MonkeyTurret> monkeyTurrets;
+    private final ShapeRenderer shapeRenderer;
 
     public StoryMode(Assets assets, Integer soundVolume, Integer musicVolume , String language) {
         super(assets, soundVolume, musicVolume);
         this.language = language;
         setEnemyManager(new EnemyManager(GameScene.GameMode.STORY));
         finishedGame = false;
+        monkeyTurrets= new Array<>();
+        shapeRenderer = new ShapeRenderer();
+        shapeRenderer.setColor(0f, 1f, 0f, 0.05f);
         initializeMaps();
     }
 
@@ -87,6 +93,19 @@ public class StoryMode extends BasicGameMode {
         if (index < tiledMaps.size) {
             setTiledMap(tiledMaps.get(index));
             setTiledMapRenderer(new OrthogonalTiledMapRenderer(getTiledMap()));
+
+            if (getCurrentMapIndex() == 0) {
+                MapLayer turretLayer = getTiledMap().getLayers().get("Turrets");
+                if (turretLayer != null) {
+                    for (MapObject object : turretLayer.getObjects()) {
+                        if (object instanceof RectangleMapObject) {
+                            Rectangle rect = ((RectangleMapObject) object).getRectangle();
+                            Vector2 turretPos = new Vector2(rect.x + rect.width / 2, rect.y + rect.height / 2);
+                            monkeyTurrets.add(new MonkeyTurret(turretPos, getAssets() ,getSoundVolume())); // Assuming you have a monkeyTurrets list
+                        }
+                    }
+                }
+            }
 
             Vector2 spawnPoint = null;
             if (getTiledMap().getLayers().get("SpawnPoint") != null) {
@@ -212,15 +231,17 @@ public class StoryMode extends BasicGameMode {
             handleGameOver(game);
         }
 
-        if(!printed){
-            for (int y = walkable[0].length - 1; y >= 0; y--) {
-                for (boolean[] booleans : walkable) {
-                    System.out.print(booleans[y] ? "1 " : "0 ");
-                }
-                System.out.println();
+        if(getCurrentMapIndex()==0){
+            shapeRenderer.setProjectionMatrix(getCamera().combined);
+            for (MonkeyTurret turret : monkeyTurrets) {
+                turret.update(delta, getCharacter().getPosition(), getEnemyBulletsManager());
+                turret.render(batch);
+                batch.end();
+                turret.renderRadar(shapeRenderer);
+                batch.begin();
             }
-            printed = true;
         }
+
 
         if ((getCurrentMapIndex() == 1 || getCurrentMapIndex() ==2) && getRayHandler() != null && playerLight != null) {
             playerLight.setPosition(
@@ -310,19 +331,19 @@ public class StoryMode extends BasicGameMode {
         batch.begin();
 
 
-        BitmapFont font = new BitmapFont();
-
-        TiledMapTileLayer canWalkLayer = (TiledMapTileLayer) getTiledMap().getLayers().get("CanWalk");
-        if (canWalkLayer != null) {
-
-            for (int x = 0; x < canWalkLayer.getWidth(); x++) {
-                for (int y = 0; y < canWalkLayer.getHeight(); y++) {
-                    TiledMapTileLayer.Cell cell = canWalkLayer.getCell(x, y);
-                    boolean walkable = cell != null;
-                    font.draw(batch, walkable ? "1" : "0", x * 16 + 5, y * 16 + 16 - 5);
-                }
-            }
-        }
+//        BitmapFont font = new BitmapFont();
+//
+//        TiledMapTileLayer canWalkLayer = (TiledMapTileLayer) getTiledMap().getLayers().get("CanWalk");
+//        if (canWalkLayer != null) {
+//
+//            for (int x = 0; x < canWalkLayer.getWidth(); x++) {
+//                for (int y = 0; y < canWalkLayer.getHeight(); y++) {
+//                    TiledMapTileLayer.Cell cell = canWalkLayer.getCell(x, y);
+//                    boolean walkable = cell != null;
+//                    font.draw(batch, walkable ? "1" : "0", x * 16 + 5, y * 16 + 16 - 5);
+//                }
+//            }
+//        }
     }
 
     private void loadNextMap() {

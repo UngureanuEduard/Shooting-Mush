@@ -95,6 +95,8 @@ public class Assets {
     public static final AssetDescriptor<Texture> goldenAppleTexture = new AssetDescriptor<>("Environment/apple_golden.png", Texture.class);
     public static final AssetDescriptor<Texture> roFlagTexture = new AssetDescriptor<>("RO.png", Texture.class);
     public static final AssetDescriptor<Texture> enFlagTexture = new AssetDescriptor<>("EN.png", Texture.class);
+    public static final AssetDescriptor<Texture> turretMonkeyTexture = new AssetDescriptor<>("Environment/monkey.png" , Texture.class);
+    public static final AssetDescriptor<Texture> turretMonkeyBulletTexture = new AssetDescriptor<>("Environment/banana.png" , Texture.class);
 
 
     public Assets() {
@@ -118,7 +120,7 @@ public class Assets {
                 zombieWalkTexture , pigKingIdleTexture , pigKingWalkTexture ,pigKingPortraitTexture , plotTwistMusic
                 ,storyTiledMap_3 , zombieSound , skeletonBossIdleTexture , skeletonBossWalkTexture , zombieBossIdleTexture
                 , zombieBossWalkTexture , zombieBulletTexture , cutscene4Map ,evilGrandpaPortraitTexture , goldenAppleTexture ,
-                roFlagTexture , enFlagTexture
+                roFlagTexture , enFlagTexture , turretMonkeyTexture , turretMonkeyBulletTexture
         };
 
         for (AssetDescriptor<?> asset : assetsToLoad) {

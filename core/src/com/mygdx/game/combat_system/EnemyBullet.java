@@ -62,6 +62,19 @@ public class EnemyBullet extends Bullet{
             };
             hitBox = new Polygon(rectVertices);
         }
+        else if (mapIndex == 4){
+            texture = assets.getAssetManager().get(Assets.turretMonkeyBulletTexture);
+            width = (float) (width * 1.8);
+            rotateAroundCenter = true;
+
+            float[] rectVertices = {
+                    0, 0,
+                    width, 0,
+                    width, height,
+                    0, height
+            };
+            hitBox = new Polygon(rectVertices);
+        }
         else {
             texture = assets.getAssetManager().get(Assets.zombieBulletTexture);
             rotateAroundCenter = true;

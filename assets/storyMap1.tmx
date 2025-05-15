@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="90" height="90" tilewidth="16" tileheight="16" infinite="0" nextlayerid="26" nextobjectid="257">
+<map version="1.10" tiledversion="1.11.0" orientation="orthogonal" renderorder="right-down" width="90" height="90" tilewidth="16" tileheight="16" infinite="0" nextlayerid="27" nextobjectid="268">
  <tileset firstgid="1" name="Grass" tilewidth="16" tileheight="16" tilecount="80" columns="10">
   <image source="Tilesets/Grass.png" width="160" height="128"/>
  </tileset>
@@ -1322,5 +1322,17 @@
  </objectgroup>
  <objectgroup id="23" name="SpawnPoint">
   <object id="220" x="147.636" y="1344.55" width="4.72727" height="3.81818"/>
+ </objectgroup>
+ <objectgroup id="26" name="Turrets">
+  <object id="257" x="536.333" y="952.667" width="3" height="2"/>
+  <object id="259" x="661.333" y="870.333" width="3.33333" height="1.66667"/>
+  <object id="260" x="326.5" y="861" width="6.5" height="3.5"/>
+  <object id="261" x="781" y="1225" width="9" height="7"/>
+  <object id="262" x="802" y="505" width="13" height="6"/>
+  <object id="263" x="382" y="333" width="9" height="7"/>
+  <object id="264" x="613" y="253" width="8" height="6"/>
+  <object id="265" x="86" y="142" width="4" height="6"/>
+  <object id="266" x="13" y="450" width="6" height="2"/>
+  <object id="267" x="73" y="840" width="9" height="7"/>
  </objectgroup>
 </map>
